@@ -1,4 +1,3 @@
-// src/pages/TypeTest.tsx
 import React, { useState } from "react";
 import styles from "./TypeTest.module.css"; // Import the CSS module
 
@@ -11,9 +10,11 @@ const TypeTest: React.FC = () => {
 
   const [currentWordIndex, setCurrentWordIndex] = useState<number>(0);
   const [userInput, setUserInput] = useState<string>("");
-  const [isCorrect, setIsCorrect] = useState<boolean>(true);
   const [correctWordsCounter, setCorrectWordsCounter] = useState<number>(0);
   const [wrongWordsCounter, setWrongWordsCounter] = useState<number>(0);
+  const [wordStatuses, setWordStatuses] = useState<(boolean | null)[]>(
+    Array(words.length).fill(null)
+  );
 
   // Handle input changes
   const handleInputChange = (e: React.ChangeEvent<HTMLInputElement>) => {
@@ -23,15 +24,23 @@ const TypeTest: React.FC = () => {
   // Handle space key press for word submission
   const handleKeyPress = (e: React.KeyboardEvent) => {
     if (e.key === " " || e.key === "Enter") {
-      // Check if the typed word is correct
-      if (userInput.trim() === words[currentWordIndex]) {
-        setIsCorrect(true);
-        setCorrectWordsCounter(
-          (correctWordsCounter) => correctWordsCounter + 1
+      const currentWord = words[currentWordIndex];
+
+      // Check if the word is correct or incorrect
+      if (userInput.trim() === currentWord) {
+        setWordStatuses((prevStatuses) =>
+          prevStatuses.map((status, index) =>
+            index === currentWordIndex ? true : status
+          )
         );
+        setCorrectWordsCounter((prev) => prev + 1);
       } else {
-        setIsCorrect(false);
-        setWrongWordsCounter((wrongWordsCounter) => wrongWordsCounter + 1);
+        setWordStatuses((prevStatuses) =>
+          prevStatuses.map((status, index) =>
+            index === currentWordIndex ? false : status
+          )
+        );
+        setWrongWordsCounter((prev) => prev + 1);
       }
 
       // Move to the next word
@@ -61,16 +70,20 @@ const TypeTest: React.FC = () => {
             </>
           ) : (
             <div className={styles.words}>
-              {words.map((word, index) => (
-                <span
-                  key={index}
-                  className={`${styles.word} ${
-                    index === currentWordIndex ? styles.highlight : ""
-                  }`}
-                >
-                  {word}
-                </span>
-              ))}
+              {words.map((word, index) => {
+                const currentWordStatus = wordStatuses[index];
+                return (
+                  <span
+                    key={index}
+                    className={`${styles.word} 
+                    ${index === currentWordIndex ? styles.selectedWord : ""} 
+                    ${currentWordStatus === true ? styles.correctWord : ""} 
+                    ${currentWordStatus === false ? styles.incorrectWord : ""}`}
+                  >
+                    {word}
+                  </span>
+                );
+              })}
             </div>
           )}
         </div>
@@ -90,11 +103,6 @@ const TypeTest: React.FC = () => {
             disabled={isFinished}
           />
         </div>
-
-        {/* Error message if word typed is wrong */}
-        {!isCorrect && !isFinished && (
-          <div className={styles.errorText}>Oops! Try again.</div>
-        )}
       </div>
     </div>
   );
