@@ -1,0 +1,100 @@
+/* Navbar.module.css */
+
+/* Base styles for the navbar */
+.navbar {
+  background-color: #333; /* Dark background */
+  padding: 1rem 2rem;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+}
+
+/* Container that holds the navbar items */
+.container {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  width: 100%;
+}
+
+/* App title styling */
+.brand {
+  font-size: 1.8rem;
+  font-weight: bold;
+  text-decoration: none;
+  display: flex;
+}
+
+.brandPrimary {
+  color: #3498db;
+}
+
+.brandSecondary {
+  color: #e74c3c;
+}
+
+/* Style for navigation items */
+.navLinks {
+  display: flex;
+  align-items: center;
+}
+
+.navList {
+  display: flex;
+  list-style: none;
+  margin: 0;
+  padding: 0;
+}
+
+.navItem {
+  margin-left: 1.5rem;
+}
+
+.navLink {
+  color: #fff;
+  text-decoration: none;
+  font-size: 1rem;
+  transition: color 0.3s;
+}
+
+.navLink:hover {
+  color: #f39c12; /* Golden color on hover */
+}
+
+/* Logout button styles */
+.logoutButton {
+  background: none;
+  border: none;
+  color: #fff;
+  font-size: 1rem;
+  cursor: pointer;
+  padding: 0;
+  transition: color 0.3s;
+}
+
+.logoutButton:hover {
+  color: #f39c12; /* Golden color on hover */
+}
+
+/* Responsive styles for small screens */
+@media (max-width: 768px) {
+  .navbar {
+    flex-direction: column;
+    align-items: flex-start;
+  }
+
+  .navLinks {
+    width: 100%;
+    justify-content: center;
+    margin-top: 1rem;
+  }
+
+  .navItem {
+    margin: 0.5rem 0;
+  }
+
+  .navLink {
+    font-size: 1.2rem;
+  }
+}

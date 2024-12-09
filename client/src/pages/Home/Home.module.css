@@ -1,0 +1,84 @@
+/* src/pages/Home.module.css */
+.container {
+  display: flex;
+  flex-direction: column;
+  /* justify-content: center; */
+  align-items: center;
+  padding: 0 20px;
+  background-color: #f4f7fc;
+  height: 100vh;
+}
+
+.hero {
+  text-align: center;
+  margin-top: 50px;
+  max-width: 800px;
+}
+
+.title {
+  font-size: 3rem;
+  color: #333;
+  margin-bottom: 1rem;
+}
+
+.subtitle {
+  font-size: 1.25rem;
+  color: #666;
+  margin-bottom: 2rem;
+}
+
+.buttonGroup {
+  display: flex;
+  justify-content: center;
+  gap: 15px;
+}
+
+.buttonPrimary,
+.buttonSecondary,
+.buttonSuccess {
+  padding: 0.75rem 1.5rem;
+  font-size: 1.1rem;
+  border-radius: 6px;
+  border: none;
+  text-decoration: none;
+  color: white;
+  text-align: center;
+  cursor: pointer;
+  transition: background-color 0.3s ease;
+}
+
+.buttonPrimary {
+  background-color: #4e9bff;
+}
+
+.buttonPrimary:hover {
+  background-color: #357ab7;
+}
+
+.buttonSecondary {
+  background-color: #6c757d;
+}
+
+.buttonSecondary:hover {
+  background-color: #5a6268;
+}
+
+.buttonSuccess {
+  background-color: #28a745;
+}
+
+.buttonSuccess:hover {
+  background-color: #218838;
+}
+
+@media (max-width: 768px) {
+  .buttonGroup {
+    flex-direction: column;
+  }
+
+  .buttonPrimary,
+  .buttonSecondary,
+  .buttonSuccess {
+    width: 100%;
+  }
+}

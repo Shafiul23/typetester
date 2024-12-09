@@ -1,0 +1,47 @@
+// src/pages/HomePage.tsx
+import React, { useState, useEffect } from "react";
+import { Link } from "react-router-dom";
+import styles from "./Home.module.css"; // Import the CSS module
+
+const Home: React.FC = () => {
+  const [isLoggedIn, setIsLoggedIn] = useState<boolean>(false);
+
+  // Simulating checking login status (replace with real authentication logic)
+  useEffect(() => {
+    const user = localStorage.getItem("user");
+    if (user) {
+      setIsLoggedIn(true);
+    } else {
+      setIsLoggedIn(false);
+    }
+  }, []);
+
+  return (
+    <div className={styles.container}>
+      <div className={styles.hero}>
+        <h1 className={styles.title}>Welcome to TypeTester!</h1>
+        <p className={styles.subtitle}>
+          Improve your typing speed and accuracy with fun typing challenges!
+        </p>
+        <div className={styles.buttonGroup}>
+          {!isLoggedIn ? (
+            <>
+              <Link to="/register" className={styles.buttonPrimary}>
+                Register
+              </Link>
+              <Link to="/login" className={styles.buttonSecondary}>
+                Login
+              </Link>
+            </>
+          ) : (
+            <Link to="/test" className={styles.buttonSuccess}>
+              Start Typing Test
+            </Link>
+          )}
+        </div>
+      </div>
+    </div>
+  );
+};
+
+export default Home;
