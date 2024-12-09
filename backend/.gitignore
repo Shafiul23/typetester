@@ -1,0 +1,75 @@
+# Byte-compiled files
+__pycache__/
+*.py[cod]
+*$py.class
+
+# Virtual environments
+venv/
+.env
+*.env
+
+# Flask instance folder
+instance/
+
+# Flask cache and logs
+*.log
+*.sqlite3
+*.db
+
+# IDE/editor-specific files
+.vscode/
+.idea/
+*.swp
+
+# System files
+.DS_Store
+Thumbs.db
+
+# Python egg and wheel files
+*.egg
+*.egg-info/
+dist/
+build/
+*.egg-info/
+
+# Pipenv and Poetry files (if used)
+Pipfile
+Pipfile.lock
+poetry.lock
+
+# Coverage reports
+htmlcov/
+.coverage
+.coverage.*
+
+# Test reports
+nosetests.xml
+coverage.xml
+*.cover
+*.py,cover
+
+# PyInstaller
+*.spec
+
+# C extensions
+*.so
+
+# Logs and debug dumps
+*.log
+*.out
+*.err
+
+# Compiled files
+*.o
+*.out
+*.obj
+
+# Backup files
+*.bak
+*.tmp
+
+# Docker and CI
+docker-compose.override.yml
+.dockerignore
+.travis.yml
+.circleci/
