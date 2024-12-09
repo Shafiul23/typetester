@@ -1,10 +1,9 @@
-import React, { useState, useEffect } from "react";
+// src/pages/TypeTest.tsx
+import React, { useState, useEffect, useRef } from "react";
+import story from "../../dictionaries/story";
 import styles from "./TypeTest.module.css"; // Import the CSS module
 
 const TypeTest: React.FC = () => {
-  const story =
-    "this is a simple story where you type one word at a time to test your typing speed and accuracy";
-
   // Split the story into an array of words
   const words = story.split(" ");
 
@@ -15,11 +14,13 @@ const TypeTest: React.FC = () => {
   const [wordStatuses, setWordStatuses] = useState<(boolean | null)[]>(
     Array(words.length).fill(null)
   ); // Track correctness of each word
-  const [timer, setTimer] = useState<number>(60); // Timer state (60 seconds)
+  const [timer, setTimer] = useState<number>(30); // Timer state (60 seconds)
   const [isFinished, setIsFinished] = useState<boolean>(false); // Is the test finished?
   const [hasStarted, setHasStarted] = useState<boolean>(false); // Whether typing has started
   const [startTime, setStartTime] = useState<number | null>(null); // Start time in milliseconds
   const [elapsedTime, setElapsedTime] = useState<number>(0); // Elapsed time in seconds
+
+  const wordsBoxRef = useRef<HTMLDivElement | null>(null);
 
   // Handle input changes
   const handleInputChange = (e: React.ChangeEvent<HTMLInputElement>) => {
@@ -32,6 +33,7 @@ const TypeTest: React.FC = () => {
 
   // Handle space key press for word submission
   const handleKeyPress = (e: React.KeyboardEvent) => {
+    if (isFinished) return;
     if (e.key === " " || e.key === "Enter") {
       const currentWord = words[currentWordIndex];
 
@@ -66,6 +68,7 @@ const TypeTest: React.FC = () => {
       setTimer((prev) => {
         if (prev <= 1) {
           clearInterval(timerInterval);
+          setElapsedTime((Date.now() - startTime!) / 1000);
           setIsFinished(true);
           return 0;
         }
@@ -75,7 +78,7 @@ const TypeTest: React.FC = () => {
 
     // Cleanup the interval when the timer reaches 0 or when the component unmounts
     return () => clearInterval(timerInterval);
-  }, [hasStarted, isFinished]);
+  }, [hasStarted, isFinished, startTime]);
 
   // Stop the timer once the user finishes early (before timer runs out)
   useEffect(() => {
@@ -84,11 +87,25 @@ const TypeTest: React.FC = () => {
       setElapsedTime((Date.now() - startTime!) / 1000); // Record the elapsed time in seconds
       setIsFinished(true); // Mark as finished
     }
-  }, [currentWordIndex, words.length, startTime, timer]);
+  }, [currentWordIndex, startTime, timer, words.length]);
 
   // Calculate Words Per Minute (WPM)
-  const wpm =
-    elapsedTime > 0 ? Math.round((correctWordsCounter / elapsedTime) * 60) : 0;
+  const wpm = Math.round((correctWordsCounter / elapsedTime) * 60);
+
+  useEffect(() => {
+    const container = wordsBoxRef.current as HTMLElement;
+    const selectedWordElement = container.childNodes[0].childNodes[
+      currentWordIndex
+    ] as HTMLElement;
+
+    if (selectedWordElement) {
+      selectedWordElement.scrollIntoView({
+        behavior: "smooth",
+        block: "center",
+        inline: "center",
+      });
+    }
+  }, [currentWordIndex]);
 
   return (
     <div className={styles.container}>
@@ -103,7 +120,7 @@ const TypeTest: React.FC = () => {
         </div>
 
         {/* Display word array in a separate box */}
-        <div className={styles.wordsBox}>
+        <div className={styles.wordsBox} ref={wordsBoxRef}>
           {isFinished ? (
             <>
               <h2>Great job! You've completed the test!</h2>
@@ -144,6 +161,7 @@ const TypeTest: React.FC = () => {
             autoCorrect="off"
             autoCapitalize="off"
             spellCheck="false"
+            autoFocus
             disabled={isFinished}
           />
         </div>
