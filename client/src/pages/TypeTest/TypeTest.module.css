@@ -28,6 +28,13 @@
   box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
 }
 
+/* Timer */
+.timer {
+  text-align: center;
+  font-size: 1.2rem;
+  color: #333;
+}
+
 /* Box for words */
 .wordsBox {
   text-align: center;
@@ -58,12 +65,12 @@
 
 .correctWord {
   color: #008000; /* green text for correct word */
-  /* font-weight: 700; */
+  font-weight: 700;
 }
 
 .incorrectWord {
   color: #ff0000; /* red text for incorrect word */
-  /* font-weight: 700; */
+  font-weight: 700;
 }
 
 /* Input field container */
