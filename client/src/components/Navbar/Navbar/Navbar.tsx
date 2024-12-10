@@ -1,12 +1,13 @@
 import React, { useState, useEffect } from "react";
 import { Link } from "react-router-dom";
-import styles from "./Navbar.module.css"; // Import the CSS module
-import classNames from "classnames"; // Import classNames for dynamic class handling
+import styles from "./Navbar.module.css";
+import classNames from "classnames";
 
 const Navbar: React.FC = () => {
   const [isLoggedIn, setIsLoggedIn] = useState<boolean>(false);
+  const [isMenuOpen, setIsMenuOpen] = useState<boolean>(false);
 
-  // Simulating checking login status (replace with real authentication logic)
+  // Check login status
   useEffect(() => {
     const user = localStorage.getItem("user");
     if (user) {
@@ -20,24 +21,49 @@ const Navbar: React.FC = () => {
   const handleLogout = () => {
     localStorage.removeItem("user");
     setIsLoggedIn(false);
+    setIsMenuOpen(false);
+  };
+
+  // Toggle the menu
+  const toggleMenu = () => {
+    setIsMenuOpen((prev) => !prev);
   };
 
   return (
     <nav className={styles.navbar}>
       <div className={styles.container}>
-        {/* Left Side: App Title */}
+        {/* App title */}
         <Link to="/" className={styles.brand}>
           <span className={styles.brandPrimary}>Type</span>
           <span className={styles.brandSecondary}>Tester</span>
         </Link>
 
-        {/* Right Side: Conditional Links based on Login Status */}
-        <div className={styles.navLinks}>
+        {/* Hamburger menu button */}
+        <button
+          className={styles.hamburger}
+          onClick={toggleMenu}
+          aria-label="Toggle navigation menu"
+        >
+          <span className={styles.hamburgerLine}></span>
+          <span className={styles.hamburgerLine}></span>
+          <span className={styles.hamburgerLine}></span>
+        </button>
+
+        {/* Navigation links */}
+        <div
+          className={classNames(styles.navLinks, {
+            [styles.open]: isMenuOpen,
+          })}
+        >
           <ul className={styles.navList}>
             {isLoggedIn ? (
               <>
                 <li className={styles.navItem}>
-                  <Link className={styles.navLink} to="/profile">
+                  <Link
+                    className={styles.navLink}
+                    to="/profile"
+                    onClick={() => setIsMenuOpen(false)}
+                  >
                     Profile
                   </Link>
                 </li>
@@ -53,17 +79,29 @@ const Navbar: React.FC = () => {
             ) : (
               <>
                 <li className={styles.navItem}>
-                  <Link className={styles.navLink} to="/register">
+                  <Link
+                    className={styles.navLink}
+                    to="/register"
+                    onClick={() => setIsMenuOpen(false)}
+                  >
                     Register
                   </Link>
                 </li>
                 <li className={styles.navItem}>
-                  <Link className={styles.navLink} to="/login">
+                  <Link
+                    className={styles.navLink}
+                    to="/login"
+                    onClick={() => setIsMenuOpen(false)}
+                  >
                     Login
                   </Link>
                 </li>
                 <li className={styles.navItem}>
-                  <Link className={styles.navLink} to="/typetest">
+                  <Link
+                    className={styles.navLink}
+                    to="/typetest"
+                    onClick={() => setIsMenuOpen(false)}
+                  >
                     Type Test
                   </Link>
                 </li>

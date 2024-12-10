@@ -14,7 +14,7 @@ const TypeTest: React.FC = () => {
   const [wordStatuses, setWordStatuses] = useState<(boolean | null)[]>(
     Array(words.length).fill(null)
   ); // Track correctness of each word
-  const [timer, setTimer] = useState<number>(30); // Timer state (60 seconds)
+  const [timer, setTimer] = useState<number>(10); // Timer state (60 seconds)
   const [isFinished, setIsFinished] = useState<boolean>(false); // Is the test finished?
   const [hasStarted, setHasStarted] = useState<boolean>(false); // Whether typing has started
   const [startTime, setStartTime] = useState<number | null>(null); // Start time in milliseconds
@@ -110,61 +110,68 @@ const TypeTest: React.FC = () => {
   return (
     <div className={styles.container}>
       <div className={styles.hero}>
-        <h1 className={styles.title}>Begin Type Test</h1>
+        <h1 className={styles.title}>Start typing to begin test!</h1>
       </div>
 
+      <div className={styles.timer}>
+        <p>Time remaining: {isFinished ? "0" : timer}s</p>
+      </div>
       <div className={styles.textBox}>
         {/* Timer display */}
-        <div className={styles.timer}>
-          <p>Time remaining: {isFinished ? "0" : timer}s</p>
-        </div>
 
         {/* Display word array in a separate box */}
-        <div className={styles.wordsBox} ref={wordsBoxRef}>
-          {isFinished ? (
-            <>
-              <h2>Great job! You've completed the test!</h2>
-              <p>Words per minute: {wpm}</p> {/* Display words per minute */}
-              <p>Correct words: {correctWordsCounter}</p>
-              <p>Wrong words: {wrongWordsCounter}</p>
-            </>
-          ) : (
-            <div className={styles.words}>
-              {words.map((word, index) => {
-                const currentWordStatus = wordStatuses[index];
 
-                return (
-                  <span
-                    key={index}
-                    className={`${styles.word} 
+        {isFinished ? (
+          <>
+            <div className={styles.reportCard}>
+              <h2>Great job! You've completed the test!</h2>
+              <h3 className={styles.wpmText}>Words per minute: {wpm}</h3>{" "}
+              <p className={styles.correctWord}>
+                Correct words: {correctWordsCounter}
+              </p>
+              <p className={styles.wrongWord}>
+                Wrong words: {wrongWordsCounter}
+              </p>
+            </div>
+          </>
+        ) : (
+          <>
+            <div className={styles.wordsBox} ref={wordsBoxRef}>
+              <div className={styles.words}>
+                {words.map((word, index) => {
+                  const currentWordStatus = wordStatuses[index];
+                  return (
+                    <span
+                      key={index}
+                      className={`${styles.word} 
                     ${index === currentWordIndex ? styles.selectedWord : ""} 
                     ${currentWordStatus === true ? styles.correctWord : ""} 
-                    ${currentWordStatus === false ? styles.incorrectWord : ""}`}
-                  >
-                    {word}
-                  </span>
-                );
-              })}
+                    ${currentWordStatus === false ? styles.wrongWord : ""}`}
+                    >
+                      {word}
+                    </span>
+                  );
+                })}
+              </div>
             </div>
-          )}
-        </div>
 
-        {/* Input field for typing */}
-        <div className={styles.inputBoxContainer}>
-          <input
-            type="text"
-            value={userInput}
-            onChange={handleInputChange}
-            onKeyDown={handleKeyPress}
-            className={styles.inputBox}
-            autoComplete="off"
-            autoCorrect="off"
-            autoCapitalize="off"
-            spellCheck="false"
-            autoFocus
-            disabled={isFinished}
-          />
-        </div>
+            <div className={styles.inputBoxContainer}>
+              <input
+                type="text"
+                value={userInput}
+                onChange={handleInputChange}
+                onKeyDown={handleKeyPress}
+                className={styles.inputBox}
+                autoComplete="off"
+                autoCorrect="off"
+                autoCapitalize="off"
+                spellCheck="false"
+                autoFocus
+                disabled={isFinished}
+              />
+            </div>
+          </>
+        )}
       </div>
     </div>
   );
