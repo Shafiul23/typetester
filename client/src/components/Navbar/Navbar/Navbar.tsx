@@ -1,47 +1,51 @@
 import React, { useState, useEffect } from "react";
-import { Link } from "react-router-dom";
+import { Link, useNavigate } from "react-router-dom";
 import styles from "./Navbar.module.css";
 import classNames from "classnames";
+import { useAuth } from "../../../context/AuthContext";
 
 const Navbar: React.FC = () => {
-  const [isLoggedIn, setIsLoggedIn] = useState<boolean>(false);
+  const { isLoggedIn, setIsLoggedIn, checkAuthStatus } = useAuth();
   const [isMenuOpen, setIsMenuOpen] = useState<boolean>(false);
 
-  // Check login status
-  useEffect(() => {
-    const user = localStorage.getItem("user");
-    if (user) {
-      setIsLoggedIn(true);
-    } else {
-      setIsLoggedIn(false);
+  const navigate = useNavigate();
+
+  const handleLogout = async () => {
+    try {
+      const response = await fetch("http://127.0.0.1:5000/auth/logout", {
+        method: "POST",
+        credentials: "include",
+      });
+      const data = await response.json();
+      if (response.ok) {
+        setIsLoggedIn(false);
+        checkAuthStatus();
+        setIsMenuOpen(false);
+        navigate("/");
+        console.log(data.message);
+      } else {
+        console.error("Logout failed:", data.error);
+      }
+    } catch (err) {
+      console.error("Error during logout", err);
     }
-  }, []);
-
-  // Handle logout
-  const handleLogout = () => {
-    localStorage.removeItem("user");
-    setIsLoggedIn(false);
-    setIsMenuOpen(false);
   };
 
-  // Toggle the menu
-  const toggleMenu = () => {
-    setIsMenuOpen((prev) => !prev);
-  };
+  useEffect(() => {
+    console.log("Is logged in: ", isLoggedIn); // Debug log
+  }, [isLoggedIn]);
 
   return (
     <nav className={styles.navbar}>
       <div className={styles.container}>
-        {/* App title */}
         <Link to="/" className={styles.brand}>
           <span className={styles.brandPrimary}>Type</span>
           <span className={styles.brandSecondary}>Tester</span>
         </Link>
 
-        {/* Hamburger menu button */}
         <button
           className={styles.hamburger}
-          onClick={toggleMenu}
+          onClick={() => setIsMenuOpen((prev) => !prev)}
           aria-label="Toggle navigation menu"
         >
           <span className={styles.hamburgerLine}></span>
@@ -49,7 +53,6 @@ const Navbar: React.FC = () => {
           <span className={styles.hamburgerLine}></span>
         </button>
 
-        {/* Navigation links */}
         <div
           className={classNames(styles.navLinks, {
             [styles.open]: isMenuOpen,

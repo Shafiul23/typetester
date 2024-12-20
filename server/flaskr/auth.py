@@ -65,6 +65,9 @@ def login():
         ).fetchone()
 
         if user and check_password_hash(user['password'], password):
+            session.clear()
+            session['user_id'] = user['id']
+            print("session id set to:", session['user_id'])
             return {"message": "Login successful"}, 200
         else:
             return {"error": "Invalid username or password"}, 401
@@ -74,23 +77,39 @@ def login():
         return {"error": "An unexpected error occurred."}, 500
 
 
+@bp.route('/status', methods=['GET'])
+def status():
+    try:
+        if g.user:
+            print("User logged in:", g.user['username'])  # Debugging log
+            return {"logged_in": True, "username": g.user['username']}, 200
+        print("No user logged in.")  # Debugging log
+        return {"logged_in": False}, 200
+    except Exception as e:
+        print(f"Error checking status: {e}")
+        return {"error": "An unexpected error occurred."}, 500
+
+
+
+@bp.route('/logout', methods=['POST'])
+def logout():
+    session.clear()
+    return {"message": "Logout successful"}, 200
+
+
 
 @bp.before_app_request
 def load_logged_in_user():
     user_id = session.get('user_id')
-
+    print(f"Session user_id: {user_id}")  # Debugging log
     if user_id is None:
         g.user = None
     else:
         g.user = get_db().execute(
             'SELECT * FROM user WHERE id = ?', (user_id,)
         ).fetchone()
+        print(f"Loaded user: {g.user}")  # Debugging log
 
-
-@bp.route('/logout')
-def logout():
-    session.clear()
-    return redirect(url_for('index'))
 
 
 def login_required(view):
@@ -102,3 +121,6 @@ def login_required(view):
         return view(**kwargs)
 
     return wrapped_view
+
+
+

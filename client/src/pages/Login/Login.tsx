@@ -2,7 +2,10 @@ import React, { useState } from "react";
 import { Link, useNavigate } from "react-router-dom";
 import styles from "./Login.module.css";
 
+import { useAuth } from "../../context/AuthContext";
+
 const Login: React.FC = () => {
+  const { setIsLoggedIn } = useAuth();
   const [username, setUsername] = useState<string>("");
   const [password, setPassword] = useState<string>("");
   const [error, setError] = useState<string | null>(null);
@@ -23,6 +26,7 @@ const Login: React.FC = () => {
       const data = await response.json();
       if (response.ok) {
         console.log(data.message);
+        setIsLoggedIn(true);
         navigate("/typetest");
       } else {
         setError(data.error);
