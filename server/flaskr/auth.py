@@ -59,7 +59,6 @@ def login():
         if not username or not password:
             return {"error": "Username and password are required."}, 400
 
-
         user = db.execute(
             "SELECT * FROM user WHERE username = ?", (username,)
         ).fetchone()
@@ -68,7 +67,7 @@ def login():
             session.clear()
             session['user_id'] = user['id']
             print("session id set to:", session['user_id'])
-            return {"message": "Login successful"}, 200
+            return {"message": "Login successful", "user_id": user['id']}, 200
         else:
             return {"error": "Invalid username or password"}, 401
 
@@ -82,7 +81,7 @@ def status():
     try:
         if g.user:
             print("User logged in:", g.user['username'])  # Debugging log
-            return {"logged_in": True, "username": g.user['username']}, 200
+            return {"logged_in": True, "username": g.user['username'], "user_id": g.user['id']}, 200
         print("No user logged in.")  # Debugging log
         return {"logged_in": False}, 200
     except Exception as e:

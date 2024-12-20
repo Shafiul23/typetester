@@ -8,8 +8,12 @@ import React, {
 
 interface AuthContextType {
   isLoggedIn: boolean;
+  userId: number | null;
   setIsLoggedIn: (loggedIn: boolean) => void;
+  setUserId: (userId: number | null) => void;
   checkAuthStatus: () => Promise<void>;
+  login: (username: string, password: string) => Promise<void>;
+  logout: () => Promise<void>;
 }
 
 const AuthContext = createContext<AuthContextType | undefined>(undefined);
@@ -18,6 +22,7 @@ export const AuthProvider: React.FC<{ children: ReactNode }> = ({
   children,
 }) => {
   const [isLoggedIn, setIsLoggedIn] = useState<boolean>(false);
+  const [userId, setUserId] = useState<number | null>(null);
 
   const checkAuthStatus = async () => {
     try {
@@ -25,10 +30,53 @@ export const AuthProvider: React.FC<{ children: ReactNode }> = ({
         credentials: "include",
       });
       const data = await response.json();
-      setIsLoggedIn(response.ok && data.logged_in);
+      if (response.ok && data.logged_in) {
+        setIsLoggedIn(true);
+        setUserId(data.user_id);
+      } else {
+        setIsLoggedIn(false);
+        setUserId(null);
+      }
     } catch (err) {
       console.error("Error checking auth status:", err);
       setIsLoggedIn(false);
+      setUserId(null);
+    }
+  };
+
+  const login = async (username: string, password: string) => {
+    try {
+      const response = await fetch("http://127.0.0.1:5000/auth/login", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        credentials: "include",
+        body: JSON.stringify({ username, password }),
+      });
+      const data = await response.json();
+      if (response.ok) {
+        setIsLoggedIn(true);
+        setUserId(data.user_id);
+        console.log("user id: ", data.user_id);
+      } else {
+        console.error("Login failed:", data.error);
+      }
+    } catch (err) {
+      console.error("Error during login:", err);
+    }
+  };
+
+  const logout = async () => {
+    try {
+      await fetch("http://127.0.0.1:5000/auth/logout", {
+        method: "POST",
+        credentials: "include",
+      });
+      setIsLoggedIn(false);
+      setUserId(null);
+    } catch (err) {
+      console.error("Error during logout:", err);
     }
   };
 
@@ -38,7 +86,15 @@ export const AuthProvider: React.FC<{ children: ReactNode }> = ({
 
   return (
     <AuthContext.Provider
-      value={{ isLoggedIn, setIsLoggedIn, checkAuthStatus }}
+      value={{
+        isLoggedIn,
+        userId,
+        setIsLoggedIn,
+        setUserId,
+        checkAuthStatus,
+        login,
+        logout,
+      }}
     >
       {children}
     </AuthContext.Provider>

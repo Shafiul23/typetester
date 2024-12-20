@@ -5,7 +5,7 @@ import styles from "./Login.module.css";
 import { useAuth } from "../../context/AuthContext";
 
 const Login: React.FC = () => {
-  const { setIsLoggedIn } = useAuth();
+  const { login } = useAuth();
   const [username, setUsername] = useState<string>("");
   const [password, setPassword] = useState<string>("");
   const [error, setError] = useState<string | null>(null);
@@ -16,21 +16,8 @@ const Login: React.FC = () => {
     e.preventDefault();
 
     try {
-      const response = await fetch("http://127.0.0.1:5000/auth/login", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        credentials: "include",
-        body: JSON.stringify({ username, password }),
-      });
-
-      const data = await response.json();
-      if (response.ok) {
-        console.log(data.message);
-        setIsLoggedIn(true);
-        navigate("/typetest");
-      } else {
-        setError(data.error);
-      }
+      await login(username, password);
+      navigate("/typetest");
     } catch (err) {
       setError("An error occurred. Please try again.");
     }

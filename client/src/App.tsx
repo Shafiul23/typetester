@@ -6,6 +6,7 @@ import Home from "./pages/Home/Home";
 import Register from "./pages/Register/Register";
 import Login from "./pages/Login/Login";
 import TypeTest from "./pages/TypeTest/TypeTest";
+import Profile from "./pages/Profile/Profile";
 
 const App: React.FC = () => {
   return (
@@ -17,7 +18,7 @@ const App: React.FC = () => {
         <Route path="/register" element={<Register />} />
         <Route path="/login" element={<Login />} />
         <Route path="/typetest" element={<TypeTest />} />
-        {/* <Route path="/profile" element={<ProfilePage />} /> */}
+        <Route path="/profile" element={<Profile />} />
       </Routes>
     </div>
   );
