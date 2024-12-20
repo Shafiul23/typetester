@@ -1,5 +1,5 @@
 import React, { useState } from "react";
-import { Link } from "react-router-dom";
+import { Link, useNavigate } from "react-router-dom";
 import styles from "./Login.module.css";
 
 const Login: React.FC = () => {
@@ -7,21 +7,28 @@ const Login: React.FC = () => {
   const [password, setPassword] = useState<string>("");
   const [error, setError] = useState<string | null>(null);
 
-  const handleLogin = (e: React.FormEvent) => {
+  const navigate = useNavigate();
+
+  const handleLogin = async (e: React.FormEvent) => {
     e.preventDefault();
 
-    // Simple validation (you can extend this based on your requirements)
-    if (!username || !password) {
-      setError("Both fields are required.");
-      return;
-    }
+    try {
+      const response = await fetch("http://127.0.0.1:5000/auth/login", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        credentials: "include",
+        body: JSON.stringify({ username, password }),
+      });
 
-    // Simulate a login process (replace with real authentication logic)
-    if (username === "user@example.com" && password === "password") {
-      localStorage.setItem("user", username); // Store user in localStorage
-      window.location.href = "/"; // Redirect to the home page
-    } else {
-      setError("Invalid username or password.");
+      const data = await response.json();
+      if (response.ok) {
+        console.log(data.message);
+        navigate("/typetest");
+      } else {
+        setError(data.error);
+      }
+    } catch (err) {
+      setError("An error occurred. Please try again.");
     }
   };
 
