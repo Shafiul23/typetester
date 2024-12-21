@@ -1,11 +1,10 @@
-/* Profile.module.css */
 .profileContainer {
   display: flex;
   flex-direction: column;
   align-items: center;
-  justify-content: center;
+  justify-content: flex-start;
   height: 100vh;
-  background-color: #f0f0f0;
+  background-color: #f4f4f4;
   padding: 20px;
 }
 
@@ -17,6 +16,7 @@
   width: 100%;
   max-width: 500px;
   text-align: center;
+  margin-bottom: 20px;
 }
 
 .username {
@@ -40,4 +40,58 @@
 .loading {
   font-size: 1.2rem;
   color: #555;
+}
+
+.tableContainer {
+  padding: 20px;
+  border-radius: 8px;
+  width: 100%;
+  margin-top: 20px;
+}
+
+.tableTitle {
+  font-size: 1.5rem;
+  color: #333;
+  margin-bottom: 15px;
+  text-align: left;
+}
+
+.table {
+  width: 100%;
+  border-collapse: collapse;
+}
+
+.table th,
+.table td {
+  border: 1px solid #ddd;
+  padding: 10px;
+  text-align: center;
+}
+
+.table th {
+  background-color: #4e9bff;
+  color: white;
+  font-weight: bold;
+}
+
+.table td {
+  color: #333;
+}
+
+.table tr:nth-child(even) {
+  background-color: #ececec;
+}
+
+.table tr:nth-child(odd) {
+  background-color: #f4f7fc;
+}
+
+.table tr:hover {
+  background-color: #e0e7ff;
+}
+
+.noScores {
+  text-align: center;
+  color: #666;
+  margin-top: 20px;
 }

@@ -151,6 +151,59 @@ def get_leaderboard():
         return {"error": "An unexpected error occurred."}, 500
 
 
+@bp.route('/personal', methods=['GET'])
+def get_personal_scores():
+    try:
+        auth_header = request.headers.get('Authorization')
+        if not auth_header:
+            return {"logged_in": False}, 401
+
+        token = auth_header.split(" ")[1]
+        decoded = decode_jwt(token)
+        if isinstance(decoded, tuple):
+            return decoded
+
+        user_id = decoded.get('user_id')
+        if not user_id:
+            return {"error": "Invalid token payload."}, 401
+
+        db = get_db()
+        personal_scores = db.execute(
+            """
+            SELECT 
+                score.id AS score_id, 
+                user.id AS user_id, 
+                user.username, 
+                score.score, 
+                score.created 
+            FROM score
+            JOIN user ON score.user_id = user.id
+            WHERE user.id = ?
+            ORDER BY score.created DESC
+            LIMIT 20
+            """,
+            (user_id,)
+        ).fetchall()
+
+        personal_list = [
+            {
+                "score_id": row["score_id"],
+                "user_id": row["user_id"],
+                "username": row["username"],
+                "score": row["score"],
+                "created": row["created"],
+            }
+            for row in personal_scores
+        ]
+
+        return {"personal": personal_list}, 200
+
+    except Exception as e:
+        print(f"Error retrieving personal scores: {e}")
+        return {"error": "An unexpected error occurred."}, 500
+
+
+
 @bp.route('/scores', methods=['POST'])
 def submit_score():
     try:
