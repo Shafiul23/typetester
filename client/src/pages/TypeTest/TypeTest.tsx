@@ -30,6 +30,20 @@ const TypeTest: React.FC = () => {
 
   const wordsBoxRef = useRef<HTMLDivElement>(null);
   const intervalRef = useRef<NodeJS.Timeout | null>(null);
+  const audioRef = useRef<HTMLAudioElement | null>(null);
+
+  useEffect(() => {
+    audioRef.current = new Audio("/typewriter-click.mp3");
+  }, []);
+
+  const playClickSound = () => {
+    if (audioRef.current) {
+      audioRef.current.currentTime = 0;
+      audioRef.current.play().catch((error) => {
+        console.error("Error playing sound:", error);
+      });
+    }
+  };
 
   const handleInputChange = useCallback(
     (e: React.ChangeEvent<HTMLInputElement>) => {
@@ -45,6 +59,8 @@ const TypeTest: React.FC = () => {
   const handleKeyPress = useCallback(
     (e: React.KeyboardEvent) => {
       if (isFinished || (e.key !== " " && e.key !== "Enter")) return;
+
+      playClickSound();
 
       const currentWord = words[currentWordIndex];
       const isCorrect = userInput.trim() === currentWord;
@@ -147,7 +163,7 @@ const TypeTest: React.FC = () => {
     setCurrentWordIndex(0);
     setWordStatuses(Array(totalWords).fill(null));
     setIsFinished(false);
-    setTimer(5); // Reset timer (or use the original time limit)
+    setTimer(5);
     setHasStarted(false);
     setScoreSaved(false);
   };
@@ -202,7 +218,10 @@ const TypeTest: React.FC = () => {
                 type="text"
                 value={userInput}
                 onChange={handleInputChange}
-                onKeyDown={handleKeyPress}
+                onKeyDown={(e) => {
+                  playClickSound();
+                  handleKeyPress(e);
+                }}
                 className={styles.inputBox}
                 autoComplete="off"
                 spellCheck="false"
