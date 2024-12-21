@@ -114,6 +114,42 @@ def status():
         return {"error": "An unexpected error occurred."}, 500
 
 
+@bp.route('/leaderboard', methods=['GET'])
+def get_leaderboard():
+    try:
+        db = get_db()
+        leaderboard = db.execute(
+            """
+            SELECT 
+                score.id AS score_id, 
+                user.id AS user_id, 
+                user.username, 
+                score.score, 
+                score.created 
+            FROM score
+            JOIN user ON score.user_id = user.id
+            ORDER BY score.score DESC
+            LIMIT 20
+            """
+        ).fetchall()
+
+        leaderboard_list = [
+            {
+                "score_id": row["score_id"],
+                "user_id": row["user_id"],
+                "username": row["username"],
+                "score": row["score"],
+                "created": row["created"],
+            }
+            for row in leaderboard
+        ]
+
+        return {"leaderboard": leaderboard_list}, 200
+
+    except Exception as e:
+        print(f"Error retrieving leaderboard: {e}")
+        return {"error": "An unexpected error occurred."}, 500
+
 
 @bp.route('/scores', methods=['POST'])
 def submit_score():

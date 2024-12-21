@@ -8,6 +8,7 @@ import Login from "./pages/Login/Login";
 import Profile from "./pages/Profile/Profile";
 import Register from "./pages/Register/Register";
 import TypeTest from "./pages/TypeTest/TypeTest";
+import Leaderboard from "./pages/Leaderboard/Leaderboard";
 
 const App: React.FC = () => {
   return (
@@ -17,6 +18,7 @@ const App: React.FC = () => {
         <Route path="/" element={<Home />} />
         <Route path="/register" element={<Register />} />
         <Route path="/login" element={<Login />} />
+        <Route path="/leaderboard" element={<Leaderboard />} />
 
         <Route element={<PrivateRoute />}>
           <Route path="/typetest" element={<TypeTest />} />

@@ -49,6 +49,15 @@ const Navbar: React.FC = () => {
                 <li className={styles.navItem}>
                   <Link
                     className={styles.navLink}
+                    to="/leaderboard"
+                    onClick={() => setIsMenuOpen(false)}
+                  >
+                    Leaderboard
+                  </Link>
+                </li>
+                <li className={styles.navItem}>
+                  <Link
+                    className={styles.navLink}
                     to="/typetest"
                     onClick={() => setIsMenuOpen(false)}
                   >
@@ -75,6 +84,15 @@ const Navbar: React.FC = () => {
               </>
             ) : (
               <>
+                <li className={styles.navItem}>
+                  <Link
+                    className={styles.navLink}
+                    to="/leaderboard"
+                    onClick={() => setIsMenuOpen(false)}
+                  >
+                    Leaderboard
+                  </Link>
+                </li>
                 <li className={styles.navItem}>
                   <Link
                     className={styles.navLink}
