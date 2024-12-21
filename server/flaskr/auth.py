@@ -1,13 +1,32 @@
 import functools
+import jwt
+import datetime
 
-from flask import (
-    Blueprint, flash, g, redirect, render_template, request, session, url_for
-)
+from flask import Blueprint, request, jsonify, g
 from werkzeug.security import check_password_hash, generate_password_hash
-
 from flaskr.db import get_db
 
+SECRET_KEY = "your_secret_key"  # Replace with a secure, private key
+ALGORITHM = "HS256"  # Algorithm used for JWT
+
 bp = Blueprint('auth', __name__, url_prefix='/auth')
+
+def generate_jwt(user_id, username):
+    payload = {
+        "user_id": user_id,
+        "username": username,
+        "exp": datetime.datetime.utcnow() + datetime.timedelta(hours=1)  # Expiration time
+    }
+    token = jwt.encode(payload, SECRET_KEY, algorithm=ALGORITHM)
+    return token
+
+def decode_jwt(token):
+    try:
+        return jwt.decode(token, SECRET_KEY, algorithms=[ALGORITHM])
+    except jwt.ExpiredSignatureError:
+        return {"error": "Token has expired"}, 401
+    except jwt.InvalidTokenError:
+        return {"error": "Invalid token"}, 401
 
 @bp.route('/register', methods=["POST"])
 def register():
@@ -53,21 +72,18 @@ def login():
 
         username = data.get('username')
         password = data.get('password')
-        db = get_db()
-
 
         if not username or not password:
             return {"error": "Username and password are required."}, 400
 
+        db = get_db()
         user = db.execute(
             "SELECT * FROM user WHERE username = ?", (username,)
         ).fetchone()
 
         if user and check_password_hash(user['password'], password):
-            session.clear()
-            session['user_id'] = user['id']
-            print("session id set to:", session['user_id'])
-            return {"message": "Login successful", "user_id": user['id']}, 200
+            token = generate_jwt(user['id'], user['username'])
+            return {"message": "Login successful", "token": token}, 200
         else:
             return {"error": "Invalid username or password"}, 401
 
@@ -79,11 +95,20 @@ def login():
 @bp.route('/status', methods=['GET'])
 def status():
     try:
-        if g.user:
-            print("User logged in:", g.user['username'])  # Debugging log
-            return {"logged_in": True, "username": g.user['username'], "user_id": g.user['id']}, 200
-        print("No user logged in.")  # Debugging log
-        return {"logged_in": False}, 200
+        auth_header = request.headers.get('Authorization')
+        if not auth_header:
+            return {"logged_in": False}, 401
+
+        token = auth_header.split(" ")[1]  # Extract the token from "Bearer <token>"
+        decoded = decode_jwt(token)
+        if isinstance(decoded, tuple):  # If an error occurred during decoding
+            return decoded
+
+        return {
+            "logged_in": True,
+            "user_id": decoded['user_id'],
+            "username": decoded['username']
+        }, 200
     except Exception as e:
         print(f"Error checking status: {e}")
         return {"error": "An unexpected error occurred."}, 500
@@ -92,22 +117,26 @@ def status():
 
 @bp.route('/logout', methods=['POST'])
 def logout():
-    session.clear()
     return {"message": "Logout successful"}, 200
-
 
 
 @bp.before_app_request
 def load_logged_in_user():
-    user_id = session.get('user_id')
-    print(f"Session user_id: {user_id}")  # Debugging log
-    if user_id is None:
+    auth_header = request.headers.get('Authorization')
+    if not auth_header:
         g.user = None
-    else:
-        g.user = get_db().execute(
-            'SELECT * FROM user WHERE id = ?', (user_id,)
-        ).fetchone()
-        print(f"Loaded user: {g.user}")  # Debugging log
+        return
+    
+    token = auth_header.split(" ")[1]  # Extract the token from "Bearer <token>"
+    decoded = decode_jwt(token)
+    if isinstance(decoded, tuple):  # If an error occurred during decoding
+        g.user = None
+        return
+    
+    g.user = get_db().execute(
+        'SELECT * FROM user WHERE id = ?', (decoded['user_id'],)
+    ).fetchone()
+
 
 
 

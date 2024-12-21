@@ -14,12 +14,13 @@ const Login: React.FC = () => {
 
   const handleLogin = async (e: React.FormEvent) => {
     e.preventDefault();
+    setError(null);
 
     try {
       await login(username, password);
       navigate("/typetest");
     } catch (err) {
-      setError("An error occurred. Please try again.");
+      setError("Invalid username or password. Please try again.");
     }
   };
 

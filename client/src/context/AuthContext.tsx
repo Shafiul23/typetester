@@ -9,8 +9,10 @@ import React, {
 interface AuthContextType {
   isLoggedIn: boolean;
   userId: number | null;
+  username: string | null;
   setIsLoggedIn: (loggedIn: boolean) => void;
   setUserId: (userId: number | null) => void;
+  setUsername: (username: string | null) => void;
   checkAuthStatus: () => Promise<void>;
   login: (username: string, password: string) => Promise<void>;
   logout: () => Promise<void>;
@@ -23,26 +25,7 @@ export const AuthProvider: React.FC<{ children: ReactNode }> = ({
 }) => {
   const [isLoggedIn, setIsLoggedIn] = useState<boolean>(false);
   const [userId, setUserId] = useState<number | null>(null);
-
-  const checkAuthStatus = async () => {
-    try {
-      const response = await fetch("http://127.0.0.1:5000/auth/status", {
-        credentials: "include",
-      });
-      const data = await response.json();
-      if (response.ok && data.logged_in) {
-        setIsLoggedIn(true);
-        setUserId(data.user_id);
-      } else {
-        setIsLoggedIn(false);
-        setUserId(null);
-      }
-    } catch (err) {
-      console.error("Error checking auth status:", err);
-      setIsLoggedIn(false);
-      setUserId(null);
-    }
-  };
+  const [username, setUsername] = useState<{ username: string } | null>(null);
 
   const login = async (username: string, password: string) => {
     try {
@@ -56,9 +39,13 @@ export const AuthProvider: React.FC<{ children: ReactNode }> = ({
       });
       const data = await response.json();
       if (response.ok) {
+        localStorage.setItem("token", data.token);
         setIsLoggedIn(true);
-        setUserId(data.user_id);
-        console.log("user id: ", data.user_id);
+        const payload = JSON.parse(atob(data.token.split(".")[1]));
+        setUserId(payload.user_id);
+        console.log("user id: ", payload.user_id);
+        setUsername(payload.username);
+        console.log("username: ", payload.username);
       } else {
         console.error("Login failed:", data.error);
       }
@@ -68,15 +55,38 @@ export const AuthProvider: React.FC<{ children: ReactNode }> = ({
   };
 
   const logout = async () => {
-    try {
-      await fetch("http://127.0.0.1:5000/auth/logout", {
-        method: "POST",
-        credentials: "include",
-      });
+    localStorage.removeItem("token"); // Remove token from storage
+    setIsLoggedIn(false);
+    setUserId(null);
+    setUsername(null);
+  };
+
+  const checkAuthStatus = async () => {
+    const token = localStorage.getItem("token");
+    if (!token) {
       setIsLoggedIn(false);
-      setUserId(null);
+      return;
+    }
+
+    try {
+      const response = await fetch("http://127.0.0.1:5000/auth/status", {
+        method: "GET",
+        headers: {
+          Authorization: `Bearer ${token}`,
+        },
+      });
+      const data = await response.json();
+      if (response.ok && data.logged_in) {
+        setIsLoggedIn(true);
+        setUserId(data.user_id);
+        setUsername(data.username);
+      } else {
+        setIsLoggedIn(false);
+        setUserId(null);
+        setUsername(null);
+      }
     } catch (err) {
-      console.error("Error during logout:", err);
+      console.error("Error checking auth status:", err);
     }
   };
 
@@ -89,8 +99,10 @@ export const AuthProvider: React.FC<{ children: ReactNode }> = ({
       value={{
         isLoggedIn,
         userId,
+        username,
         setIsLoggedIn,
         setUserId,
+        setUsername,
         checkAuthStatus,
         login,
         logout,

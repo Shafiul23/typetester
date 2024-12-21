@@ -9,11 +9,10 @@ def create_app(test_config=None):
     app = Flask(__name__, instance_relative_config=True)
     app.config.from_mapping(
         SECRET_KEY='dev',
-        SESSION_COOKIE_SECURE=False,
         DATABASE=os.path.join(app.instance_path, 'flaskr.sqlite'),
     )
 
-    print("SESSION_COOKIE_SECURE is set to:", app.config['SESSION_COOKIE_SECURE'])
+    print("SECRET_KEY is set to:", app.config['SECRET_KEY'])
 
     if test_config is None:
         # load the instance config, if it exists, when not testing
@@ -38,11 +37,6 @@ def create_app(test_config=None):
 
     from . import auth
     app.register_blueprint(auth.bp)
-
-    app.config['SECRET_KEY'] = 'your-secret-key'  # Secret key for signing the session cookie
-    app.config['SESSION_COOKIE_SAMESITE'] = 'Lax'  # Or 'Strict' if more secure
-    app.config['SESSION_COOKIE_HTTPONLY'] = True
-    app.config['SESSION_COOKIE_SECURE'] = False
 
     # Enable CORS
     CORS(app, supports_credentials=True)
