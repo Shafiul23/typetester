@@ -2,19 +2,18 @@
 import React from "react";
 import { Route, Routes } from "react-router-dom";
 import Navbar from "./components/Navbar/Navbar/Navbar";
-import Home from "./pages/Home/Home";
-import Register from "./pages/Register/Register";
-import Login from "./pages/Login/Login";
-import TypeTest from "./pages/TypeTest/TypeTest";
-import Profile from "./pages/Profile/Profile";
 import PrivateRoute from "./components/PrivateRoute/PrivateRoute";
+import Home from "./pages/Home/Home";
+import Login from "./pages/Login/Login";
+import Profile from "./pages/Profile/Profile";
+import Register from "./pages/Register/Register";
+import TypeTest from "./pages/TypeTest/TypeTest";
 
 const App: React.FC = () => {
   return (
     <div>
       <Navbar />
       <Routes>
-        {/* Define your routes here */}
         <Route path="/" element={<Home />} />
         <Route path="/register" element={<Register />} />
         <Route path="/login" element={<Login />} />

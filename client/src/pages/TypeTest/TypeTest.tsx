@@ -26,6 +26,7 @@ const TypeTest: React.FC = () => {
   const [isFinished, setIsFinished] = useState(false);
   const [hasStarted, setHasStarted] = useState(false);
   const [startTime, setStartTime] = useState<number | null>(null);
+  const [scoreSaved, setScoreSaved] = useState(false);
 
   const wordsBoxRef = useRef<HTMLDivElement>(null);
   const intervalRef = useRef<NodeJS.Timeout | null>(null);
@@ -128,11 +129,14 @@ const TypeTest: React.FC = () => {
 
       if (response.ok) {
         console.log("Score submitted successfully!");
+        setScoreSaved(true);
       } else {
         console.error("Failed to submit score");
+        setScoreSaved(false);
       }
     } catch (error) {
       console.error("Error submitting score:", error);
+      setScoreSaved(false);
     }
   };
 
@@ -141,9 +145,11 @@ const TypeTest: React.FC = () => {
     setCorrectWordsCounter(0);
     setWrongWordsCounter(0);
     setCurrentWordIndex(0);
+    setWordStatuses(Array(totalWords).fill(null));
     setIsFinished(false);
     setTimer(5); // Reset timer (or use the original time limit)
     setHasStarted(false);
+    setScoreSaved(false);
   };
 
   return (
@@ -165,8 +171,11 @@ const TypeTest: React.FC = () => {
               Correct words: {correctWordsCounter}
             </p>
             <p className={styles.wrongWord}>Wrong words: {wrongWordsCounter}</p>
+            {scoreSaved && <p>Score saved!</p>}
             <div className={styles.buttonContainer}>
-              <button onClick={submitScore}>Save</button>
+              <button onClick={submitScore} disabled={scoreSaved}>
+                Save
+              </button>
               <button onClick={resetTest}>Try Again</button>
             </div>
           </div>
