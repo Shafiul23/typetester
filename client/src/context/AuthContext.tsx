@@ -7,10 +7,8 @@ import React, {
 } from "react";
 
 interface AuthContextType {
-  isLoggedIn: boolean;
   userId: number | null;
   username: string | null;
-  setIsLoggedIn: (loggedIn: boolean) => void;
   setUserId: (userId: number | null) => void;
   setUsername: (username: string | null) => void;
   checkAuthStatus: () => Promise<void>;
@@ -23,7 +21,6 @@ const AuthContext = createContext<AuthContextType | undefined>(undefined);
 export const AuthProvider: React.FC<{ children: ReactNode }> = ({
   children,
 }) => {
-  const [isLoggedIn, setIsLoggedIn] = useState<boolean>(false);
   const [userId, setUserId] = useState<number | null>(null);
   const [username, setUsername] = useState<{ username: string } | null>(null);
 
@@ -40,7 +37,6 @@ export const AuthProvider: React.FC<{ children: ReactNode }> = ({
       const data = await response.json();
       if (response.ok) {
         localStorage.setItem("token", data.token);
-        setIsLoggedIn(true);
         const payload = JSON.parse(atob(data.token.split(".")[1]));
         setUserId(payload.user_id);
         console.log("user id: ", payload.user_id);
@@ -56,7 +52,6 @@ export const AuthProvider: React.FC<{ children: ReactNode }> = ({
 
   const logout = async () => {
     localStorage.removeItem("token"); // Remove token from storage
-    setIsLoggedIn(false);
     setUserId(null);
     setUsername(null);
   };
@@ -64,7 +59,8 @@ export const AuthProvider: React.FC<{ children: ReactNode }> = ({
   const checkAuthStatus = async () => {
     const token = localStorage.getItem("token");
     if (!token) {
-      setIsLoggedIn(false);
+      setUserId(null);
+      setUsername(null);
       return;
     }
 
@@ -77,11 +73,9 @@ export const AuthProvider: React.FC<{ children: ReactNode }> = ({
       });
       const data = await response.json();
       if (response.ok && data.logged_in) {
-        setIsLoggedIn(true);
         setUserId(data.user_id);
         setUsername(data.username);
       } else {
-        setIsLoggedIn(false);
         setUserId(null);
         setUsername(null);
       }
@@ -97,10 +91,8 @@ export const AuthProvider: React.FC<{ children: ReactNode }> = ({
   return (
     <AuthContext.Provider
       value={{
-        isLoggedIn,
         userId,
         username,
-        setIsLoggedIn,
         setUserId,
         setUsername,
         checkAuthStatus,

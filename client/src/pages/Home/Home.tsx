@@ -4,7 +4,7 @@ import styles from "./Home.module.css";
 import { useAuth } from "../../context/AuthContext";
 
 const Home: React.FC = () => {
-  const { isLoggedIn } = useAuth();
+  const { userId } = useAuth();
 
   return (
     <div className={styles.container}>
@@ -14,7 +14,7 @@ const Home: React.FC = () => {
           Improve your typing speed and accuracy with fun typing challenges!
         </p>
         <div className={styles.buttonGroup}>
-          {!isLoggedIn ? (
+          {!userId ? (
             <>
               <Link to="/register" className={styles.buttonPrimary}>
                 Register

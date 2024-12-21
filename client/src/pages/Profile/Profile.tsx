@@ -3,7 +3,7 @@ import { useAuth } from "../../context/AuthContext";
 import styles from "./Profile.module.css";
 
 const Profile: React.FC = () => {
-  const { isLoggedIn, username, userId } = useAuth();
+  const { username } = useAuth();
   const [error, setError] = useState<string | null>(null);
 
   return (

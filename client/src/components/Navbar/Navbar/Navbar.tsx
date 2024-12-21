@@ -5,7 +5,7 @@ import classNames from "classnames";
 import { useAuth } from "../../../context/AuthContext";
 
 const Navbar: React.FC = () => {
-  const { isLoggedIn, logout } = useAuth();
+  const { userId, logout } = useAuth();
   const [isMenuOpen, setIsMenuOpen] = useState<boolean>(false);
 
   const navigate = useNavigate();
@@ -44,7 +44,7 @@ const Navbar: React.FC = () => {
           })}
         >
           <ul className={styles.navList}>
-            {isLoggedIn ? (
+            {userId ? (
               <>
                 <li className={styles.navItem}>
                   <Link
