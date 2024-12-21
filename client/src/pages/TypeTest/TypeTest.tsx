@@ -7,8 +7,11 @@ import React, {
 } from "react";
 import story from "../../dictionaries/story";
 import styles from "./TypeTest.module.css";
+import { useAuth } from "../../context/AuthContext";
 
 const TypeTest: React.FC = () => {
+  const { userId } = useAuth();
+
   const words = useMemo(() => story.split(" "), []);
   const totalWords = words.length;
 
@@ -19,7 +22,7 @@ const TypeTest: React.FC = () => {
   const [wordStatuses, setWordStatuses] = useState(
     Array(totalWords).fill(null)
   );
-  const [timer, setTimer] = useState(60);
+  const [timer, setTimer] = useState(5);
   const [isFinished, setIsFinished] = useState(false);
   const [hasStarted, setHasStarted] = useState(false);
   const [startTime, setStartTime] = useState<number | null>(null);
@@ -110,6 +113,39 @@ const TypeTest: React.FC = () => {
     [correctWordsCounter, elapsedTime]
   );
 
+  const submitScore = async () => {
+    try {
+      const response = await fetch("http://127.0.0.1:5000/auth/scores", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({
+          user_id: userId,
+          score: wpm,
+        }),
+      });
+
+      if (response.ok) {
+        console.log("Score submitted successfully!");
+      } else {
+        console.error("Failed to submit score");
+      }
+    } catch (error) {
+      console.error("Error submitting score:", error);
+    }
+  };
+
+  const resetTest = () => {
+    setUserInput("");
+    setCorrectWordsCounter(0);
+    setWrongWordsCounter(0);
+    setCurrentWordIndex(0);
+    setIsFinished(false);
+    setTimer(5); // Reset timer (or use the original time limit)
+    setHasStarted(false);
+  };
+
   return (
     <div className={styles.container}>
       <div className={styles.hero}>
@@ -129,6 +165,10 @@ const TypeTest: React.FC = () => {
               Correct words: {correctWordsCounter}
             </p>
             <p className={styles.wrongWord}>Wrong words: {wrongWordsCounter}</p>
+            <div className={styles.buttonContainer}>
+              <button onClick={submitScore}>Save</button>
+              <button onClick={resetTest}>Try Again</button>
+            </div>
           </div>
         ) : (
           <>

@@ -115,6 +115,34 @@ def status():
 
 
 
+@bp.route('/scores', methods=['POST'])
+def submit_score():
+    try:
+        data = request.get_json()
+        if not data:
+            return {"error": "Invalid input"}, 400
+
+        user_id = data.get('user_id')
+        score = data.get('score')
+
+        if not user_id or not score:
+            return {"error": "User ID and score are required."}, 400
+
+        print(f"Received score: user_id={user_id}, score={score}")
+
+        db = get_db()
+        db.execute(
+            "INSERT INTO score (user_id, score) VALUES (?, ?)",
+            (user_id, score)
+        )
+        db.commit()
+        return {"message": "Score submitted successfully!"}, 201
+
+    except Exception as e:
+        print(f"Error submitting score: {e}")
+        return {"error": "An unexpected error occurred."}, 500
+
+
 @bp.route('/logout', methods=['POST'])
 def logout():
     return {"message": "Logout successful"}, 200
@@ -136,8 +164,6 @@ def load_logged_in_user():
     g.user = get_db().execute(
         'SELECT * FROM user WHERE id = ?', (decoded['user_id'],)
     ).fetchone()
-
-
 
 
 def login_required(view):
