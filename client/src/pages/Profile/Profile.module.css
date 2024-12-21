@@ -53,24 +53,24 @@
   font-size: 1.5rem;
   color: #333;
   margin-bottom: 15px;
-  text-align: left;
+  text-align: center;
 }
 
 .table {
   width: 100%;
   border-collapse: collapse;
+  box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
 }
 
 .table th,
 .table td {
   border: 1px solid #ddd;
   padding: 10px;
-  text-align: center;
+  text-align: left;
 }
 
 .table th {
-  background-color: #4e9bff;
-  color: white;
+  background-color: #ececec;
   font-weight: bold;
 }
 
@@ -86,12 +86,8 @@
   background-color: #f4f7fc;
 }
 
-.table tr:hover {
-  background-color: #e0e7ff;
-}
-
 .noScores {
-  text-align: center;
+  text-align: left;
   color: #666;
   margin-top: 20px;
 }
