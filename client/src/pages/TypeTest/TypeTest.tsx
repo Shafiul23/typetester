@@ -7,11 +7,8 @@ import React, {
 } from "react";
 import story from "../../dictionaries/story";
 import styles from "./TypeTest.module.css";
-import { useAuth } from "../../context/AuthContext";
 
 const TypeTest: React.FC = () => {
-  const { userId } = useAuth();
-
   const words = useMemo(() => story.split(" "), []);
   const totalWords = words.length;
 
@@ -22,7 +19,7 @@ const TypeTest: React.FC = () => {
   const [wordStatuses, setWordStatuses] = useState(
     Array(totalWords).fill(null)
   );
-  const [timer, setTimer] = useState(5);
+  const [timer, setTimer] = useState(10);
   const [isFinished, setIsFinished] = useState(false);
   const [hasStarted, setHasStarted] = useState(false);
   const [startTime, setStartTime] = useState<number | null>(null);
@@ -136,9 +133,9 @@ const TypeTest: React.FC = () => {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
+          Authorization: `Bearer ${localStorage.getItem("token")}`,
         },
         body: JSON.stringify({
-          user_id: userId,
           score: wpm,
         }),
       });
@@ -163,7 +160,7 @@ const TypeTest: React.FC = () => {
     setCurrentWordIndex(0);
     setWordStatuses(Array(totalWords).fill(null));
     setIsFinished(false);
-    setTimer(5);
+    setTimer(10);
     setHasStarted(false);
     setScoreSaved(false);
   };

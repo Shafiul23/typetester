@@ -211,13 +211,23 @@ def submit_score():
         if not data:
             return {"error": "Invalid input"}, 400
 
-        user_id = data.get('user_id')
         score = data.get('score')
 
-        if not user_id or not score:
-            return {"error": "User ID and score are required."}, 400
+        if not score:
+            return {"error": "Score is required."}, 400
 
-        print(f"Received score: user_id={user_id}, score={score}")
+        auth_header = request.headers.get('Authorization')
+        if not auth_header:
+            return {"error": "Authorization token is required."}, 401
+
+        token = auth_header.split(" ")[1]
+        decoded = decode_jwt(token)
+        if isinstance(decoded, tuple):
+            return decoded
+
+        user_id = decoded.get('user_id')
+        if not user_id:
+            return {"error": "User ID is missing from token."}, 401
 
         db = get_db()
         db.execute(
