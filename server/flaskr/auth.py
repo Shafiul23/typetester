@@ -6,8 +6,8 @@ from flask import Blueprint, request, jsonify, g
 from werkzeug.security import check_password_hash, generate_password_hash
 from flaskr.db import get_db
 
-SECRET_KEY = "your_secret_key"  # Replace with a secure, private key
-ALGORITHM = "HS256"  # Algorithm used for JWT
+SECRET_KEY = "your_secret_key"
+ALGORITHM = "HS256"
 
 bp = Blueprint('auth', __name__, url_prefix='/auth')
 
@@ -15,7 +15,7 @@ def generate_jwt(user_id, username):
     payload = {
         "user_id": user_id,
         "username": username,
-        "exp": datetime.datetime.utcnow() + datetime.timedelta(hours=1)  # Expiration time
+        "exp": datetime.datetime.utcnow() + datetime.timedelta(hours=1)
     }
     token = jwt.encode(payload, SECRET_KEY, algorithm=ALGORITHM)
     return token
@@ -99,9 +99,9 @@ def status():
         if not auth_header:
             return {"logged_in": False}, 401
 
-        token = auth_header.split(" ")[1]  # Extract the token from "Bearer <token>"
+        token = auth_header.split(" ")[1]
         decoded = decode_jwt(token)
-        if isinstance(decoded, tuple):  # If an error occurred during decoding
+        if isinstance(decoded, tuple):
             return decoded
 
         return {
@@ -212,7 +212,6 @@ def submit_score():
             return {"error": "Invalid input"}, 400
 
         score = data.get('score')
-
         if not score:
             return {"error": "Score is required."}, 400
 
@@ -230,6 +229,27 @@ def submit_score():
             return {"error": "User ID is missing from token."}, 401
 
         db = get_db()
+
+        last_submission = db.execute(
+            """
+            SELECT created 
+            FROM score 
+            WHERE user_id = ? 
+            ORDER BY created DESC 
+            LIMIT 1
+            """,
+            (user_id,)
+        ).fetchone()
+
+        if last_submission:
+            from datetime import datetime, timedelta
+
+            cooldown_period = timedelta(minutes=1)
+            last_submission_time = last_submission["created"]
+
+            if datetime.now() - last_submission_time < cooldown_period:
+                return {"error": "You can only submit a score once every minute."}, 429
+
         db.execute(
             "INSERT INTO score (user_id, score) VALUES (?, ?)",
             (user_id, score)
@@ -254,9 +274,9 @@ def load_logged_in_user():
         g.user = None
         return
     
-    token = auth_header.split(" ")[1]  # Extract the token from "Bearer <token>"
+    token = auth_header.split(" ")[1]
     decoded = decode_jwt(token)
-    if isinstance(decoded, tuple):  # If an error occurred during decoding
+    if isinstance(decoded, tuple):
         g.user = None
         return
     

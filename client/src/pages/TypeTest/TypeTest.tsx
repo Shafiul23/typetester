@@ -116,7 +116,7 @@ const TypeTest: React.FC = () => {
 
   const elapsedTime = useMemo(
     () => (startTime ? (Date.now() - startTime) / 1000 : 0),
-    [startTime, isFinished]
+    [startTime]
   );
 
   const wpm = useMemo(
@@ -144,11 +144,19 @@ const TypeTest: React.FC = () => {
         console.log("Score submitted successfully!");
         setScoreSaved(true);
       } else {
-        console.error("Failed to submit score");
+        const errorData = await response.json();
+        if (response.status === 429) {
+          console.error("Rate limit error:", errorData.error);
+          alert("You can only submit a score once every minute. Please wait.");
+        } else {
+          console.error("Failed to submit score:", errorData.error);
+          alert(errorData.error || "Failed to submit score. Please try again.");
+        }
         setScoreSaved(false);
       }
     } catch (error) {
       console.error("Error submitting score:", error);
+      alert("An unexpected error occurred. Please try again later.");
       setScoreSaved(false);
     }
   };
