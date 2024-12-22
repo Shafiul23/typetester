@@ -15,11 +15,12 @@ const Profile: React.FC = () => {
   const [error, setError] = useState<string | null>(null);
   const [scores, setScores] = useState<Score[]>([]);
   const [loading, setLoading] = useState<boolean>(true);
+  const [orderBy, setOrderBy] = useState<string>("created");
 
   useEffect(() => {
     const fetchScores = async () => {
       try {
-        const response = await fetch("/auth/personal", {
+        const response = await fetch(`/auth/personal?order_by=${orderBy}`, {
           headers: {
             Authorization: `Bearer ${localStorage.getItem("token")}`,
           },
@@ -39,7 +40,7 @@ const Profile: React.FC = () => {
     };
 
     fetchScores();
-  }, []);
+  }, [orderBy]);
 
   return (
     <div className={styles.profileContainer}>
@@ -53,7 +54,24 @@ const Profile: React.FC = () => {
           )}
 
           <div className={styles.tableContainer}>
-            <h2 className={styles.tableTitle}>Your Recent Scores</h2>
+            <div className={styles.tableTitleContainer}>
+              <h2 className={styles.tableTitle}>Your Scores</h2>
+              {orderBy === "created" ? (
+                <button
+                  className={styles.sortButton}
+                  onClick={() => setOrderBy("score")}
+                >
+                  Sort by Score
+                </button>
+              ) : (
+                <button
+                  className={styles.sortButton}
+                  onClick={() => setOrderBy("created")}
+                >
+                  Sort by Date
+                </button>
+              )}
+            </div>
             {scores.length > 0 ? (
               <table className={styles.table}>
                 <thead>

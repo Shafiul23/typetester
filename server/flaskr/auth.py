@@ -167,9 +167,15 @@ def get_personal_scores():
         if not user_id:
             return {"error": "Invalid token payload."}, 401
 
+        order_by = request.args.get('order_by', 'created')
+        if order_by not in ['created', 'score']:
+            return {"error": "Invalid order_by parameter."}, 400
+
+        order_clause = 'created' if order_by == 'created' else 'score'
+
         db = get_db()
         personal_scores = db.execute(
-            """
+            f"""
             SELECT 
                 score.id AS score_id, 
                 user.id AS user_id, 
@@ -179,7 +185,7 @@ def get_personal_scores():
             FROM score
             JOIN user ON score.user_id = user.id
             WHERE user.id = ?
-            ORDER BY score.created DESC
+            ORDER BY {order_clause} DESC
             LIMIT 20
             """,
             (user_id,)

@@ -11,7 +11,7 @@ const Home: React.FC = () => {
       <div className={styles.hero}>
         <h1 className={styles.title}>Welcome to TypeTester!</h1>
         <p className={styles.subtitle}>
-          Improve your typing speed and accuracy with fun typing challenges!
+          Test your typing speed and compete with friends!
         </p>
         <div className={styles.buttonGroup}>
           {!userId ? (
