@@ -168,7 +168,9 @@ const TypeTest: React.FC = () => {
   return (
     <div className={styles.container}>
       <div className={styles.hero}>
-        <h1 className={styles.title}>Start typing to begin test!</h1>
+        {!hasStarted && (
+          <h1 className={styles.title}>Start typing to begin test!</h1>
+        )}
       </div>
 
       <div className={styles.timer}>
