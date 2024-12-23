@@ -8,5 +8,6 @@
     "allowJs": true,
     "jsx": "react-jsx"
   },
-  "include": ["src/**/*", "src/global.d.ts"]
+  "include": ["src/**/*", "src/global.d.ts"],
+  "exclude": ["src/__mocks__/**/*.js"]
 }
