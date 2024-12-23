@@ -12,7 +12,14 @@ interface AuthContextType {
   setUserId: (userId: number | null) => void;
   setUsername: (username: string | null) => void;
   checkAuthStatus: () => Promise<void>;
-  login: (username: string, password: string) => Promise<void>;
+  register: (
+    username: string,
+    password: string
+  ) => Promise<{ success: boolean; message: string }>;
+  login: (
+    username: string,
+    password: string
+  ) => Promise<{ success: boolean; message: string }>;
   logout: () => Promise<void>;
 }
 
@@ -23,6 +30,28 @@ export const AuthProvider: React.FC<{ children: ReactNode }> = ({
 }) => {
   const [userId, setUserId] = useState<number | null>(null);
   const [username, setUsername] = useState<{ username: string } | null>(null);
+
+  const register = async (username: string, password: string) => {
+    try {
+      const response = await fetch("http://127.0.0.1:5000/auth/register", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        credentials: "include",
+        body: JSON.stringify({ username, password }),
+      });
+
+      const data = await response.json();
+      if (!response.ok) {
+        throw new Error(data.error || "Registration failed");
+      }
+      return { success: true, message: data.message };
+    } catch (error: any) {
+      console.error("Error during registration:", error);
+      return { success: false, message: error.message || "An error occurred." };
+    }
+  };
 
   const login = async (username: string, password: string) => {
     try {
@@ -35,23 +64,23 @@ export const AuthProvider: React.FC<{ children: ReactNode }> = ({
         body: JSON.stringify({ username, password }),
       });
       const data = await response.json();
-      if (response.ok) {
-        localStorage.setItem("token", data.token);
-        const payload = JSON.parse(atob(data.token.split(".")[1]));
-        setUserId(payload.user_id);
-        console.log("user id: ", payload.user_id);
-        setUsername(payload.username);
-        console.log("username: ", payload.username);
-      } else {
-        console.error("Login failed:", data.error);
+
+      if (!response.ok) {
+        throw new Error(data.error || "Login failed");
       }
+      localStorage.setItem("token", data.token);
+      const payload = JSON.parse(atob(data.token.split(".")[1]));
+      setUserId(payload.user_id);
+      setUsername(payload.username);
+      return { success: true, message: data.message };
     } catch (err) {
       console.error("Error during login:", err);
+      return { success: false, message: err.message || "An error occurred." };
     }
   };
 
   const logout = async () => {
-    localStorage.removeItem("token"); // Remove token from storage
+    localStorage.removeItem("token");
     setUserId(null);
     setUsername(null);
   };
@@ -98,6 +127,7 @@ export const AuthProvider: React.FC<{ children: ReactNode }> = ({
         checkAuthStatus,
         login,
         logout,
+        register,
       }}
     >
       {children}

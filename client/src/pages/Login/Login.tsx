@@ -8,19 +8,23 @@ const Login: React.FC = () => {
   const { login } = useAuth();
   const [username, setUsername] = useState<string>("");
   const [password, setPassword] = useState<string>("");
-  const [error, setError] = useState<string | null>(null);
+  const [errorMessage, setErrorMessage] = useState<string | null>(null);
 
   const navigate = useNavigate();
 
   const handleLogin = async (e: React.FormEvent) => {
     e.preventDefault();
-    setError(null);
+    setErrorMessage(null);
 
-    try {
-      await login(username, password);
+    const response = await login(username, password);
+
+    if (response.success) {
       navigate("/typetest");
-    } catch (err) {
-      setError("Invalid username or password. Please try again.");
+    } else {
+      setErrorMessage(
+        response.message || "An unexpected error occurred. Please try again."
+      );
+      setPassword("");
     }
   };
 
@@ -28,7 +32,6 @@ const Login: React.FC = () => {
     <div className={styles.container}>
       <div className={styles.formWrapper}>
         <h2 className={styles.title}>Login</h2>
-        {error && <div className={styles.error}>{error}</div>}
         <form onSubmit={handleLogin} className={styles.form}>
           <div className={styles.inputGroup}>
             <label htmlFor="username" className={styles.label}>
@@ -58,6 +61,9 @@ const Login: React.FC = () => {
             />
           </div>
 
+          {errorMessage && (
+            <div className={styles.errorMessage}>{errorMessage}</div>
+          )}
           <button type="submit" className={styles.submitButton}>
             Login
           </button>

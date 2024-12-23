@@ -1,50 +1,43 @@
 import React, { useState } from "react";
-import { Link } from "react-router-dom";
+import { Link, useNavigate } from "react-router-dom";
 import styles from "./Register.module.css";
+import { useAuth } from "../../context/AuthContext";
 
 const Register: React.FC = () => {
+  const { register } = useAuth();
   const [username, setUsername] = useState("");
   const [password, setPassword] = useState("");
   const [confirmPassword, setConfirmPassword] = useState("");
+  const [errorMessage, setErrorMessage] = useState<string | null>(null);
+
+  const navigate = useNavigate();
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
 
     if (username.trim() === "" || password.trim() === "") {
-      alert("Username and password cannot be empty");
+      setErrorMessage("Username and password cannot be empty");
       return;
     }
 
     if (password !== confirmPassword) {
-      alert("Passwords do not match!");
+      setErrorMessage("Passwords do not match!");
       return;
     }
 
-    try {
-      const response = await fetch("http://127.0.0.1:5000/auth/register", {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-        },
-        credentials: "include",
-        body: JSON.stringify({ username, password }),
-      });
+    const response = await register(username, password);
 
-      const data = await response.json();
-
-      if (!response.ok) {
-        alert(data.error || "Registration failed");
-      } else {
-        setUsername("");
-        setPassword("");
-        setConfirmPassword("");
-        alert(data.message || "Registered successfully!");
-        // Optionally redirect to login page
-        window.location.href = "/login";
-      }
-    } catch (error) {
-      console.error("Error during registration:", error);
-      alert("An error occurred. Please try again.");
+    if (response.success) {
+      setUsername("");
+      setPassword("");
+      setConfirmPassword("");
+      setErrorMessage(null);
+      navigate("/login");
+    } else {
+      setErrorMessage(response.message);
+      setUsername("");
+      setPassword("");
+      setConfirmPassword("");
     }
   };
 
@@ -95,6 +88,9 @@ const Register: React.FC = () => {
             />
           </div>
 
+          {errorMessage && (
+            <div className={styles.errorMessage}>{errorMessage}</div>
+          )}
           <div className={styles.buttonGroup}>
             <button type="submit" className={styles.submitButton}>
               Register
