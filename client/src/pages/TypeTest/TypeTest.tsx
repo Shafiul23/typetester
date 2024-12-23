@@ -1,5 +1,5 @@
 import React, {
-  useState,
+  useReducer,
   useEffect,
   useRef,
   useMemo,
@@ -9,35 +9,94 @@ import story from "../../dictionaries/story";
 import styles from "./TypeTest.module.css";
 import useSubmitScore from "../../hooks/useSubmitScore";
 import useAudio from "../../hooks/useAudio";
+import useTimer from "../../hooks/useTimer";
+
+const initialState = {
+  currentWordIndex: 0,
+  userInput: "",
+  correctWordsCounter: 0,
+  wrongWordsCounter: 0,
+  wordStatuses: [] as (boolean | null)[],
+  timer: 10,
+  isFinished: false,
+  hasStarted: false,
+  elapsedTime: 0,
+};
+
+type State = typeof initialState;
+
+type Action =
+  | { type: "START_TEST" }
+  | { type: "UPDATE_INPUT"; payload: string }
+  | { type: "CHECK_WORD"; payload: boolean }
+  | { type: "INCREMENT_INDEX" }
+  | { type: "UPDATE_STATUSES"; payload: (boolean | null)[] }
+  | { type: "SET_FINISHED" }
+  | { type: "DECREMENT_TIMER" }
+  | { type: "RESET_TEST"; payload: number }
+  | { type: "SET_ELAPSED_TIME"; payload: number };
+
+const typeTestReducer = (state: State, action: Action): State => {
+  switch (action.type) {
+    case "START_TEST":
+      return { ...state, hasStarted: true };
+    case "UPDATE_INPUT":
+      return { ...state, userInput: action.payload };
+    case "CHECK_WORD":
+      return action.payload
+        ? { ...state, correctWordsCounter: state.correctWordsCounter + 1 }
+        : { ...state, wrongWordsCounter: state.wrongWordsCounter + 1 };
+    case "INCREMENT_INDEX":
+      return { ...state, currentWordIndex: state.currentWordIndex + 1 };
+    case "UPDATE_STATUSES":
+      return { ...state, wordStatuses: action.payload };
+    case "SET_FINISHED":
+      return { ...state, isFinished: true };
+    case "DECREMENT_TIMER":
+      return { ...state, timer: state.timer - 1 };
+    case "RESET_TEST":
+      return {
+        ...initialState,
+        wordStatuses: Array(action.payload).fill(null),
+      };
+    case "SET_ELAPSED_TIME":
+      return { ...state, elapsedTime: action.payload };
+    default:
+      return state;
+  }
+};
 
 const TypeTest: React.FC = () => {
   const words = useMemo(() => story.split(" "), []);
   const totalWords = words.length;
 
-  const [currentWordIndex, setCurrentWordIndex] = useState(0);
-  const [userInput, setUserInput] = useState("");
-  const [correctWordsCounter, setCorrectWordsCounter] = useState(0);
-  const [wrongWordsCounter, setWrongWordsCounter] = useState(0);
-  const [wordStatuses, setWordStatuses] = useState(
-    Array(totalWords).fill(null)
-  );
-  const [timer, setTimer] = useState(10);
-  const [isFinished, setIsFinished] = useState(false);
-  const [hasStarted, setHasStarted] = useState(false);
-  const [elapsedTime, setElapsedTime] = useState<number>(0);
+  const [state, dispatch] = useReducer(typeTestReducer, {
+    ...initialState,
+    wordStatuses: Array(totalWords).fill(null),
+  });
+
   const { submitScore, scoreSaved } = useSubmitScore();
   const { playAudio } = useAudio("/typewriter-click.mp3");
+  const { timer, hasStarted, isFinished } = state;
 
+  const startTimeRef = useTimer(hasStarted, isFinished, dispatch);
   const wordsBoxRef = useRef<HTMLDivElement>(null);
-  const intervalRef = useRef<NodeJS.Timeout | null>(null);
-  const startTimeRef = useRef<number | null>(null);
+
+  const {
+    currentWordIndex,
+    userInput,
+    correctWordsCounter,
+    wrongWordsCounter,
+    wordStatuses,
+    elapsedTime,
+  } = state;
 
   const handleInputChange = useCallback(
     (e: React.ChangeEvent<HTMLInputElement>) => {
       if (!hasStarted) {
-        setHasStarted(true);
+        dispatch({ type: "START_TEST" });
       }
-      setUserInput(e.target.value);
+      dispatch({ type: "UPDATE_INPUT", payload: e.target.value });
     },
     [hasStarted]
   );
@@ -51,47 +110,26 @@ const TypeTest: React.FC = () => {
       const currentWord = words[currentWordIndex];
       const isCorrect = userInput.trim() === currentWord;
 
-      setWordStatuses((prev) => {
-        const newStatuses = [...prev];
-        newStatuses[currentWordIndex] = isCorrect;
-        return newStatuses;
-      });
+      const updatedStatuses = [...wordStatuses];
+      updatedStatuses[currentWordIndex] = isCorrect;
 
-      if (isCorrect) {
-        setCorrectWordsCounter((prev) => prev + 1);
-      } else {
-        setWrongWordsCounter((prev) => prev + 1);
-      }
-
-      setUserInput("");
-      setCurrentWordIndex((prev) => prev + 1);
+      dispatch({ type: "UPDATE_STATUSES", payload: updatedStatuses });
+      dispatch({ type: "CHECK_WORD", payload: isCorrect });
+      dispatch({ type: "INCREMENT_INDEX" });
+      dispatch({ type: "UPDATE_INPUT", payload: "" });
     },
-    [isFinished, playAudio, words, currentWordIndex, userInput]
+    [isFinished, playAudio, words, currentWordIndex, userInput, wordStatuses]
   );
 
   useEffect(() => {
-    if (hasStarted && !isFinished) {
-      startTimeRef.current = Date.now();
-      intervalRef.current = setInterval(() => {
-        setTimer((prev) => {
-          if (prev <= 1) {
-            clearInterval(intervalRef.current!);
-            setElapsedTime((Date.now() - startTimeRef.current!) / 1000);
-            setIsFinished(true);
-            return 0;
-          }
-          return prev - 1;
-        });
-      }, 1000);
+    if (timer <= 0) {
+      dispatch({
+        type: "SET_ELAPSED_TIME",
+        payload: (Date.now() - startTimeRef.current!) / 1000,
+      });
+      dispatch({ type: "SET_FINISHED" });
     }
-    return () => clearInterval(intervalRef.current!);
-  }, [hasStarted, isFinished]);
-
-  useEffect(() => {
-    if (currentWordIndex >= totalWords) {
-      setIsFinished(true);
-    }
-  }, [currentWordIndex, totalWords]);
+  }, [timer, dispatch, startTimeRef]);
 
   useEffect(() => {
     if (!wordsBoxRef.current) return;
@@ -109,15 +147,7 @@ const TypeTest: React.FC = () => {
   const wpm = Math.round((correctWordsCounter / safeElapsedTime) * 60);
 
   const resetTest = () => {
-    setUserInput("");
-    setCorrectWordsCounter(0);
-    setWrongWordsCounter(0);
-    setCurrentWordIndex(0);
-    setWordStatuses(Array(totalWords).fill(null));
-    setIsFinished(false);
-    setTimer(10);
-    setHasStarted(false);
-    setElapsedTime(0);
+    dispatch({ type: "RESET_TEST", payload: totalWords });
     startTimeRef.current = null;
   };
 
