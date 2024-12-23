@@ -1,17 +1,19 @@
 import React, {
-  useReducer,
-  useEffect,
-  useRef,
-  useMemo,
   useCallback,
+  useEffect,
+  useMemo,
+  useReducer,
+  useRef,
 } from "react";
-import story from "../../dictionaries/story";
-import styles from "./TypeTest.module.css";
-import useSubmitScore from "../../hooks/useSubmitScore";
+import commonWords from "../../dictionaries/commonWords";
+import storyWords from "../../dictionaries/story";
 import useAudio from "../../hooks/useAudio";
+import useSubmitScore from "../../hooks/useSubmitScore";
 import useTimer from "../../hooks/useTimer";
+import styles from "./TypeTest.module.css";
 
 const initialState = {
+  useStory: false,
   currentWordIndex: 0,
   userInput: "",
   correctWordsCounter: 0,
@@ -21,11 +23,13 @@ const initialState = {
   isFinished: false,
   hasStarted: false,
   elapsedTime: 0,
+  scoreSaved: false,
 };
 
 type State = typeof initialState;
 
 type Action =
+  | { type: "TOGGLE_DICTIONARY" }
   | { type: "START_TEST" }
   | { type: "UPDATE_INPUT"; payload: string }
   | { type: "CHECK_WORD"; payload: boolean }
@@ -33,11 +37,14 @@ type Action =
   | { type: "UPDATE_STATUSES"; payload: (boolean | null)[] }
   | { type: "SET_FINISHED" }
   | { type: "DECREMENT_TIMER" }
+  | { type: "SET_SCORE_SAVED"; payload: boolean }
   | { type: "RESET_TEST"; payload: number }
   | { type: "SET_ELAPSED_TIME"; payload: number };
 
 const typeTestReducer = (state: State, action: Action): State => {
   switch (action.type) {
+    case "TOGGLE_DICTIONARY":
+      return { ...state, useStory: !state.useStory };
     case "START_TEST":
       return { ...state, hasStarted: true };
     case "UPDATE_INPUT":
@@ -54,6 +61,8 @@ const typeTestReducer = (state: State, action: Action): State => {
       return { ...state, isFinished: true };
     case "DECREMENT_TIMER":
       return { ...state, timer: state.timer - 1 };
+    case "SET_SCORE_SAVED":
+      return { ...state, scoreSaved: action.payload };
     case "RESET_TEST":
       return {
         ...initialState,
@@ -67,15 +76,23 @@ const typeTestReducer = (state: State, action: Action): State => {
 };
 
 const TypeTest: React.FC = () => {
-  const words = useMemo(() => story.split(" "), []);
+  const [state, dispatch] = useReducer(typeTestReducer, { ...initialState });
+
+  const words = useMemo(
+    () => (state.useStory ? storyWords : commonWords),
+    [state.useStory]
+  );
+
   const totalWords = words.length;
 
-  const [state, dispatch] = useReducer(typeTestReducer, {
-    ...initialState,
-    wordStatuses: Array(totalWords).fill(null),
-  });
+  useEffect(() => {
+    dispatch({
+      type: "UPDATE_STATUSES",
+      payload: Array(totalWords).fill(null),
+    });
+  }, [totalWords]);
 
-  const { submitScore, scoreSaved } = useSubmitScore();
+  const { submitScore } = useSubmitScore();
   const { playAudio } = useAudio("/typewriter-click.mp3");
   const { timer, hasStarted, isFinished } = state;
 
@@ -121,6 +138,10 @@ const TypeTest: React.FC = () => {
     [isFinished, playAudio, words, currentWordIndex, userInput, wordStatuses]
   );
 
+  const toggleDictionary = () => {
+    dispatch({ type: "TOGGLE_DICTIONARY" });
+  };
+
   useEffect(() => {
     if (timer <= 0) {
       dispatch({
@@ -146,6 +167,13 @@ const TypeTest: React.FC = () => {
   const safeElapsedTime = Math.max(elapsedTime, 1);
   const wpm = Math.round((correctWordsCounter / safeElapsedTime) * 60);
 
+  const handleScoreSubmission = async (score: number) => {
+    const success = await submitScore(score);
+    if (success) {
+      dispatch({ type: "SET_SCORE_SAVED", payload: true });
+    }
+  };
+
   const resetTest = () => {
     dispatch({ type: "RESET_TEST", payload: totalWords });
     startTimeRef.current = null;
@@ -159,8 +187,16 @@ const TypeTest: React.FC = () => {
         )}
       </div>
 
-      <div className={styles.timer}>
-        <p>Time remaining: {timer}s</p>
+      <div className={styles.timerContainer}>
+        <div className={styles.timer}>
+          <p>Time remaining: {timer}s</p>
+        </div>
+
+        {!hasStarted && (
+          <button onClick={toggleDictionary} className={styles.toggleButton}>
+            {state.useStory ? "Use Most Common 200 Words" : "Use Short Story"}
+          </button>
+        )}
       </div>
 
       <div className={styles.textBox}>
@@ -172,14 +208,15 @@ const TypeTest: React.FC = () => {
               Correct words: {correctWordsCounter}
             </p>
             <p className={styles.wrongWord}>Wrong words: {wrongWordsCounter}</p>
-            {scoreSaved && <p>Score saved!</p>}
+            {state.scoreSaved && <p>Score saved!</p>}
             <div className={styles.buttonContainer}>
               <button
-                onClick={() => submitScore(wpm)}
-                disabled={scoreSaved || !wpm}
+                onClick={() => handleScoreSubmission(wpm)}
+                disabled={state.scoreSaved || !wpm}
               >
                 Save
               </button>
+
               <button onClick={resetTest}>Try Again</button>
             </div>
           </div>

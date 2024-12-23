@@ -1,16 +1,14 @@
 import { useState, useCallback } from "react";
 
 interface UseSubmitScoreReturn {
-  submitScore: (score: number) => Promise<void>;
-  scoreSaved: boolean;
+  submitScore: (score: number) => Promise<boolean>;
   error: string | null;
 }
 
 const useSubmitScore = (): UseSubmitScoreReturn => {
-  const [scoreSaved, setScoreSaved] = useState(false);
   const [error, setError] = useState<string | null>(null);
 
-  const submitScore = useCallback(async (score: number) => {
+  const submitScore = useCallback(async (score: number): Promise<boolean> => {
     try {
       const response = await fetch("http://127.0.0.1:5000/auth/scores", {
         method: "POST",
@@ -18,18 +16,15 @@ const useSubmitScore = (): UseSubmitScoreReturn => {
           "Content-Type": "application/json",
           Authorization: `Bearer ${localStorage.getItem("token")}`,
         },
-        body: JSON.stringify({
-          score,
-        }),
+        body: JSON.stringify({ score }),
       });
 
       if (response.ok) {
         console.log("Score submitted successfully!");
-        setScoreSaved(true);
         setError(null);
+        return true;
       } else {
         const errorData = await response.json();
-        setScoreSaved(false);
 
         if (response.status === 429) {
           console.error("Rate limit error:", errorData.error);
@@ -40,16 +35,17 @@ const useSubmitScore = (): UseSubmitScoreReturn => {
         }
 
         setError(errorData.error || "Failed to submit score.");
+        return false;
       }
     } catch (error) {
       console.error("Error submitting score:", error);
       alert("An unexpected error occurred. Please try again later.");
-      setScoreSaved(false);
       setError("An unexpected error occurred.");
+      return false;
     }
   }, []);
 
-  return { submitScore, scoreSaved, error };
+  return { submitScore, error };
 };
 
 export default useSubmitScore;

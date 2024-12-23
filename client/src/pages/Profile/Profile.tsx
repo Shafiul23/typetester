@@ -76,7 +76,7 @@ const Profile: React.FC = () => {
               <table className={styles.table}>
                 <thead>
                   <tr>
-                    <th>Score</th>
+                    <th>Score / wpm</th>
                     <th>Date</th>
                   </tr>
                 </thead>

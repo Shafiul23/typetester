@@ -36,10 +36,31 @@
   font-size: 1.6rem;
 }
 
+.timerContainer {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
 .timer {
   text-align: center;
   font-size: 1.2rem;
   color: #333;
+}
+
+.toggleButton {
+  padding: 8px 12px;
+  font-size: 14px;
+  background-color: #007bff;
+  color: white;
+  border: none;
+  border-radius: 4px;
+  cursor: pointer;
+  transition: background-color 0.3s ease;
+}
+
+.toggleButton:hover {
+  background-color: #0056b3;
 }
 
 .wordsBox {
