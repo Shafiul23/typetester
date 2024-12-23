@@ -187,19 +187,18 @@ const TypeTest: React.FC = () => {
         )}
       </div>
 
-      <div className={styles.timerContainer}>
-        <div className={styles.timer}>
-          <p>Time remaining: {timer}s</p>
+      <div className={styles.textBox}>
+        <div className={styles.timerContainer}>
+          <div className={styles.timer}>
+            <p>Time remaining: {timer}s</p>
+          </div>
+          {!hasStarted && (
+            <button onClick={toggleDictionary} className={styles.toggleButton}>
+              {state.useStory ? "Use Most Common 200 Words" : "Use Short Story"}
+            </button>
+          )}
         </div>
 
-        {!hasStarted && (
-          <button onClick={toggleDictionary} className={styles.toggleButton}>
-            {state.useStory ? "Use Most Common 200 Words" : "Use Short Story"}
-          </button>
-        )}
-      </div>
-
-      <div className={styles.textBox}>
         {isFinished ? (
           <div className={styles.reportCard}>
             <h2>Great job! You've completed the test!</h2>
