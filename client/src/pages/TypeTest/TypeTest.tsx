@@ -7,6 +7,8 @@ import React, {
 } from "react";
 import story from "../../dictionaries/story";
 import styles from "./TypeTest.module.css";
+import useSubmitScore from "../../hooks/useSubmitScore";
+import useAudio from "../../hooks/useAudio";
 
 const TypeTest: React.FC = () => {
   const words = useMemo(() => story.split(" "), []);
@@ -22,31 +24,18 @@ const TypeTest: React.FC = () => {
   const [timer, setTimer] = useState(10);
   const [isFinished, setIsFinished] = useState(false);
   const [hasStarted, setHasStarted] = useState(false);
-  const [startTime, setStartTime] = useState<number | null>(null);
-  const [scoreSaved, setScoreSaved] = useState(false);
+  const [elapsedTime, setElapsedTime] = useState<number>(0);
+  const { submitScore, scoreSaved } = useSubmitScore();
+  const { playAudio } = useAudio("/typewriter-click.mp3");
 
   const wordsBoxRef = useRef<HTMLDivElement>(null);
   const intervalRef = useRef<NodeJS.Timeout | null>(null);
-  const audioRef = useRef<HTMLAudioElement | null>(null);
-
-  useEffect(() => {
-    audioRef.current = new Audio("/typewriter-click.mp3");
-  }, []);
-
-  const playClickSound = () => {
-    if (audioRef.current) {
-      audioRef.current.currentTime = 0;
-      audioRef.current.play().catch((error) => {
-        console.error("Error playing sound:", error);
-      });
-    }
-  };
+  const startTimeRef = useRef<number | null>(null);
 
   const handleInputChange = useCallback(
     (e: React.ChangeEvent<HTMLInputElement>) => {
       if (!hasStarted) {
         setHasStarted(true);
-        setStartTime(Date.now());
       }
       setUserInput(e.target.value);
     },
@@ -57,7 +46,7 @@ const TypeTest: React.FC = () => {
     (e: React.KeyboardEvent) => {
       if (isFinished || (e.key !== " " && e.key !== "Enter")) return;
 
-      playClickSound();
+      playAudio();
 
       const currentWord = words[currentWordIndex];
       const isCorrect = userInput.trim() === currentWord;
@@ -77,15 +66,17 @@ const TypeTest: React.FC = () => {
       setUserInput("");
       setCurrentWordIndex((prev) => prev + 1);
     },
-    [isFinished, userInput, words, currentWordIndex]
+    [isFinished, playAudio, words, currentWordIndex, userInput]
   );
 
   useEffect(() => {
     if (hasStarted && !isFinished) {
+      startTimeRef.current = Date.now();
       intervalRef.current = setInterval(() => {
         setTimer((prev) => {
           if (prev <= 1) {
             clearInterval(intervalRef.current!);
+            setElapsedTime((Date.now() - startTimeRef.current!) / 1000);
             setIsFinished(true);
             return 0;
           }
@@ -114,52 +105,8 @@ const TypeTest: React.FC = () => {
     });
   }, [currentWordIndex]);
 
-  const elapsedTime = useMemo(
-    () => (startTime ? (Date.now() - startTime) / 1000 : 0),
-    [startTime]
-  );
-
-  const wpm = useMemo(
-    () =>
-      elapsedTime > 0
-        ? Math.round((correctWordsCounter / elapsedTime) * 60)
-        : 0,
-    [correctWordsCounter, elapsedTime]
-  );
-
-  const submitScore = async () => {
-    try {
-      const response = await fetch("http://127.0.0.1:5000/auth/scores", {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-          Authorization: `Bearer ${localStorage.getItem("token")}`,
-        },
-        body: JSON.stringify({
-          score: wpm,
-        }),
-      });
-
-      if (response.ok) {
-        console.log("Score submitted successfully!");
-        setScoreSaved(true);
-      } else {
-        const errorData = await response.json();
-        if (response.status === 429) {
-          console.error("Rate limit error:", errorData.error);
-          alert("You can only submit a score once every minute. Please wait.");
-        } else {
-          console.error("Failed to submit score:", errorData.error);
-          alert(errorData.error || "Failed to submit score. Please try again.");
-        }
-        setScoreSaved(false);
-      }
-    } catch (error) {
-      console.error("Error submitting score:", error);
-      alert("An unexpected error occurred. Please try again later.");
-      setScoreSaved(false);
-    }
-  };
+  const safeElapsedTime = Math.max(elapsedTime, 1);
+  const wpm = Math.round((correctWordsCounter / safeElapsedTime) * 60);
 
   const resetTest = () => {
     setUserInput("");
@@ -170,7 +117,8 @@ const TypeTest: React.FC = () => {
     setIsFinished(false);
     setTimer(10);
     setHasStarted(false);
-    setScoreSaved(false);
+    setElapsedTime(0);
+    startTimeRef.current = null;
   };
 
   return (
@@ -196,7 +144,10 @@ const TypeTest: React.FC = () => {
             <p className={styles.wrongWord}>Wrong words: {wrongWordsCounter}</p>
             {scoreSaved && <p>Score saved!</p>}
             <div className={styles.buttonContainer}>
-              <button onClick={submitScore} disabled={scoreSaved}>
+              <button
+                onClick={() => submitScore(wpm)}
+                disabled={scoreSaved || !wpm}
+              >
                 Save
               </button>
               <button onClick={resetTest}>Try Again</button>
@@ -226,7 +177,7 @@ const TypeTest: React.FC = () => {
                 value={userInput}
                 onChange={handleInputChange}
                 onKeyDown={(e) => {
-                  playClickSound();
+                  playAudio();
                   handleKeyPress(e);
                 }}
                 className={styles.inputBox}
