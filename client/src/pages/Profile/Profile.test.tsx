@@ -1,7 +1,7 @@
-import { render, screen, waitFor, fireEvent } from "@testing-library/react";
+import { fireEvent, render, screen, waitFor } from "@testing-library/react";
 import { BrowserRouter } from "react-router-dom";
-import Profile from "./Profile";
 import { useAuth } from "../../context/AuthContext";
+import Profile from "./Profile";
 
 jest.mock("../../context/AuthContext", () => ({
   useAuth: jest.fn(),
@@ -49,15 +49,29 @@ describe("Profile page tests", () => {
     );
 
     expect(screen.getByText(/loading/i)).toBeInTheDocument();
-    await screen.findByText(/Welcome, user1/i);
-    expect(screen.getByText(/80/i)).toBeInTheDocument();
-    expect(screen.getByText(/90/i)).toBeInTheDocument();
-    expect(screen.getByText("12/1/2024, 12:00:00 AM")).toBeInTheDocument();
-    expect(screen.getByText("12/2/2024, 12:00:00 AM")).toBeInTheDocument();
+    await waitFor(() => {
+      screen.getByText(/Welcome, user1/i);
+    });
+    await waitFor(() => {
+      expect(screen.queryByText(/loading/i)).not.toBeInTheDocument();
+    });
+    await waitFor(() => {
+      expect(screen.getByText(/80/i)).toBeInTheDocument();
+    });
+    await waitFor(() => {
+      expect(screen.getByText("12/1/2024, 12:00:00 AM")).toBeInTheDocument();
+    });
+    await waitFor(() => {
+      expect(screen.getByText(/90/i)).toBeInTheDocument();
+    });
+    await waitFor(() => {
+      expect(screen.getByText("12/2/2024, 12:00:00 AM")).toBeInTheDocument();
+    });
   });
 
   it("should display an error if personal scores fail to load", async () => {
     (useAuth as jest.Mock).mockReturnValue({ username: "user1" });
+
     (global.fetch as jest.Mock).mockRejectedValueOnce(
       new Error("Failed to fetch scores")
     );
@@ -69,7 +83,10 @@ describe("Profile page tests", () => {
     );
 
     await screen.findByText(/failed to fetch scores/i);
-    expect(screen.getByText(/failed to fetch scores/i)).toBeInTheDocument();
+
+    await waitFor(() => {
+      expect(screen.getByText(/failed to fetch scores/i)).toBeInTheDocument();
+    });
   });
 
   it("should update the order of scores when the sort button is clicked", async () => {
@@ -104,12 +121,20 @@ describe("Profile page tests", () => {
     );
 
     await screen.findByText(/80/i);
-    expect(screen.getByText(/80/i)).toBeInTheDocument();
-    expect(screen.getByText(/90/i)).toBeInTheDocument();
+    await waitFor(() => {
+      expect(screen.getByText(/80/i)).toBeInTheDocument();
+    });
+    await waitFor(() => {
+      expect(screen.getByText(/90/i)).toBeInTheDocument();
+    });
 
     fireEvent.click(screen.getByText(/Sort by Score/i));
 
-    expect(screen.getByText(/90/i)).toBeInTheDocument();
-    expect(screen.getByText(/80/i)).toBeInTheDocument();
+    await waitFor(() => {
+      expect(screen.getByText(/90/i)).toBeInTheDocument();
+    });
+    await waitFor(() => {
+      expect(screen.getByText(/80/i)).toBeInTheDocument();
+    });
   });
 });
