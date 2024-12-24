@@ -10,7 +10,7 @@ afterEach(() => {
   jest.restoreAllMocks();
 });
 
-describe("Leaderboard Component", () => {
+describe("Leaderboard page tests", () => {
   it("should render leaderboard data", async () => {
     (global.fetch as jest.Mock).mockResolvedValueOnce({
       ok: true,

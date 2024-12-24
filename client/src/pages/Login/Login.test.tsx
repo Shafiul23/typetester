@@ -12,7 +12,7 @@ jest.mock("react-router-dom", () => ({
   useNavigate: () => mockNavigate,
 }));
 
-describe("Login Component", () => {
+describe("Login page tests", () => {
   beforeEach(() => {
     jest.clearAllMocks();
   });
