@@ -2,21 +2,17 @@ import { render, screen, fireEvent, waitFor } from "@testing-library/react";
 import Register from "./Register";
 import { BrowserRouter } from "react-router-dom";
 
-// Mock the useAuth context
 jest.mock("../../context/AuthContext", () => ({
   useAuth: jest.fn(),
 }));
 
-// Mock the navigate function
 const mockNavigate = jest.fn();
 jest.mock("react-router-dom", () => ({
   ...jest.requireActual("react-router-dom"),
   useNavigate: () => mockNavigate,
 }));
 
-describe("Register Component", () => {
-  const { useAuth } = require("../../context/AuthContext");
-  useAuth.mockReturnValue({ register: jest.fn() });
+describe("Register page tests", () => {
   beforeEach(() => {
     jest.clearAllMocks();
   });
@@ -37,7 +33,7 @@ describe("Register Component", () => {
     expect(screen.getByRole("button", { name: /register/i })).toBeDefined();
   });
 
-  it("shows error if fields are empty", async () => {
+  it("should show error if fields are empty", async () => {
     const { useAuth } = require("../../context/AuthContext");
     useAuth.mockReturnValue({ register: jest.fn() });
     render(
@@ -53,7 +49,7 @@ describe("Register Component", () => {
     ).toBeDefined();
   });
 
-  it("shows error if passwords do not match", async () => {
+  it("should show error if passwords do not match", async () => {
     const { useAuth } = require("../../context/AuthContext");
     useAuth.mockReturnValue({ register: jest.fn() });
     render(
@@ -76,7 +72,7 @@ describe("Register Component", () => {
     expect(await screen.findByText(/passwords do not match!/i)).toBeDefined();
   });
 
-  it("successfully registers and navigates", async () => {
+  it("should successfully register and navigate", async () => {
     const { useAuth } = require("../../context/AuthContext");
     useAuth.mockReturnValue({
       register: jest.fn().mockResolvedValue({ success: true }),
@@ -104,7 +100,7 @@ describe("Register Component", () => {
     });
   });
 
-  it("shows error message on failed registration", async () => {
+  it("should show error message on failed registration", async () => {
     const { useAuth } = require("../../context/AuthContext");
     useAuth.mockReturnValue({
       register: jest

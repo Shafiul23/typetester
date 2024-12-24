@@ -2,12 +2,15 @@
   "compilerOptions": {
     "moduleResolution": "node",
     "esModuleInterop": true,
-    "target": "es5",
+    "target": "es6",
     "module": "ESNext",
-    "lib": ["dom", "es2015"],
+    "lib": ["dom", "es2017"],
     "allowJs": true,
-    "jsx": "react-jsx"
+    "jsx": "react-jsx",
+    "resolveJsonModule": true,
+    "forceConsistentCasingInFileNames": true,
+    "skipLibCheck": true
   },
   "include": ["src/**/*", "src/global.d.ts"],
-  "exclude": ["src/__mocks__/**/*.js"]
+  "exclude": ["node_modules", "dist", "src/__mocks__/**/*.js"]
 }
