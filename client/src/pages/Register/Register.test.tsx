@@ -33,7 +33,7 @@ describe("Register page tests", () => {
     expect(screen.getByRole("button", { name: /register/i })).toBeDefined();
   });
 
-  it("should show error if fields are empty", async () => {
+  it("should show error if username is too short", async () => {
     const { useAuth } = require("../../context/AuthContext");
     useAuth.mockReturnValue({ register: jest.fn() });
     render(
@@ -42,11 +42,92 @@ describe("Register page tests", () => {
       </BrowserRouter>
     );
 
+    fireEvent.change(screen.getByLabelText(/username/i), {
+      target: { value: "us" },
+    });
+    fireEvent.change(screen.getByTestId("password"), {
+      target: { value: "Password123!" },
+    });
+    fireEvent.change(screen.getByLabelText(/confirm password/i), {
+      target: { value: "Password123!" },
+    });
     fireEvent.click(screen.getByRole("button", { name: /register/i }));
 
     expect(
-      await screen.findByText(/username and password cannot be empty/i)
+      await screen.findByText(/username must be at least 3 characters long/i)
     ).toBeDefined();
+  });
+
+  it("should show error if username contains non-alphanumeric characters", async () => {
+    const { useAuth } = require("../../context/AuthContext");
+    useAuth.mockReturnValue({ register: jest.fn() });
+    render(
+      <BrowserRouter>
+        <Register />
+      </BrowserRouter>
+    );
+
+    fireEvent.change(screen.getByLabelText(/username/i), {
+      target: { value: "user@name" },
+    });
+    fireEvent.change(screen.getByTestId("password"), {
+      target: { value: "Password123!" },
+    });
+    fireEvent.change(screen.getByLabelText(/confirm password/i), {
+      target: { value: "Password123!" },
+    });
+    fireEvent.click(screen.getByRole("button", { name: /register/i }));
+
+    expect(
+      await screen.findByText(/username can only contain letters and numbers/i)
+    ).toBeDefined();
+  });
+
+  it("should show error if password does not meet complexity requirements", async () => {
+    const { useAuth } = require("../../context/AuthContext");
+    useAuth.mockReturnValue({ register: jest.fn() });
+    render(
+      <BrowserRouter>
+        <Register />
+      </BrowserRouter>
+    );
+
+    fireEvent.change(screen.getByLabelText(/username/i), {
+      target: { value: "validuser" },
+    });
+    fireEvent.change(screen.getByTestId("password"), {
+      target: { value: "short" },
+    });
+    fireEvent.change(screen.getByLabelText(/confirm password/i), {
+      target: { value: "short" },
+    });
+    fireEvent.click(screen.getByRole("button", { name: /register/i }));
+
+    expect(
+      await screen.findByText(/password must be at least 6 characters long/i)
+    ).toBeDefined();
+
+    fireEvent.change(screen.getByTestId("password"), {
+      target: { value: "password" },
+    });
+    fireEvent.change(screen.getByLabelText(/confirm password/i), {
+      target: { value: "password" },
+    });
+    fireEvent.click(screen.getByRole("button", { name: /register/i }));
+
+    expect(
+      await screen.findByText(
+        /password must contain at least one uppercase letter/i
+      )
+    ).toBeDefined();
+
+    fireEvent.change(screen.getByTestId("password"), {
+      target: { value: "Password1" },
+    });
+    fireEvent.change(screen.getByLabelText(/confirm password/i), {
+      target: { value: "Password1" },
+    });
+    fireEvent.click(screen.getByRole("button", { name: /register/i }));
   });
 
   it("should show error if passwords do not match", async () => {
@@ -59,13 +140,13 @@ describe("Register page tests", () => {
     );
 
     fireEvent.change(screen.getByLabelText(/username/i), {
-      target: { value: "testuser" },
+      target: { value: "validuser" },
     });
     fireEvent.change(screen.getByTestId("password"), {
-      target: { value: "password123" },
+      target: { value: "Password123!" },
     });
     fireEvent.change(screen.getByLabelText(/confirm password/i), {
-      target: { value: "password456" },
+      target: { value: "Password456!" },
     });
     fireEvent.click(screen.getByRole("button", { name: /register/i }));
 
@@ -85,13 +166,13 @@ describe("Register page tests", () => {
     );
 
     fireEvent.change(screen.getByLabelText(/username/i), {
-      target: { value: "testuser" },
+      target: { value: "validuser" },
     });
     fireEvent.change(screen.getByTestId("password"), {
-      target: { value: "password123" },
+      target: { value: "Password123!" },
     });
     fireEvent.change(screen.getByLabelText(/confirm password/i), {
-      target: { value: "password123" },
+      target: { value: "Password123!" },
     });
     fireEvent.click(screen.getByRole("button", { name: /register/i }));
 
@@ -115,13 +196,13 @@ describe("Register page tests", () => {
     );
 
     fireEvent.change(screen.getByLabelText(/username/i), {
-      target: { value: "testuser" },
+      target: { value: "validuser" },
     });
     fireEvent.change(screen.getByTestId("password"), {
-      target: { value: "password123" },
+      target: { value: "Password123!" },
     });
     fireEvent.change(screen.getByLabelText(/confirm password/i), {
-      target: { value: "password123" },
+      target: { value: "Password123!" },
     });
     fireEvent.click(screen.getByRole("button", { name: /register/i }));
 

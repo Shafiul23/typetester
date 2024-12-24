@@ -12,32 +12,56 @@ const Register: React.FC = () => {
 
   const navigate = useNavigate();
 
-  const handleSubmit = async (e: React.FormEvent) => {
-    e.preventDefault();
+  const validateInputs = (): string | null => {
+    if (username.trim().length < 3) {
+      return "Username must be at least 3 characters long.";
+    }
+    if (!/^[a-zA-Z0-9]+$/.test(username)) {
+      return "Username can only contain letters and numbers.";
+    }
 
-    if (username.trim() === "" || password.trim() === "") {
-      setErrorMessage("Username and password cannot be empty");
-      return;
+    if (password.length < 6) {
+      return "Password must be at least 6 characters long.";
+    }
+    if (!/[A-Z]/.test(password)) {
+      return "Password must contain at least one uppercase letter.";
+    }
+    if (!/[a-z]/.test(password)) {
+      return "Password must contain at least one lowercase letter.";
+    }
+    if (!/[0-9]/.test(password)) {
+      return "Password must contain at least one digit.";
     }
 
     if (password !== confirmPassword) {
-      setErrorMessage("Passwords do not match!");
+      return "Passwords do not match!";
+    }
+
+    return null;
+  };
+
+  const handleSubmit = async (e: React.FormEvent) => {
+    e.preventDefault();
+
+    const validationError = validateInputs();
+    if (validationError) {
+      setErrorMessage(validationError);
       return;
     }
 
-    const response = await register(username, password);
-
-    if (response.success) {
-      setUsername("");
-      setPassword("");
-      setConfirmPassword("");
-      setErrorMessage(null);
-      navigate("/login");
-    } else {
-      setErrorMessage(response.message);
-      setUsername("");
-      setPassword("");
-      setConfirmPassword("");
+    try {
+      const response = await register(username, password);
+      if (response?.success) {
+        setUsername("");
+        setPassword("");
+        setConfirmPassword("");
+        setErrorMessage(null);
+        navigate("/login");
+      } else {
+        setErrorMessage(response?.message || "Registration failed");
+      }
+    } catch (error) {
+      setErrorMessage("An unexpected error occurred.");
     }
   };
 

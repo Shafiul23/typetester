@@ -19,7 +19,7 @@ const initialState = {
   correctWordsCounter: 0,
   wrongWordsCounter: 0,
   wordStatuses: [] as (boolean | null)[],
-  timer: 10,
+  timer: 60,
   isFinished: false,
   hasStarted: false,
   elapsedTime: 0,

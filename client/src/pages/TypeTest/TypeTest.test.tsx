@@ -23,7 +23,7 @@ describe("TypeTest Component", () => {
       </BrowserRouter>
     );
     expect(screen.getByText("Start typing to begin test!")).toBeInTheDocument();
-    expect(screen.getByText("Time remaining: 10s")).toBeInTheDocument();
+    expect(screen.getByText("Time remaining: 60s")).toBeInTheDocument();
   });
 
   it("should start the test on input change", () => {

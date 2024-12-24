@@ -1,6 +1,7 @@
 import functools
 import jwt
 import datetime
+import re
 
 from flask import Blueprint, request, jsonify, g
 from werkzeug.security import check_password_hash, generate_password_hash
@@ -42,8 +43,21 @@ def register():
 
         if not username:
             error = 'Username is required.'
-        elif not password:
+        elif len(username) < 3:
+            error = 'Username must be at least 3 characters long.'
+        elif not username.isalnum():
+            error = 'Username can only contain letters and numbers.'
+
+        if not password:
             error = 'Password is required.'
+        elif len(password) < 6:
+            error = 'Password must be at least 6 characters long.'
+        elif not re.search(r'[A-Z]', password):
+            error = 'Password must contain at least one uppercase letter.'
+        elif not re.search(r'[a-z]', password):
+            error = 'Password must contain at least one lowercase letter.'
+        elif not re.search(r'[0-9]', password):
+            error = 'Password must contain at least one digit.'
 
         if error is None:
             try:
