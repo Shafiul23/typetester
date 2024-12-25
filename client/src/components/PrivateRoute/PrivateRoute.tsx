@@ -1,4 +1,3 @@
-// src/components/PrivateRoute/PrivateRoute.tsx
 import React, { useState, useEffect } from "react";
 import { Navigate, Outlet } from "react-router-dom";
 import { useAuth } from "../../context/AuthContext";

@@ -281,28 +281,3 @@ def submit_score():
         print(f"Error submitting score: {e}")
         return {"error": "An unexpected error occurred."}, 500
 
-
-@bp.route('/logout', methods=['POST'])
-def logout():
-    return {"message": "Logout successful"}, 200
-
-
-@bp.before_app_request
-def load_logged_in_user():
-    auth_header = request.headers.get('Authorization')
-    if not auth_header:
-        g.user = None
-        return
-    
-    token = auth_header.split(" ")[1]
-    decoded = decode_jwt(token)
-    if isinstance(decoded, tuple):
-        g.user = None
-        return
-    
-    g.user = get_db().execute(
-        'SELECT * FROM user WHERE id = ?', (decoded['user_id'],)
-    ).fetchone()
-
-
-

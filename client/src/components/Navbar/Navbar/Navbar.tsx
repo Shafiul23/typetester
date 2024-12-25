@@ -1,8 +1,8 @@
-import React, { useState, useEffect } from "react";
-import { Link, useNavigate } from "react-router-dom";
-import styles from "./Navbar.module.css";
 import classNames from "classnames";
+import React, { useState } from "react";
+import { Link, useNavigate } from "react-router-dom";
 import { useAuth } from "../../../context/AuthContext";
+import styles from "./Navbar.module.css";
 
 const Navbar: React.FC = () => {
   const { userId, logout } = useAuth();
