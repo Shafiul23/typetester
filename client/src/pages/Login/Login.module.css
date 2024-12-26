@@ -10,11 +10,11 @@
 .formWrapper {
   background-color: #ffffff;
   box-shadow: 0 6px 12px rgba(0, 0, 0, 0.1);
-  padding: 2rem;
-  border-radius: 8px;
+  padding: 1.5rem;
+  border-radius: 0.5rem;
   width: 100%;
-  max-width: 400px;
-  margin-top: 60px;
+  max-width: 22rem;
+  margin-top: 1rem;
 }
 
 .title {
@@ -22,7 +22,7 @@
   font-weight: 600;
   text-align: center;
   color: #333;
-  margin-bottom: 1.5rem;
+  margin-bottom: 1.25rem;
 }
 
 .inputGroup {
@@ -72,7 +72,7 @@
 
 .footer {
   text-align: center;
-  margin-top: 1.5rem;
+  margin-top: 1.25rem;
 }
 
 .footerText {
@@ -97,5 +97,21 @@
   font-size: 1rem;
   font-weight: 500;
   text-align: center;
-  margin-bottom: 16px;
+  margin-bottom: 1rem;
+}
+
+@media (min-width: 768px) {
+  .formWrapper {
+    padding: 2rem;
+    max-width: 24rem;
+    margin-top: 3rem;
+  }
+
+  .title {
+    margin-bottom: 1.5rem;
+  }
+
+  .footer {
+    margin-top: 1.5rem;
+  }
 }

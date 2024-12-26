@@ -81,7 +81,7 @@ const Profile: React.FC = () => {
                   </tr>
                 </thead>
                 <tbody>
-                  {scores.map((score, index) => (
+                  {scores.map((score) => (
                     <tr key={score.score_id}>
                       <td>{score.score}</td>
                       <td>{new Date(score.created).toLocaleString()}</td>

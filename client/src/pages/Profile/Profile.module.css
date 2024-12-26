@@ -3,24 +3,13 @@
   flex-direction: column;
   align-items: center;
   justify-content: flex-start;
-  height: 100vh;
+  min-height: 100vh;
   background-color: #f4f4f4;
-  padding: 20px;
-}
-
-.profileInfo {
-  background-color: white;
-  padding: 20px;
-  border-radius: 8px;
-  box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
-  width: 100%;
-  max-width: 500px;
-  text-align: center;
-  margin-bottom: 20px;
+  padding: 1rem;
 }
 
 .username {
-  font-size: 2rem;
+  font-size: 1.75rem;
   font-weight: bold;
   color: #333;
 }
@@ -28,22 +17,22 @@
 .details {
   font-size: 1rem;
   color: #555;
-  margin-top: 10px;
+  margin-top: 0.5rem;
 }
 
 .error {
   color: red;
   font-size: 1rem;
-  margin-bottom: 20px;
+  margin-bottom: 1rem;
 }
 
 .loading {
-  font-size: 1.2rem;
+  font-size: 1rem;
   color: #555;
 }
 
 .tableContainer {
-  padding: 20px;
+  padding: 1rem;
   border-radius: 8px;
   width: 100%;
 }
@@ -52,24 +41,25 @@
   display: flex;
   justify-content: space-between;
   align-items: center;
-  margin-bottom: 15px;
+  margin-bottom: 1rem;
 }
 
 .tableTitle {
-  font-size: 1.5rem;
+  font-size: 1.25rem;
   color: #333;
   margin: 0;
 }
 
 .sortButton {
-  padding: 8px 12px;
-  font-size: 14px;
+  padding: 0.5rem 0.75rem;
+  font-size: 0.875rem;
   background-color: #007bff;
   color: white;
   border: none;
-  border-radius: 4px;
+  border-radius: 0.25rem;
   cursor: pointer;
   transition: background-color 0.3s ease;
+  margin-top: 0.5rem;
 }
 
 .sortButton:hover {
@@ -85,7 +75,7 @@
 .table th,
 .table td {
   border: 1px solid #ddd;
-  padding: 10px;
+  padding: 0.75rem;
   text-align: left;
 }
 
@@ -109,5 +99,11 @@
 .noScores {
   text-align: left;
   color: #666;
-  margin-top: 20px;
+  margin-top: 1rem;
+}
+
+@media (min-width: 768px) {
+  .tableContainer {
+    max-width: 1000px;
+  }
 }

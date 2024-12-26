@@ -52,7 +52,7 @@ const Leaderboard: React.FC = () => {
             <tr>
               <th>Rank</th>
               <th>Username</th>
-              <th>Score</th>
+              <th>Score / wpm</th>
               <th>Date</th>
             </tr>
           </thead>

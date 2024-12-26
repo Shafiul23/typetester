@@ -1,43 +1,42 @@
-/* src/pages/Home.module.css */
 .container {
   display: flex;
   flex-direction: column;
-  /* justify-content: center; */
   align-items: center;
-  padding: 0 20px;
+  padding: 1rem;
   background-color: #f4f7fc;
-  height: 100vh;
+  min-height: 100vh;
 }
 
 .hero {
   text-align: center;
-  margin-top: 50px;
-  max-width: 800px;
+  margin: 0 auto;
+  padding: 1rem;
 }
 
 .title {
-  font-size: 3rem;
+  font-size: 2rem;
   color: #333;
   margin-bottom: 1rem;
 }
 
 .subtitle {
-  font-size: 1.25rem;
+  font-size: 1rem;
   color: #666;
   margin-bottom: 2rem;
 }
 
 .buttonGroup {
   display: flex;
-  justify-content: center;
-  gap: 15px;
+  flex-direction: column;
+  gap: 10px;
+  width: 100%;
 }
 
 .buttonPrimary,
 .buttonSecondary,
 .buttonSuccess {
   padding: 0.75rem 1.5rem;
-  font-size: 1.1rem;
+  font-size: 1rem;
   border-radius: 6px;
   border: none;
   text-decoration: none;
@@ -71,14 +70,25 @@
   background-color: #218838;
 }
 
-@media (max-width: 768px) {
+@media (min-width: 768px) {
+  .title {
+    font-size: 2.5rem;
+  }
+
+  .subtitle {
+    font-size: 1.2rem;
+  }
+
   .buttonGroup {
-    flex-direction: column;
+    flex-direction: row;
+    justify-content: center;
+    gap: 15px;
+    width: auto;
   }
 
   .buttonPrimary,
   .buttonSecondary,
   .buttonSuccess {
-    width: 100%;
+    width: auto;
   }
 }
