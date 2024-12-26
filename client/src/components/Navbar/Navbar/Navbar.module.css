@@ -1,9 +1,6 @@
-/* Navbar.module.css */
-
-/* Navbar Base Styles */
 .navbar {
   background-color: #333;
-  padding: 1rem 2rem;
+  padding: 1rem 1rem;
   display: flex;
   justify-content: space-between;
   align-items: center;
@@ -11,7 +8,6 @@
   position: relative;
 }
 
-/* Container that holds the navbar items */
 .container {
   display: flex;
   justify-content: space-between;
@@ -19,28 +15,20 @@
   width: 100%;
 }
 
-/* Hamburger Menu Button */
 .hamburger {
-  display: none;
+  display: flex;
   flex-direction: column;
   justify-content: space-between;
-  width: 24px;
-  height: 18px;
+  width: 30px;
+  height: 25px;
   background: none;
   border: none;
   cursor: pointer;
+  z-index: 1001;
 }
 
-.hamburgerLine {
-  width: 100%;
-  height: 3px;
-  background-color: #fff;
-  border-radius: 2px;
-}
-
-/* App title styling */
 .brand {
-  font-size: 1.8rem;
+  font-size: 1.6rem;
   font-weight: bold;
   text-decoration: none;
   display: flex;
@@ -54,10 +42,23 @@
   color: #e74c3c;
 }
 
-/* Navigation Links */
 .navLinks {
-  display: flex;
-  align-items: center;
+  position: fixed;
+  top: 0;
+  right: -100%;
+  height: 100%;
+  width: 70%;
+  background-color: #333;
+  flex-direction: column;
+  padding: 3rem 1rem;
+  transition: right 0.3s ease;
+  z-index: 1000;
+  opacity: 0;
+}
+
+.navLinks.open {
+  right: 0;
+  opacity: 1;
 }
 
 .navList {
@@ -65,16 +66,18 @@
   list-style: none;
   margin: 0;
   padding: 0;
+  flex-direction: column;
+  align-items: flex-start;
 }
 
 .navItem {
-  margin-left: 1.5rem;
+  margin: 1.5rem 0;
 }
 
 .navLink {
   color: #fff;
   text-decoration: none;
-  font-size: 1rem;
+  font-size: 1.3rem;
   transition: color 0.3s;
 }
 
@@ -82,53 +85,49 @@
   color: #f39c12;
 }
 
-/* Logout button styles */
 .logoutButton {
   background: none;
   border: none;
   color: #fff;
-  font-size: 1rem;
+  font-size: 1.3rem;
   cursor: pointer;
   padding: 0;
   transition: color 0.3s;
 }
 
 .logoutButton:hover {
-  color: #f39c12; /* Golden color on hover */
+  color: #f39c12;
 }
 
-/* Responsive Styles */
-@media (max-width: 768px) {
+@media (min-width: 768px) {
   .hamburger {
-    display: flex;
+    display: none;
   }
 
   .navLinks {
-    position: fixed;
-    top: 0;
-    right: -100%;
-    height: 100%;
-    width: 60%;
-    background-color: #333;
-    flex-direction: column;
-    margin-top: 4rem;
-    transition: right 0.3s ease;
-    z-index: 1000;
-  }
-
-  .navLinks.open {
-    right: 0;
+    display: flex;
+    position: static;
+    flex-direction: row;
+    background: none;
+    height: auto;
+    width: auto;
+    padding: 0;
+    opacity: 1;
   }
 
   .navList {
-    flex-direction: column;
+    flex-direction: row;
   }
 
   .navItem {
-    margin: 1.2rem 0;
+    margin: 0 1rem;
   }
 
   .navLink {
-    font-size: 1.2rem;
+    font-size: 1rem;
+  }
+
+  .logoutButton {
+    font-size: 1rem;
   }
 }

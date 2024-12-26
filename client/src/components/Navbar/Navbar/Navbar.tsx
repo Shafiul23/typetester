@@ -1,12 +1,12 @@
-import classNames from "classnames";
 import React, { useState } from "react";
-import { Link, useNavigate } from "react-router-dom";
+import HamburgerMenu from "react-hamburger-menu";
 import { useAuth } from "../../../context/AuthContext";
+import { Link, useNavigate } from "react-router-dom";
 import styles from "./Navbar.module.css";
 
 const Navbar: React.FC = () => {
   const { userId, logout } = useAuth();
-  const [isMenuOpen, setIsMenuOpen] = useState<boolean>(false);
+  const [isMenuOpen, setIsMenuOpen] = useState(false);
 
   const navigate = useNavigate();
 
@@ -28,55 +28,43 @@ const Navbar: React.FC = () => {
           <span className={styles.brandSecondary}>Tester</span>
         </Link>
 
-        <button
+        <HamburgerMenu
+          isOpen={isMenuOpen}
+          menuClicked={() => setIsMenuOpen(!isMenuOpen)}
+          width={30}
+          height={25}
+          strokeWidth={3}
+          rotate={0}
+          color="#fff"
+          borderRadius={0}
+          animationDuration={0.3}
           className={styles.hamburger}
-          onClick={() => setIsMenuOpen((prev) => !prev)}
-          aria-label="Toggle navigation menu"
-        >
-          <span className={styles.hamburgerLine}></span>
-          <span className={styles.hamburgerLine}></span>
-          <span className={styles.hamburgerLine}></span>
-        </button>
+          data-testid="toggle-menu"
+        />
 
-        <div
-          className={classNames(styles.navLinks, {
-            [styles.open]: isMenuOpen,
-          })}
-        >
+        <div className={`${styles.navLinks} ${isMenuOpen ? styles.open : ""}`}>
           <ul className={styles.navList}>
             {userId ? (
               <>
                 <li className={styles.navItem}>
-                  <Link
-                    className={styles.navLink}
-                    to="/leaderboard"
-                    onClick={() => setIsMenuOpen(false)}
-                  >
+                  <Link to="/leaderboard" className={styles.navLink}>
                     Leaderboard
                   </Link>
                 </li>
                 <li className={styles.navItem}>
-                  <Link
-                    className={styles.navLink}
-                    to="/typetest"
-                    onClick={() => setIsMenuOpen(false)}
-                  >
+                  <Link to="/typetest" className={styles.navLink}>
                     Type Test
                   </Link>
                 </li>
                 <li className={styles.navItem}>
-                  <Link
-                    className={styles.navLink}
-                    to="/profile"
-                    onClick={() => setIsMenuOpen(false)}
-                  >
+                  <Link to="/profile" className={styles.navLink}>
                     Profile
                   </Link>
                 </li>
                 <li className={styles.navItem}>
                   <button
-                    className={classNames(styles.navLink, styles.logoutButton)}
                     onClick={handleLogout}
+                    className={styles.logoutButton}
                   >
                     Logout
                   </button>
@@ -85,29 +73,17 @@ const Navbar: React.FC = () => {
             ) : (
               <>
                 <li className={styles.navItem}>
-                  <Link
-                    className={styles.navLink}
-                    to="/leaderboard"
-                    onClick={() => setIsMenuOpen(false)}
-                  >
+                  <Link to="/leaderboard" className={styles.navLink}>
                     Leaderboard
                   </Link>
                 </li>
                 <li className={styles.navItem}>
-                  <Link
-                    className={styles.navLink}
-                    to="/register"
-                    onClick={() => setIsMenuOpen(false)}
-                  >
+                  <Link to="/register" className={styles.navLink}>
                     Register
                   </Link>
                 </li>
                 <li className={styles.navItem}>
-                  <Link
-                    className={styles.navLink}
-                    to="/login"
-                    onClick={() => setIsMenuOpen(false)}
-                  >
+                  <Link to="/login" className={styles.navLink}>
                     Login
                   </Link>
                 </li>

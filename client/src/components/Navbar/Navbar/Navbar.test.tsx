@@ -29,7 +29,6 @@ describe("Navbar tests", () => {
 
     expect(screen.getByText(/Type/i)).toBeInTheDocument();
     expect(screen.getByText(/Tester/i)).toBeInTheDocument();
-    expect(screen.getByLabelText("Toggle navigation menu")).toBeInTheDocument();
   });
 
   it("shows guest links when user is not logged in", () => {
