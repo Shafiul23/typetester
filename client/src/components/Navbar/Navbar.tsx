@@ -1,6 +1,6 @@
 import React, { useState } from "react";
 import HamburgerMenu from "react-hamburger-menu";
-import { useAuth } from "../../../context/AuthContext";
+import { useAuth } from "../../context/AuthContext";
 import { Link, useNavigate } from "react-router-dom";
 import styles from "./Navbar.module.css";
 

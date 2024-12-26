@@ -3,7 +3,7 @@ import { BrowserRouter } from "react-router-dom";
 
 import Navbar from "./Navbar";
 
-jest.mock("../../../context/AuthContext", () => ({
+jest.mock("../../context/AuthContext", () => ({
   useAuth: jest.fn(),
 }));
 
@@ -19,7 +19,7 @@ describe("Navbar tests", () => {
   });
 
   it("renders the title and navigation menu", async () => {
-    const { useAuth } = require("../../../context/AuthContext");
+    const { useAuth } = require("../../context/AuthContext");
     (useAuth as jest.Mock).mockReturnValue({ userId: null });
     render(
       <BrowserRouter>
@@ -32,7 +32,7 @@ describe("Navbar tests", () => {
   });
 
   it("shows guest links when user is not logged in", () => {
-    const { useAuth } = require("../../../context/AuthContext");
+    const { useAuth } = require("../../context/AuthContext");
     (useAuth as jest.Mock).mockReturnValue({ userId: null });
     render(
       <BrowserRouter>
@@ -46,7 +46,7 @@ describe("Navbar tests", () => {
   });
 
   it("shows user links when user is logged in", () => {
-    const { useAuth } = require("../../../context/AuthContext");
+    const { useAuth } = require("../../context/AuthContext");
     (useAuth as jest.Mock).mockReturnValue({ userId: 1 });
     render(
       <BrowserRouter>
