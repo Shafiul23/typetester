@@ -46,22 +46,34 @@ const Navbar: React.FC = () => {
           <ul className={styles.navList}>
             {userId ? (
               <>
-                <li className={styles.navItem}>
+                <li
+                  className={styles.navItem}
+                  onClick={() => setIsMenuOpen(false)}
+                >
                   <Link to="/leaderboard" className={styles.navLink}>
                     Leaderboard
                   </Link>
                 </li>
-                <li className={styles.navItem}>
+                <li
+                  className={styles.navItem}
+                  onClick={() => setIsMenuOpen(false)}
+                >
                   <Link to="/typetest" className={styles.navLink}>
                     Type Test
                   </Link>
                 </li>
-                <li className={styles.navItem}>
+                <li
+                  className={styles.navItem}
+                  onClick={() => setIsMenuOpen(false)}
+                >
                   <Link to="/profile" className={styles.navLink}>
                     Profile
                   </Link>
                 </li>
-                <li className={styles.navItem}>
+                <li
+                  className={styles.navItem}
+                  onClick={() => setIsMenuOpen(false)}
+                >
                   <button
                     onClick={handleLogout}
                     className={styles.logoutButton}
@@ -72,17 +84,26 @@ const Navbar: React.FC = () => {
               </>
             ) : (
               <>
-                <li className={styles.navItem}>
+                <li
+                  className={styles.navItem}
+                  onClick={() => setIsMenuOpen(false)}
+                >
                   <Link to="/leaderboard" className={styles.navLink}>
                     Leaderboard
                   </Link>
                 </li>
-                <li className={styles.navItem}>
+                <li
+                  className={styles.navItem}
+                  onClick={() => setIsMenuOpen(false)}
+                >
                   <Link to="/register" className={styles.navLink}>
                     Register
                   </Link>
                 </li>
-                <li className={styles.navItem}>
+                <li
+                  className={styles.navItem}
+                  onClick={() => setIsMenuOpen(false)}
+                >
                   <Link to="/login" className={styles.navLink}>
                     Login
                   </Link>
