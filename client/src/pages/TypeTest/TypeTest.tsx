@@ -194,7 +194,7 @@ const TypeTest: React.FC = () => {
           </div>
           {!hasStarted && (
             <button onClick={toggleDictionary} className={styles.toggleButton}>
-              {state.useStory ? "Use Most Common 200 Words" : "Use Short Story"}
+              {state.useStory ? "Use Most Common 300 Words" : "Use Short Story"}
             </button>
           )}
         </div>

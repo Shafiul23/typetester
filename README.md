@@ -1,6 +1,10 @@
 # Type Tester
 
-#### Video Demo: <URL HERE>
+#### Video Demo: https://youtu.be/rBoJuZAD7Mw
+
+## Setup
+
+Check readme in /server and /client for instructions on how to install the run the app
 
 # Description:
 

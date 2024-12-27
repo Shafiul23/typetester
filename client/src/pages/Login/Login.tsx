@@ -41,6 +41,7 @@ const Login: React.FC = () => {
               type="text"
               id="username"
               value={username}
+              autoComplete="off"
               onChange={(e) => setUsername(e.target.value)}
               className={styles.input}
               required

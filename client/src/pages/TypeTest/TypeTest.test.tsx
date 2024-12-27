@@ -51,7 +51,7 @@ describe("TypeTest Component", () => {
     );
     const button = screen.getByText("Use Short Story");
     fireEvent.click(button);
-    expect(screen.getByText("Use Most Common 200 Words")).toBeInTheDocument();
+    expect(screen.getByText("Use Most Common 300 Words")).toBeInTheDocument();
   });
 
   it("should update input value on change", () => {

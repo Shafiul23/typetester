@@ -13,6 +13,7 @@ const Register: React.FC = () => {
   const navigate = useNavigate();
 
   const validateInputs = (): string | null => {
+    setErrorMessage(null);
     if (username.trim().length < 3) {
       return "Username must be at least 3 characters long.";
     }
@@ -79,6 +80,7 @@ const Register: React.FC = () => {
               id="username"
               value={username}
               onChange={(e) => setUsername(e.target.value)}
+              autoComplete="off"
               required
               className={styles.input}
             />

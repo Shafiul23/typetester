@@ -61,7 +61,7 @@ describe("Login page tests", () => {
     await screen.findByText(/invalid credentials/i);
   });
 
-  it("should navigate to /typetest on successful login", async () => {
+  it("should navigate to home on successful login", async () => {
     const { useAuth } = require("../../context/AuthContext");
     useAuth.mockReturnValue({
       login: jest
@@ -84,7 +84,7 @@ describe("Login page tests", () => {
 
     fireEvent.click(screen.getByRole("button", { name: /login/i }));
 
-    await waitFor(() => expect(mockNavigate).toHaveBeenCalledWith("/typetest"));
+    await waitFor(() => expect(mockNavigate).toHaveBeenCalledWith("/"));
   });
 
   it("should clear the password field after a failed login attempt", async () => {

@@ -26,7 +26,7 @@ describe("Register page tests", () => {
       </BrowserRouter>
     );
 
-    expect(screen.getByText(/create an account/i)).toBeDefined();
+    expect(screen.getByText(/create account/i)).toBeDefined();
     expect(screen.getByLabelText(/username/i)).toBeDefined();
     expect(screen.getByTestId("password")).toBeDefined();
     expect(screen.getByLabelText(/confirm password/i)).toBeDefined();
