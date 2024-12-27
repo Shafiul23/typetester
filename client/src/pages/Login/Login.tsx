@@ -19,7 +19,7 @@ const Login: React.FC = () => {
     const response = await login(username, password);
 
     if (response.success) {
-      navigate("/typetest");
+      navigate("/");
     } else {
       setErrorMessage(
         response.message || "An unexpected error occurred. Please try again."

@@ -22,11 +22,11 @@
   font-weight: 600;
   text-align: center;
   color: #333;
-  margin-bottom: 1.25rem;
+  margin-bottom: 2rem;
 }
 
 .inputGroup {
-  margin-bottom: 1rem;
+  margin-bottom: 2rem;
 }
 
 .label {
@@ -43,20 +43,19 @@
   border-radius: 4px;
   font-size: 1rem;
   color: #333;
-  background-color: #f9f9f9;
   transition: border-color 0.3s ease;
   box-sizing: border-box;
 }
 
 .input:focus {
-  border-color: #3498db;
+  border-color: #4e9bff;
   outline: none;
 }
 
 .submitButton {
   width: 100%;
   padding: 0.75rem;
-  background-color: #3498db;
+  background-color: #4e9bff;
   color: #ffffff;
   font-size: 1rem;
   font-weight: 600;
@@ -64,15 +63,16 @@
   border-radius: 4px;
   cursor: pointer;
   transition: background-color 0.3s ease;
+  margin-top: 1rem;
 }
 
 .submitButton:hover {
-  background-color: #2980b9;
+  background-color: #357ab7;
 }
 
 .footer {
   text-align: center;
-  margin-top: 1.25rem;
+  margin-top: 2rem;
 }
 
 .footerText {
@@ -103,11 +103,11 @@
 @media (min-width: 768px) {
   .formWrapper {
     padding: 2rem;
-    max-width: 24rem;
-    margin-top: 3rem;
+    max-width: 25rem;
   }
 
   .title {
+    font-size: 2rem;
     margin-bottom: 1.5rem;
   }
 

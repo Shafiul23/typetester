@@ -1,42 +1,45 @@
 .container {
   display: flex;
-  justify-content: center;
-  align-items: flex-start;
-  height: 100vh;
+  flex-direction: column;
+  justify-content: flex-start;
+  align-items: center;
+  min-height: 100vh;
   background-color: #f4f4f4;
-  padding: 0 20px;
+  padding: 1rem;
 }
 
 .card {
   background-color: white;
-  padding: 2rem;
-  border-radius: 8px;
-  box-shadow: 0 4px 10px rgba(0, 0, 0, 0.1);
+  padding: 1.5rem;
+  border-radius: 0.5rem;
+  box-shadow: 0 6px 12px rgba(0, 0, 0, 0.1);
   width: 100%;
-  max-width: 400px;
+  max-width: 22rem;
   box-sizing: border-box;
-  margin-top: 60px;
+  margin-top: 1rem;
 }
 
 .title {
+  font-size: 2rem;
   text-align: center;
-  font-size: 1.75rem;
   color: #333;
-  margin-bottom: 1.5rem;
+  margin-bottom: 3rem;
 }
 
 .form {
   display: flex;
   flex-direction: column;
+  gap: 2rem;
   padding: 0;
 }
 
 .formGroup {
-  margin-bottom: 1.25rem;
+  display: flex;
+  flex-direction: column;
 }
 
 .label {
-  font-size: 1rem;
+  font-size: 0.9rem;
   color: #555;
   margin-bottom: 0.5rem;
   font-weight: 500;
@@ -84,12 +87,13 @@
 
 .loginRedirect {
   text-align: center;
-  margin-top: 1rem;
+  font-size: 0.9rem;
 }
 
 .link {
   color: #4e9bff;
   text-decoration: none;
+  font-weight: 500;
 }
 
 .link:hover {
@@ -101,4 +105,21 @@
   font-size: 1rem;
   font-weight: 500;
   text-align: center;
+  margin-top: 0.5rem;
+}
+
+@media (min-width: 768px) {
+  .card {
+    max-width: 25rem;
+    padding: 2rem;
+  }
+
+  .title {
+    font-size: 2rem;
+    margin-bottom: 1.5rem;
+  }
+
+  .loginRedirect {
+    font-size: 1rem;
+  }
 }

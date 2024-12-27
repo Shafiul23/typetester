@@ -68,7 +68,7 @@ const Register: React.FC = () => {
   return (
     <div className={styles.container}>
       <div className={styles.card}>
-        <h2 className={styles.title}>Create an Account</h2>
+        <h2 className={styles.title}>Create Account</h2>
         <form onSubmit={handleSubmit} className={styles.form}>
           <div className={styles.formGroup}>
             <label htmlFor="username" className={styles.label}>
