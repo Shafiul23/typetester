@@ -5,7 +5,9 @@ import re
 
 from flask import Blueprint, request, jsonify, g
 from werkzeug.security import check_password_hash, generate_password_hash
-from flaskr.db import get_db
+from flaskr.db import db
+from sqlalchemy.exc import IntegrityError
+from .models import User, Score
 
 SECRET_KEY = "your_secret_key"
 ALGORITHM = "HS256"
@@ -38,7 +40,6 @@ def register():
                 
         username = data.get('username')
         password = data.get('password')
-        db = get_db()
         error = None
 
         if not username:
@@ -64,15 +65,18 @@ def register():
             error = 'Password must contain at least one digit.'
 
         if error is None:
-            try:
-                db.execute(
-                    "INSERT INTO user (username, password) VALUES (?, ?)",
-                    (username, generate_password_hash(password, method='pbkdf2:sha256')),
-                )
-                db.commit()
-                return {'message': 'Registered successfully'}, 201
-            except db.IntegrityError:
-                error = f"User {username} is already registered."
+            existing_user = User.query.filter_by(username=username).first()
+            if existing_user:
+                return {"error": f"User {username} is already registered."}, 400
+
+            new_user = User(
+                username=username,
+                password=generate_password_hash(password, method='pbkdf2:sha256')
+            )
+            db.session.add(new_user)
+            db.session.commit()
+
+            return {'message': 'Registered successfully'}, 201
 
         return {"error": error}, 400
 
@@ -94,13 +98,10 @@ def login():
         if not username or not password:
             return {"error": "Username and password are required."}, 400
 
-        db = get_db()
-        user = db.execute(
-            "SELECT * FROM user WHERE username = ?", (username,)
-        ).fetchone()
+        user = User.query.filter_by(username=username).first()
 
-        if user and check_password_hash(user['password'], password):
-            token = generate_jwt(user['id'], user['username'])
+        if user and check_password_hash(user.password, password):
+            token = generate_jwt(user.id, user.username)
             return {"message": "Login successful", "token": token}, 200
         else:
             return {"error": "Invalid username or password"}, 401
@@ -135,29 +136,21 @@ def status():
 @bp.route('/leaderboard', methods=['GET'])
 def get_leaderboard():
     try:
-        db = get_db()
-        leaderboard = db.execute(
-            """
-            SELECT 
-                score.id AS score_id, 
-                user.id AS user_id, 
-                user.username, 
-                score.score, 
-                score.created 
-            FROM score
-            JOIN user ON score.user_id = user.id
-            ORDER BY score.score DESC
-            LIMIT 20
-            """
-        ).fetchall()
+        leaderboard = db.session.query(
+            Score.id.label('score_id'),
+            User.id.label('user_id'),
+            User.username,
+            Score.score,
+            Score.created
+        ).join(User).order_by(Score.score.desc()).limit(20).all()
 
         leaderboard_list = [
             {
-                "score_id": row["score_id"],
-                "user_id": row["user_id"],
-                "username": row["username"],
-                "score": row["score"],
-                "created": row["created"],
+                "score_id": row.score_id,
+                "user_id": row.user_id,
+                "username": row.username,
+                "score": row.score,
+                "created": row.created,
             }
             for row in leaderboard
         ]
@@ -167,6 +160,7 @@ def get_leaderboard():
     except Exception as e:
         print(f"Error retrieving leaderboard: {e}")
         return {"error": "An unexpected error occurred."}, 500
+
 
 
 @bp.route('/personal', methods=['GET'])
@@ -189,33 +183,23 @@ def get_personal_scores():
         if order_by not in ['created', 'score']:
             return {"error": "Invalid order_by parameter."}, 400
 
-        order_clause = 'created' if order_by == 'created' else 'score'
+        order_clause = Score.created if order_by == 'created' else Score.score
 
-        db = get_db()
-        personal_scores = db.execute(
-            f"""
-            SELECT 
-                score.id AS score_id, 
-                user.id AS user_id, 
-                user.username, 
-                score.score, 
-                score.created 
-            FROM score
-            JOIN user ON score.user_id = user.id
-            WHERE user.id = ?
-            ORDER BY {order_clause} DESC
-            LIMIT 20
-            """,
-            (user_id,)
-        ).fetchall()
+        personal_scores = db.session.query(
+            Score.id.label('score_id'),
+            User.id.label('user_id'),
+            User.username,
+            Score.score,
+            Score.created
+        ).join(User).filter(User.id == user_id).order_by(order_clause.desc()).limit(20).all()
 
         personal_list = [
             {
-                "score_id": row["score_id"],
-                "user_id": row["user_id"],
-                "username": row["username"],
-                "score": row["score"],
-                "created": row["created"],
+                "score_id": row.score_id,
+                "user_id": row.user_id,
+                "username": row.username,
+                "score": row.score,
+                "created": row.created,
             }
             for row in personal_scores
         ]
@@ -252,33 +236,23 @@ def submit_score():
         if not user_id:
             return {"error": "User ID is missing from token."}, 401
 
-        db = get_db()
+        user = User.query.get(user_id)
+        if not user:
+            return {"error": "User not found."}, 404
 
-        last_submission = db.execute(
-            """
-            SELECT created 
-            FROM score 
-            WHERE user_id = ? 
-            ORDER BY created DESC 
-            LIMIT 1
-            """,
-            (user_id,)
-        ).fetchone()
+        from datetime import datetime, timedelta
+
+        last_submission = Score.query.filter_by(user_id=user_id).order_by(Score.created.desc()).first()
 
         if last_submission:
-            from datetime import datetime, timedelta
-
             cooldown_period = timedelta(minutes=1)
-            last_submission_time = last_submission["created"]
-
-            if datetime.now() - last_submission_time < cooldown_period:
+            if datetime.now() - last_submission.created < cooldown_period:
                 return {"error": "You can only submit a score once every minute."}, 429
 
-        db.execute(
-            "INSERT INTO score (user_id, score) VALUES (?, ?)",
-            (user_id, score)
-        )
-        db.commit()
+        new_score = Score(user_id=user_id, score=score)
+        db.session.add(new_score)
+        db.session.commit()
+
         return {"message": "Score submitted successfully!"}, 201
 
     except Exception as e:
@@ -303,14 +277,18 @@ def delete_profile():
         if not user_id:
             return {"error": "User ID is missing from token."}, 401
 
-        db = get_db()
-        db.execute("DELETE FROM score WHERE user_id = ?", (user_id,))
-        db.execute("DELETE FROM user WHERE id = ?", (user_id,))
-        db.commit()
+        user = User.query.get(user_id)
+        if not user:
+            return {"error": "User not found."}, 404
+
+        Score.query.filter_by(user_id=user_id).delete()
+        db.session.delete(user)
+        db.session.commit()
 
         return {"message": "User profile and associated data deleted successfully."}, 200
 
     except Exception as e:
         print(f"Error deleting profile: {e}")
         return {"error": "An unexpected error occurred."}, 500
+
 

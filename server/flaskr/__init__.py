@@ -1,17 +1,16 @@
 import os
-
 from flask import Flask
 from flask_cors import CORS
-
+from flaskr.db import db
 
 def create_app(test_config=None):
     app = Flask(__name__, instance_relative_config=True)
+
     app.config.from_mapping(
         SECRET_KEY='dev',
-        DATABASE=os.path.join(app.instance_path, 'flaskr.sqlite'),
+        SQLALCHEMY_DATABASE_URI='postgresql://typetester:admin123@localhost/typetester_db',
+        SQLALCHEMY_TRACK_MODIFICATIONS=False,
     )
-
-    print("SECRET_KEY is set to:", app.config['SECRET_KEY'])
 
     if test_config is None:
         app.config.from_pyfile('config.py', silent=True)
@@ -23,7 +22,6 @@ def create_app(test_config=None):
     except OSError:
         pass
 
-    from . import db
     db.init_app(app)
 
     from . import auth
