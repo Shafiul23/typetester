@@ -73,3 +73,6 @@ docker-compose.override.yml
 .dockerignore
 .travis.yml
 .circleci/
+
+# Flask environment variables file
+.flaskenv
