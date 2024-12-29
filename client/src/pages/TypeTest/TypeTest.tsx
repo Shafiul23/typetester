@@ -93,7 +93,7 @@ const TypeTest: React.FC = () => {
   }, [totalWords]);
 
   const { submitScore } = useSubmitScore();
-  const { playAudio } = useAudio("/typewriter-click.mp3");
+  const { playAudio } = useAudio("/typewriter-click.mp3", 0.7);
   const { timer, hasStarted, isFinished } = state;
 
   const startTimeRef = useTimer(hasStarted, isFinished, dispatch);

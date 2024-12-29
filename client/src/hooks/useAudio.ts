@@ -1,10 +1,11 @@
 import { useRef } from "react";
 
-const useAudio = (audioSrc: string) => {
+const useAudio = (audioSrc: string, volume: number = 1.0) => {
   const audioRef = useRef<HTMLAudioElement | null>(null);
 
   if (!audioRef.current) {
     audioRef.current = new Audio(audioSrc);
+    audioRef.current.volume = Math.min(Math.max(volume, 0), 1);
   }
 
   const playAudio = () => {
