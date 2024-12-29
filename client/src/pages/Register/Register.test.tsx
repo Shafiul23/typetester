@@ -57,6 +57,30 @@ describe("Register page tests", () => {
       await screen.findByText(/username must be at least 3 characters long/i)
     ).toBeDefined();
   });
+  it("should show error if username is too long", async () => {
+    const { useAuth } = require("../../context/AuthContext");
+    useAuth.mockReturnValue({ register: jest.fn() });
+    render(
+      <BrowserRouter>
+        <Register />
+      </BrowserRouter>
+    );
+
+    fireEvent.change(screen.getByLabelText(/username/i), {
+      target: { value: "usernameThatIsTooLong" },
+    });
+    fireEvent.change(screen.getByTestId("password"), {
+      target: { value: "Password123!" },
+    });
+    fireEvent.change(screen.getByLabelText(/confirm password/i), {
+      target: { value: "Password123!" },
+    });
+    fireEvent.click(screen.getByRole("button", { name: /register/i }));
+
+    expect(
+      await screen.findByText(/username must not exceed 20 characters/i)
+    ).toBeDefined();
+  });
 
   it("should show error if username contains non-alphanumeric characters", async () => {
     const { useAuth } = require("../../context/AuthContext");
@@ -115,19 +139,13 @@ describe("Register page tests", () => {
     });
     fireEvent.click(screen.getByRole("button", { name: /register/i }));
 
-    expect(
-      await screen.findByText(
-        /password must contain at least one uppercase letter/i
-      )
-    ).toBeDefined();
-
-    fireEvent.change(screen.getByTestId("password"), {
-      target: { value: "Password1" },
+    await waitFor(async () => {
+      expect(
+        await screen.findByText(
+          /password must contain at least one uppercase letter/i
+        )
+      ).toBeDefined();
     });
-    fireEvent.change(screen.getByLabelText(/confirm password/i), {
-      target: { value: "Password1" },
-    });
-    fireEvent.click(screen.getByRole("button", { name: /register/i }));
   });
 
   it("should show error if passwords do not match", async () => {
@@ -150,7 +168,9 @@ describe("Register page tests", () => {
     });
     fireEvent.click(screen.getByRole("button", { name: /register/i }));
 
-    expect(await screen.findByText(/passwords do not match!/i)).toBeDefined();
+    await waitFor(async () => {
+      expect(await screen.findByText(/passwords do not match!/i)).toBeDefined();
+    });
   });
 
   it("should successfully register and navigate", async () => {

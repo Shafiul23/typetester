@@ -17,6 +17,9 @@ const Register: React.FC = () => {
     if (username.trim().length < 3) {
       return "Username must be at least 3 characters long.";
     }
+    if (username.trim().length > 20) {
+      return "Username must not exceed 20 characters.";
+    }
     if (!/^[a-zA-Z0-9]+$/.test(username)) {
       return "Username can only contain letters and numbers.";
     }

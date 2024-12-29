@@ -45,6 +45,8 @@ def register():
             error = 'Username is required.'
         elif len(username) < 3:
             error = 'Username must be at least 3 characters long.'
+        elif len(username) > 20:
+            error = 'Username must not exceed 20 characters.'
         elif not username.isalnum():
             error = 'Username can only contain letters and numbers.'
 
@@ -52,6 +54,8 @@ def register():
             error = 'Password is required.'
         elif len(password) < 6:
             error = 'Password must be at least 6 characters long.'
+        elif len(password) > 64:
+            error = 'Password must not exceed 64 characters.'
         elif not re.search(r'[A-Z]', password):
             error = 'Password must contain at least one uppercase letter.'
         elif not re.search(r'[a-z]', password):
@@ -281,7 +285,7 @@ def submit_score():
         print(f"Error submitting score: {e}")
         return {"error": "An unexpected error occurred."}, 500
 
-        
+
 
 @bp.route('/delete', methods=['DELETE'])
 def delete_profile():
