@@ -137,4 +137,50 @@ describe("Profile page tests", () => {
       expect(screen.getByText(/80/i)).toBeInTheDocument();
     });
   });
+
+  it("should delete the profile and redirect to login", async () => {
+    jest.spyOn(window, "confirm").mockReturnValue(true);
+
+    const mockLogout = jest.fn();
+    const mockToken = "mocked-token";
+
+    (useAuth as jest.Mock).mockReturnValue({
+      userId: 1,
+      username: "user1",
+      logout: mockLogout,
+    });
+
+    global.localStorage.setItem("token", mockToken);
+    (global.fetch as jest.Mock).mockResolvedValueOnce({
+      ok: true,
+      json: jest.fn(),
+    });
+
+    render(
+      <BrowserRouter>
+        <Profile />
+      </BrowserRouter>
+    );
+
+    const deleteButton = screen.getByTestId("delete-button");
+    fireEvent.click(deleteButton);
+
+    await waitFor(() => {
+      expect(window.confirm).toHaveBeenCalledWith(
+        "Are you sure you want to delete your profile? This action cannot be undone."
+      );
+    });
+
+    await waitFor(() => {
+      expect(global.fetch).toHaveBeenCalledWith(
+        "http://127.0.0.1:5000/auth/delete",
+        {
+          method: "DELETE",
+          headers: {
+            Authorization: `Bearer ${mockToken}`,
+          },
+        }
+      );
+    });
+  });
 });

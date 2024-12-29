@@ -102,6 +102,20 @@
   margin-top: 1rem;
 }
 
+.deleteButton {
+  background-color: red;
+  color: white;
+  border: none;
+  padding: 10px 20px;
+  margin-top: 20px;
+  cursor: pointer;
+  border-radius: 5px;
+}
+
+.deleteButton:hover {
+  background-color: darkred;
+}
+
 @media (min-width: 768px) {
   .tableContainer {
     max-width: 1000px;

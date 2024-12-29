@@ -281,3 +281,32 @@ def submit_score():
         print(f"Error submitting score: {e}")
         return {"error": "An unexpected error occurred."}, 500
 
+        
+
+@bp.route('/delete', methods=['DELETE'])
+def delete_profile():
+    try:
+        auth_header = request.headers.get('Authorization')
+        if not auth_header:
+            return {"error": "Authorization token is required."}, 401
+
+        token = auth_header.split(" ")[1]
+        decoded = decode_jwt(token)
+        if isinstance(decoded, tuple):
+            return decoded
+
+        user_id = decoded.get('user_id')
+        if not user_id:
+            return {"error": "User ID is missing from token."}, 401
+
+        db = get_db()
+        db.execute("DELETE FROM score WHERE user_id = ?", (user_id,))
+        db.execute("DELETE FROM user WHERE id = ?", (user_id,))
+        db.commit()
+
+        return {"message": "User profile and associated data deleted successfully."}, 200
+
+    except Exception as e:
+        print(f"Error deleting profile: {e}")
+        return {"error": "An unexpected error occurred."}, 500
+

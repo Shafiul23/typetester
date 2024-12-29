@@ -1,6 +1,7 @@
 import React, { useEffect, useState } from "react";
 import { useAuth } from "../../context/AuthContext";
 import styles from "./Profile.module.css";
+import { useNavigate } from "react-router-dom";
 
 interface Score {
   score_id: number;
@@ -11,20 +12,53 @@ interface Score {
 }
 
 const Profile: React.FC = () => {
-  const { username } = useAuth();
+  const { username, logout } = useAuth();
   const [error, setError] = useState<string | null>(null);
   const [scores, setScores] = useState<Score[]>([]);
   const [loading, setLoading] = useState<boolean>(true);
   const [orderBy, setOrderBy] = useState<string>("created");
 
+  const navigate = useNavigate();
+
+  const deleteProfile = async () => {
+    if (
+      !window.confirm(
+        "Are you sure you want to delete your profile? This action cannot be undone."
+      )
+    ) {
+      return;
+    }
+
+    try {
+      const response = await fetch(`http://127.0.0.1:5000/auth/delete`, {
+        method: "DELETE",
+        headers: {
+          Authorization: `Bearer ${localStorage.getItem("token")}`,
+        },
+      });
+
+      if (!response.ok) {
+        throw new Error("Failed to delete profile.");
+      }
+
+      logout();
+      navigate("/login");
+    } catch (err: any) {
+      setError(err.message);
+    }
+  };
+
   useEffect(() => {
     const fetchScores = async () => {
       try {
-        const response = await fetch(`/auth/personal?order_by=${orderBy}`, {
-          headers: {
-            Authorization: `Bearer ${localStorage.getItem("token")}`,
-          },
-        });
+        const response = await fetch(
+          `http://127.0.0.1:5000/auth/personal?order_by=${orderBy}`,
+          {
+            headers: {
+              Authorization: `Bearer ${localStorage.getItem("token")}`,
+            },
+          }
+        );
 
         if (!response.ok) {
           throw new Error("Failed to fetch personal scores.");
@@ -95,6 +129,13 @@ const Profile: React.FC = () => {
           </div>
         </>
       )}
+      <button
+        onClick={deleteProfile}
+        className={styles.deleteButton}
+        data-testid="delete-button"
+      >
+        Delete Profile
+      </button>
     </div>
   );
 };
