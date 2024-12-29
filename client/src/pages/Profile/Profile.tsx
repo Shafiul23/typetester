@@ -30,12 +30,15 @@ const Profile: React.FC = () => {
     }
 
     try {
-      const response = await fetch(`http://127.0.0.1:5000/auth/delete`, {
-        method: "DELETE",
-        headers: {
-          Authorization: `Bearer ${localStorage.getItem("token")}`,
-        },
-      });
+      const response = await fetch(
+        `${process.env.REACT_APP_BACKEND_API_URL}/auth/delete`,
+        {
+          method: "DELETE",
+          headers: {
+            Authorization: `Bearer ${localStorage.getItem("token")}`,
+          },
+        }
+      );
 
       if (!response.ok) {
         throw new Error("Failed to delete profile.");
@@ -52,7 +55,7 @@ const Profile: React.FC = () => {
     const fetchScores = async () => {
       try {
         const response = await fetch(
-          `http://127.0.0.1:5000/auth/personal?order_by=${orderBy}`,
+          `${process.env.REACT_APP_BACKEND_API_URL}/personal?order_by=${orderBy}`,
           {
             headers: {
               Authorization: `Bearer ${localStorage.getItem("token")}`,

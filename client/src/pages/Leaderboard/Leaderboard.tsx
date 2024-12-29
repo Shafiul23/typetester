@@ -19,7 +19,9 @@ const Leaderboard: React.FC = () => {
   useEffect(() => {
     const fetchLeaderboard = async () => {
       try {
-        const response = await fetch("http://127.0.0.1:5000/auth/leaderboard");
+        const response = await fetch(
+          `${process.env.REACT_APP_BACKEND_API_URL}/auth/leaderboard`
+        );
         if (!response.ok) {
           throw new Error("Failed to fetch leaderboard data");
         }

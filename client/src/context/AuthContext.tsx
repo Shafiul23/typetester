@@ -33,15 +33,19 @@ export const AuthProvider: React.FC<{ children: ReactNode }> = ({
 
   const register = async (username: string, password: string) => {
     try {
-      const response = await fetch("http://127.0.0.1:5000/auth/register", {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-        },
-        credentials: "include",
-        body: JSON.stringify({ username, password }),
-      });
+      const response = await fetch(
+        `${process.env.REACT_APP_BACKEND_API_URL}/auth/register`,
+        {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json",
+          },
+          credentials: "include",
+          body: JSON.stringify({ username, password }),
+        }
+      );
 
+      console.log("env variable", process.env.REACT_APP_BACKEND_API_URL);
       const data = await response.json();
       if (!response.ok) {
         throw new Error(data.error || "Registration failed");
@@ -55,14 +59,18 @@ export const AuthProvider: React.FC<{ children: ReactNode }> = ({
 
   const login = async (username: string, password: string) => {
     try {
-      const response = await fetch("http://127.0.0.1:5000/auth/login", {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-        },
-        credentials: "include",
-        body: JSON.stringify({ username, password }),
-      });
+      const response = await fetch(
+        `${process.env.REACT_APP_BACKEND_API_URL}/auth/login`,
+        {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json",
+          },
+          credentials: "include",
+          body: JSON.stringify({ username, password }),
+        }
+      );
+      console.log("env variable", process.env.REACT_APP_BACKEND_API_URL);
       const data = await response.json();
 
       if (!response.ok) {
@@ -86,6 +94,7 @@ export const AuthProvider: React.FC<{ children: ReactNode }> = ({
   };
 
   const checkAuthStatus = async () => {
+    console.log("env variable", process.env.REACT_APP_BACKEND_API_URL);
     const token = localStorage.getItem("token");
     if (!token) {
       setUserId(null);
@@ -94,12 +103,15 @@ export const AuthProvider: React.FC<{ children: ReactNode }> = ({
     }
 
     try {
-      const response = await fetch("http://127.0.0.1:5000/auth/status", {
-        method: "GET",
-        headers: {
-          Authorization: `Bearer ${token}`,
-        },
-      });
+      const response = await fetch(
+        `${process.env.REACT_APP_BACKEND_API_URL}/auth/status`,
+        {
+          method: "GET",
+          headers: {
+            Authorization: `Bearer ${token}`,
+          },
+        }
+      );
       const data = await response.json();
       if (response.ok && data.logged_in) {
         setUserId(data.user_id);
