@@ -55,7 +55,7 @@ const Profile: React.FC = () => {
     const fetchScores = async () => {
       try {
         const response = await fetch(
-          `${process.env.REACT_APP_BACKEND_API_URL}/personal?order_by=${orderBy}`,
+          `${process.env.REACT_APP_BACKEND_API_URL}/auth/personal?order_by=${orderBy}`,
           {
             headers: {
               Authorization: `Bearer ${localStorage.getItem("token")}`,

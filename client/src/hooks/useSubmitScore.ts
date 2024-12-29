@@ -23,7 +23,6 @@ const useSubmitScore = (): UseSubmitScoreReturn => {
       );
 
       if (response.ok) {
-        console.log("Score submitted successfully!");
         setError(null);
         return true;
       } else {

@@ -3,12 +3,25 @@ import { Navigate, Outlet } from "react-router-dom";
 import { useAuth } from "../../context/AuthContext";
 
 const PrivateRoute: React.FC = () => {
-  const { userId, checkAuthStatus } = useAuth();
+  const { userId, setUserId, setUsername } = useAuth();
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
-    checkAuthStatus().finally(() => setLoading(false));
-  }, [checkAuthStatus]);
+    const token = localStorage.getItem("token");
+
+    if (token) {
+      try {
+        const payload = JSON.parse(atob(token.split(".")[1]));
+        setUserId(payload.user_id);
+        setUsername(payload.username);
+      } catch (error) {
+        console.error("Invalid token:", error);
+        localStorage.removeItem("token");
+      }
+    }
+
+    setLoading(false);
+  }, [setUserId, setUsername]);
 
   if (loading) {
     return <div>Loading...</div>;

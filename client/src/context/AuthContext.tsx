@@ -1,17 +1,10 @@
-import React, {
-  createContext,
-  useState,
-  useEffect,
-  useContext,
-  ReactNode,
-} from "react";
+import React, { createContext, useState, useContext, ReactNode } from "react";
 
 interface AuthContextType {
   userId: number | null;
   username: string | null;
   setUserId: (userId: number | null) => void;
   setUsername: (username: string | null) => void;
-  checkAuthStatus: () => Promise<void>;
   register: (
     username: string,
     password: string
@@ -45,7 +38,6 @@ export const AuthProvider: React.FC<{ children: ReactNode }> = ({
         }
       );
 
-      console.log("env variable", process.env.REACT_APP_BACKEND_API_URL);
       const data = await response.json();
       if (!response.ok) {
         throw new Error(data.error || "Registration failed");
@@ -70,7 +62,6 @@ export const AuthProvider: React.FC<{ children: ReactNode }> = ({
           body: JSON.stringify({ username, password }),
         }
       );
-      console.log("env variable", process.env.REACT_APP_BACKEND_API_URL);
       const data = await response.json();
 
       if (!response.ok) {
@@ -93,42 +84,6 @@ export const AuthProvider: React.FC<{ children: ReactNode }> = ({
     setUsername(null);
   };
 
-  const checkAuthStatus = async () => {
-    console.log("env variable", process.env.REACT_APP_BACKEND_API_URL);
-    const token = localStorage.getItem("token");
-    if (!token) {
-      setUserId(null);
-      setUsername(null);
-      return;
-    }
-
-    try {
-      const response = await fetch(
-        `${process.env.REACT_APP_BACKEND_API_URL}/auth/status`,
-        {
-          method: "GET",
-          headers: {
-            Authorization: `Bearer ${token}`,
-          },
-        }
-      );
-      const data = await response.json();
-      if (response.ok && data.logged_in) {
-        setUserId(data.user_id);
-        setUsername(data.username);
-      } else {
-        setUserId(null);
-        setUsername(null);
-      }
-    } catch (err) {
-      console.error("Error checking auth status:", err);
-    }
-  };
-
-  useEffect(() => {
-    checkAuthStatus();
-  }, []);
-
   return (
     <AuthContext.Provider
       value={{
@@ -136,7 +91,6 @@ export const AuthProvider: React.FC<{ children: ReactNode }> = ({
         username,
         setUserId,
         setUsername,
-        checkAuthStatus,
         login,
         logout,
         register,

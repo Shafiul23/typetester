@@ -111,28 +111,6 @@ def login():
         return {"error": "An unexpected error occurred."}, 500
 
 
-@bp.route('/status', methods=['GET'])
-def status():
-    try:
-        auth_header = request.headers.get('Authorization')
-        if not auth_header:
-            return {"logged_in": False}, 401
-
-        token = auth_header.split(" ")[1]
-        decoded = decode_jwt(token)
-        if isinstance(decoded, tuple):
-            return decoded
-
-        return {
-            "logged_in": True,
-            "user_id": decoded['user_id'],
-            "username": decoded['username']
-        }, 200
-    except Exception as e:
-        print(f"Error checking status: {e}")
-        return {"error": "An unexpected error occurred."}, 500
-
-
 @bp.route('/leaderboard', methods=['GET'])
 def get_leaderboard():
     try:
