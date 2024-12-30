@@ -5,6 +5,7 @@
   padding: 1rem;
   background-color: #f4f7fc;
   min-height: 100vh;
+  box-sizing: border-box;
 }
 
 .hero {
@@ -16,20 +17,34 @@
 .title {
   font-size: 2rem;
   color: #333;
-  margin-bottom: 1rem;
+  margin-bottom: 2rem;
 }
 
 .subtitle {
   font-size: 1rem;
   color: #666;
   margin-bottom: 2rem;
+  line-height: 1.4;
+}
+
+.bodyContainer {
+  margin: auto;
+  width: 100%;
+  text-align: left;
+}
+
+p {
+  font-size: 1rem;
+  color: #444;
+  margin-bottom: 2rem;
 }
 
 .buttonGroup {
   display: flex;
   flex-direction: column;
-  gap: 10px;
+  gap: 15px;
   width: 100%;
+  align-items: center;
 }
 
 .buttonPrimary,
@@ -44,6 +59,7 @@
   text-align: center;
   cursor: pointer;
   transition: background-color 0.3s ease;
+  width: 90%;
 }
 
 .buttonPrimary {
@@ -77,6 +93,13 @@
 
   .subtitle {
     font-size: 1.2rem;
+  }
+
+  .bodyContainer {
+    text-align: center;
+    padding-top: 1rem;
+    padding-bottom: 2rem;
+    line-height: 5px;
   }
 
   .buttonGroup {
