@@ -38,7 +38,7 @@ def register():
         if not data:
             return {"error": "Invalid input"}, 400
                 
-        username = data.get('username').lower()
+        username = data.get('username', '').lower()
         password = data.get('password')
         error = None
 
@@ -92,7 +92,7 @@ def login():
         if not data:
             return {"error": "Invalid input"}, 400
 
-        username = data.get('username').lower()
+        username = data.get('username', '').lower()
         password = data.get('password')
 
         if not username or not password:
