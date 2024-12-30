@@ -4,17 +4,14 @@ from flask_cors import CORS
 from flaskr.db import db
 from dotenv import load_dotenv
 
-load_dotenv()
+load_dotenv(dotenv_path='.flaskenv')
 
 def create_app(test_config=None):
     app = Flask(__name__, instance_relative_config=True)
 
     app.config.from_mapping(
         SECRET_KEY=os.getenv('FLASK_SECRET_KEY', 'dev'),
-        SQLALCHEMY_DATABASE_URI=os.getenv(
-            'DATABASE_URL', 
-            'postgresql://typetester:admin123@localhost/typetester_db'
-        ),
+        SQLALCHEMY_DATABASE_URI=os.getenv('DATABASE_URL'),
         SQLALCHEMY_TRACK_MODIFICATIONS=False,
     )
 
