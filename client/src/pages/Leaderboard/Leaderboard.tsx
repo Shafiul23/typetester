@@ -1,5 +1,6 @@
 import React, { useEffect, useState } from "react";
 import styles from "./Leaderboard.module.css";
+import Loading from "../../components/Loading/Loading";
 
 interface LeaderboardEntry {
   score_id: number;
@@ -38,7 +39,11 @@ const Leaderboard: React.FC = () => {
   }, []);
 
   if (loading) {
-    return <div className={styles.loading}>Loading leaderboard...</div>;
+    return (
+      <div>
+        <Loading />
+      </div>
+    );
   }
 
   if (error) {

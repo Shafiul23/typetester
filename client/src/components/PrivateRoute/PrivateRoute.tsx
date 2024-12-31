@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from "react";
 import { Navigate, Outlet } from "react-router-dom";
 import { useAuth } from "../../context/AuthContext";
+import Loading from "../Loading/Loading";
 
 const PrivateRoute: React.FC = () => {
   const { userId, setUserId, setUsername } = useAuth();
@@ -24,7 +25,11 @@ const PrivateRoute: React.FC = () => {
   }, [setUserId, setUsername]);
 
   if (loading) {
-    return <div>Loading...</div>;
+    return (
+      <div>
+        <Loading />
+      </div>
+    );
   }
 
   if (!userId) {

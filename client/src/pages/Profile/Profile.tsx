@@ -2,6 +2,7 @@ import React, { useEffect, useState } from "react";
 import { useAuth } from "../../context/AuthContext";
 import styles from "./Profile.module.css";
 import { useNavigate } from "react-router-dom";
+import Loading from "../../components/Loading/Loading";
 
 interface Score {
   score_id: number;
@@ -83,7 +84,7 @@ const Profile: React.FC = () => {
     <div className={styles.profileContainer}>
       {error && <div className={styles.error}>{error}</div>}
       {loading ? (
-        <div className={styles.loading}>Loading...</div>
+        <Loading />
       ) : (
         <>
           {username && (

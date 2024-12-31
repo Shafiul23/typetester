@@ -207,6 +207,7 @@ const TypeTest: React.FC = () => {
               Correct words: {correctWordsCounter}
             </p>
             <p className={styles.wrongWord}>Wrong words: {wrongWordsCounter}</p>
+            <p>Hit the save button below to save your score to your profile</p>
             {state.scoreSaved && <p>Score saved!</p>}
             <div className={styles.buttonContainer}>
               <button
