@@ -1,0 +1,33 @@
+.footer {
+  background-color: #f4f7fc;
+  padding-top: 1rem;
+  text-align: center;
+  border-top: 1px solid #e0e0e0;
+}
+
+.container {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+}
+
+.links {
+  display: flex;
+  gap: 1.5rem;
+  justify-content: center;
+}
+
+.link {
+  text-decoration: none;
+  color: #4e9bff;
+  font-size: 1rem;
+}
+
+.link:hover {
+  color: #357ab7;
+}
+
+.copyright {
+  font-size: 0.875rem;
+  color: #666;
+}
