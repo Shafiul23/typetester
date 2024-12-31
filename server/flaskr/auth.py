@@ -57,8 +57,6 @@ def register():
             error = 'Password must be at least 6 characters long.'
         elif len(password) > 64:
             error = 'Password must not exceed 64 characters.'
-        elif not re.search(r'[A-Z]', password):
-            error = 'Password must contain at least one uppercase letter.'
         elif not re.search(r'[a-z]', password):
             error = 'Password must contain at least one lowercase letter.'
         elif not re.search(r'[0-9]', password):

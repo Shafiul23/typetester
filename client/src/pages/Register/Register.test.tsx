@@ -130,22 +130,6 @@ describe("Register page tests", () => {
     expect(
       await screen.findByText(/password must be at least 6 characters long/i)
     ).toBeDefined();
-
-    fireEvent.change(screen.getByTestId("password"), {
-      target: { value: "password" },
-    });
-    fireEvent.change(screen.getByLabelText(/confirm password/i), {
-      target: { value: "password" },
-    });
-    fireEvent.click(screen.getByRole("button", { name: /register/i }));
-
-    await waitFor(async () => {
-      expect(
-        await screen.findByText(
-          /password must contain at least one uppercase letter/i
-        )
-      ).toBeDefined();
-    });
   });
 
   it("should show error if passwords do not match", async () => {

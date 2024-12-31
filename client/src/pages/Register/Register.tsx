@@ -27,9 +27,6 @@ const Register: React.FC = () => {
     if (password.length < 6) {
       return "Password must be at least 6 characters long.";
     }
-    if (!/[A-Z]/.test(password)) {
-      return "Password must contain at least one uppercase letter.";
-    }
     if (!/[a-z]/.test(password)) {
       return "Password must contain at least one lowercase letter.";
     }
@@ -102,6 +99,15 @@ const Register: React.FC = () => {
               required
               className={styles.input}
             />
+          </div>
+
+          <div className={styles.passwordRequirements}>
+            Password must contain:
+            <ul>
+              <li>At least 6 characters</li>
+              <li>At least 1 lowercase letter</li>
+              <li>At least 1 number</li>
+            </ul>
           </div>
 
           <div className={styles.formGroup}>

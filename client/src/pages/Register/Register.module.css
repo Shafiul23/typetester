@@ -64,6 +64,13 @@
   color: #aaa;
 }
 
+.passwordRequirements {
+  font-size: 0.9rem;
+  color: grey;
+  margin-top: -0.5rem;
+  margin-bottom: -1.5rem;
+}
+
 .buttonGroup {
   margin-top: 1.25rem;
 }
