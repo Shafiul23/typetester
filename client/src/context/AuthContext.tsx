@@ -1,4 +1,10 @@
-import React, { createContext, useState, useContext, ReactNode } from "react";
+import React, {
+  createContext,
+  useState,
+  useContext,
+  ReactNode,
+  useEffect,
+} from "react";
 
 interface AuthContextType {
   userId: number | null;
@@ -23,6 +29,19 @@ export const AuthProvider: React.FC<{ children: ReactNode }> = ({
 }) => {
   const [userId, setUserId] = useState<number | null>(null);
   const [username, setUsername] = useState<{ username: string } | null>(null);
+
+  useEffect(() => {
+    const token = localStorage.getItem("token");
+    if (token) {
+      try {
+        const payload = JSON.parse(atob(token.split(".")[1]));
+        setUserId(payload.user_id);
+        setUsername(payload.username);
+      } catch (err) {
+        console.error("Error decoding token:", err);
+      }
+    }
+  }, []);
 
   const register = async (username: string, password: string) => {
     try {
