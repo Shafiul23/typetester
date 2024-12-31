@@ -1,31 +1,47 @@
 import React, { useState } from "react";
 import { Link, useNavigate } from "react-router-dom";
+import { Snackbar } from "@mui/material";
 import styles from "./Login.module.css";
 
 import { useAuth } from "../../context/AuthContext";
+import Loading from "../../components/Loading/Loading";
 
 const Login: React.FC = () => {
   const { login } = useAuth();
   const [username, setUsername] = useState<string>("");
   const [password, setPassword] = useState<string>("");
   const [errorMessage, setErrorMessage] = useState<string | null>(null);
+  const [loading, setLoading] = useState<boolean>(false);
+  const [openSnackbar, setOpenSnackbar] = useState(false);
 
   const navigate = useNavigate();
 
   const handleLogin = async (e: React.FormEvent) => {
     e.preventDefault();
     setErrorMessage(null);
+    setLoading(true);
 
-    const response = await login(username, password);
-
-    if (response.success) {
-      navigate("/");
-    } else {
-      setErrorMessage(
-        response.message || "An unexpected error occurred. Please try again."
-      );
-      setPassword("");
+    try {
+      const response = await login(username, password);
+      if (response?.success) {
+        navigate("/");
+      } else {
+        setErrorMessage(
+          response?.message || "An unexpected error occurred. Please try again."
+        );
+        setPassword("");
+        setOpenSnackbar(true);
+      }
+    } catch (error) {
+      setErrorMessage("An unexpected error occurred.");
+      setOpenSnackbar(true);
+    } finally {
+      setLoading(false);
     }
+  };
+
+  const handleCloseSnackbar = () => {
+    setOpenSnackbar(false);
   };
 
   return (
@@ -62,13 +78,15 @@ const Login: React.FC = () => {
             />
           </div>
 
-          {errorMessage && (
-            <div className={styles.errorMessage}>{errorMessage}</div>
-          )}
-          <button type="submit" className={styles.submitButton}>
+          <button
+            type="submit"
+            disabled={loading}
+            className={styles.submitButton}
+          >
             Login
           </button>
         </form>
+        {loading && <Loading />}
 
         <div className={styles.footer}>
           <p className={styles.footerText}>Don't have an account?</p>
@@ -77,6 +95,12 @@ const Login: React.FC = () => {
           </Link>
         </div>
       </div>
+      <Snackbar
+        open={openSnackbar}
+        message={errorMessage || "Something went wrong"}
+        autoHideDuration={6000}
+        onClose={handleCloseSnackbar}
+      />
     </div>
   );
 };

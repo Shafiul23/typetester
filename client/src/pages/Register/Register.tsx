@@ -1,15 +1,18 @@
 import React, { useState } from "react";
 import { Link, useNavigate } from "react-router-dom";
-import styles from "./Register.module.css";
+import { Snackbar } from "@mui/material";
 import { useAuth } from "../../context/AuthContext";
+import styles from "./Register.module.css";
+import Loading from "../../components/Loading/Loading";
 
 const Register: React.FC = () => {
   const { register } = useAuth();
   const [username, setUsername] = useState("");
   const [password, setPassword] = useState("");
   const [confirmPassword, setConfirmPassword] = useState("");
+  const [loading, setLoading] = useState<boolean>(false);
   const [errorMessage, setErrorMessage] = useState<string | null>(null);
-
+  const [openSnackbar, setOpenSnackbar] = useState(false);
   const navigate = useNavigate();
 
   const validateInputs = (): string | null => {
@@ -43,10 +46,12 @@ const Register: React.FC = () => {
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
+    setLoading(true);
 
     const validationError = validateInputs();
     if (validationError) {
       setErrorMessage(validationError);
+      setOpenSnackbar(true);
       return;
     }
 
@@ -60,10 +65,18 @@ const Register: React.FC = () => {
         navigate("/login");
       } else {
         setErrorMessage(response?.message || "Registration failed");
+        setOpenSnackbar(true);
       }
     } catch (error) {
       setErrorMessage("An unexpected error occurred.");
+      setOpenSnackbar(true);
+    } finally {
+      setLoading(false);
     }
+  };
+
+  const handleCloseSnackbar = () => {
+    setOpenSnackbar(false);
   };
 
   return (
@@ -85,6 +98,13 @@ const Register: React.FC = () => {
               className={styles.input}
             />
           </div>
+          <div className={styles.requirements}>
+            Username must contain:
+            <ul>
+              <li>At least 3 characters</li>
+              <li>Only letters and numbers</li>
+            </ul>
+          </div>
 
           <div className={styles.formGroup}>
             <label htmlFor="password" className={styles.label}>
@@ -100,8 +120,7 @@ const Register: React.FC = () => {
               className={styles.input}
             />
           </div>
-
-          <div className={styles.passwordRequirements}>
+          <div className={styles.requirements}>
             Password must contain:
             <ul>
               <li>At least 6 characters</li>
@@ -124,14 +143,16 @@ const Register: React.FC = () => {
             />
           </div>
 
-          {errorMessage && (
-            <div className={styles.errorMessage}>{errorMessage}</div>
-          )}
           <div className={styles.buttonGroup}>
-            <button type="submit" className={styles.submitButton}>
+            <button
+              type="submit"
+              disabled={loading}
+              className={styles.submitButton}
+            >
               Register
             </button>
           </div>
+          {loading && <Loading />}
 
           <div className={styles.loginRedirect}>
             <p>
@@ -143,6 +164,13 @@ const Register: React.FC = () => {
           </div>
         </form>
       </div>
+
+      <Snackbar
+        open={openSnackbar}
+        message={errorMessage || "Something went wrong"}
+        autoHideDuration={6000}
+        onClose={handleCloseSnackbar}
+      />
     </div>
   );
 };

@@ -5,7 +5,6 @@ import React, {
   ReactNode,
   useEffect,
 } from "react";
-import Loading from "../components/Loading/Loading";
 
 interface AuthContextType {
   userId: number | null;
@@ -21,7 +20,6 @@ interface AuthContextType {
     password: string
   ) => Promise<{ success: boolean; message: string }>;
   logout: () => Promise<void>;
-  loading: boolean;
 }
 
 const AuthContext = createContext<AuthContextType | undefined>(undefined);
@@ -30,8 +28,7 @@ export const AuthProvider: React.FC<{ children: ReactNode }> = ({
   children,
 }) => {
   const [userId, setUserId] = useState<number | null>(null);
-  const [username, setUsername] = useState<{ username: string } | null>(null);
-  const [loading, setLoading] = useState<boolean>(false);
+  const [username, setUsername] = useState<string | null>(null);
 
   useEffect(() => {
     const token = localStorage.getItem("token");
@@ -47,7 +44,6 @@ export const AuthProvider: React.FC<{ children: ReactNode }> = ({
   }, []);
 
   const register = async (username: string, password: string) => {
-    setLoading(true);
     try {
       const response = await fetch(
         `${process.env.REACT_APP_BACKEND_API_URL}/auth/register`,
@@ -69,13 +65,10 @@ export const AuthProvider: React.FC<{ children: ReactNode }> = ({
     } catch (error: any) {
       console.error("Error during registration:", error);
       return { success: false, message: error.message || "An error occurred." };
-    } finally {
-      setLoading(false);
     }
   };
 
   const login = async (username: string, password: string) => {
-    setLoading(true);
     try {
       const response = await fetch(
         `${process.env.REACT_APP_BACKEND_API_URL}/auth/login`,
@@ -101,8 +94,6 @@ export const AuthProvider: React.FC<{ children: ReactNode }> = ({
     } catch (err) {
       console.error("Error during login:", err);
       return { success: false, message: err.message || "An error occurred." };
-    } finally {
-      setLoading(false);
     }
   };
 
@@ -122,10 +113,9 @@ export const AuthProvider: React.FC<{ children: ReactNode }> = ({
         login,
         logout,
         register,
-        loading,
       }}
     >
-      {loading ? <Loading /> : children}
+      {children}
     </AuthContext.Provider>
   );
 };

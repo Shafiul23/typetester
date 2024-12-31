@@ -16,7 +16,6 @@
   width: 100%;
   max-width: 22rem;
   box-sizing: border-box;
-  margin-top: 1rem;
 }
 
 .title {
@@ -64,10 +63,10 @@
   color: #aaa;
 }
 
-.passwordRequirements {
+.requirements {
   font-size: 0.9rem;
   color: grey;
-  margin-top: -0.5rem;
+  margin-top: -1rem;
   margin-bottom: -1.5rem;
 }
 
