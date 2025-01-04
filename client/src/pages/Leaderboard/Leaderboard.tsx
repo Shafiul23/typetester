@@ -40,7 +40,7 @@ const Leaderboard: React.FC = () => {
 
   if (loading) {
     return (
-      <div>
+      <div className={styles.loading}>
         <Loading />
       </div>
     );
