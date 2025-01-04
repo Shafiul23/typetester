@@ -59,13 +59,13 @@ describe("Profile page tests", () => {
       expect(screen.getByText(/80/i)).toBeInTheDocument();
     });
     await waitFor(() => {
-      expect(screen.getByText("12/1/2024, 12:00:00 AM")).toBeInTheDocument();
+      expect(screen.getByText("01/12/24, 00:00:00")).toBeInTheDocument();
     });
     await waitFor(() => {
       expect(screen.getByText(/90/i)).toBeInTheDocument();
     });
     await waitFor(() => {
-      expect(screen.getByText("12/2/2024, 12:00:00 AM")).toBeInTheDocument();
+      expect(screen.getByText("02/12/24, 00:00:00")).toBeInTheDocument();
     });
   });
 

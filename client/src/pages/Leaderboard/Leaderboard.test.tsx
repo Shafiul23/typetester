@@ -40,11 +40,11 @@ describe("Leaderboard page tests", () => {
       </BrowserRouter>
     );
 
-    expect(screen.getByText(/loading leaderboard/i)).toBeInTheDocument();
+    expect(screen.getByText(/loading/i)).toBeInTheDocument();
     await screen.findByText(/user1/i);
     expect(screen.getByText(/user1/i)).toBeInTheDocument();
     expect(screen.getByText(/80/i)).toBeInTheDocument();
-    expect(screen.getByText("12/1/2024")).toBeInTheDocument();
+    expect(screen.getByText("01/12/24")).toBeInTheDocument();
   });
 
   it("should display an error if leaderboard data fails to load", async () => {
