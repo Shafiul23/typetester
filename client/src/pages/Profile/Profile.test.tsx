@@ -162,8 +162,11 @@ describe("Profile page tests", () => {
       </BrowserRouter>
     );
 
-    const deleteButton = screen.getByTestId("delete-button");
-    fireEvent.click(deleteButton);
+    await waitFor(() => {
+      const deleteButton = screen.getByTestId("delete-button");
+      // eslint-disable-next-line testing-library/no-wait-for-side-effects
+      fireEvent.click(deleteButton);
+    });
 
     await waitFor(() => {
       expect(window.confirm).toHaveBeenCalledWith(

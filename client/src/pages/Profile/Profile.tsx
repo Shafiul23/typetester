@@ -159,6 +159,7 @@ const Profile: React.FC = () => {
       >
         Delete Profile
       </button>
+
       <Snackbar
         open={openSnackbar}
         message={errorMessage || "Something went wrong"}
