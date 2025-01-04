@@ -58,7 +58,7 @@ describe("Login page tests", () => {
 
     fireEvent.click(screen.getByRole("button", { name: /login/i }));
 
-    await screen.findByText(/invalid credentials/i);
+    await screen.findAllByText(/invalid credentials/i);
   });
 
   it("should navigate to home on successful login", async () => {
@@ -112,7 +112,7 @@ describe("Login page tests", () => {
 
     fireEvent.click(screen.getByRole("button", { name: /login/i }));
 
-    await screen.findByText(/invalid credentials/i);
+    await screen.findAllByText(/invalid credentials/i);
 
     expect(passwordInput).toHaveValue("");
   });

@@ -4,54 +4,25 @@ import { Snackbar } from "@mui/material";
 import { useAuth } from "../../context/AuthContext";
 import styles from "./Register.module.css";
 import Loading from "../../components/Loading/Loading";
+import { useValidation } from "../../hooks/useValidation";
 
 const Register: React.FC = () => {
   const { register } = useAuth();
+  const { validationError, validateInputs } = useValidation();
   const [username, setUsername] = useState("");
   const [password, setPassword] = useState("");
   const [confirmPassword, setConfirmPassword] = useState("");
   const [loading, setLoading] = useState<boolean>(false);
-  const [errorMessage, setErrorMessage] = useState<string | null>(null);
+  const [backendError, setBackendError] = useState<string | null>(null);
   const [openSnackbar, setOpenSnackbar] = useState(false);
   const navigate = useNavigate();
-
-  const validateInputs = (): string | null => {
-    setErrorMessage(null);
-    if (username.trim().length < 3) {
-      return "Username must be at least 3 characters long.";
-    }
-    if (username.trim().length > 20) {
-      return "Username must not exceed 20 characters.";
-    }
-    if (!/^[a-zA-Z0-9]+$/.test(username)) {
-      return "Username can only contain letters and numbers.";
-    }
-
-    if (password.length < 6) {
-      return "Password must be at least 6 characters long.";
-    }
-    if (!/[a-z]/.test(password)) {
-      return "Password must contain at least one lowercase letter.";
-    }
-    if (!/[0-9]/.test(password)) {
-      return "Password must contain at least one digit.";
-    }
-
-    if (password !== confirmPassword) {
-      return "Passwords do not match!";
-    }
-
-    return null;
-  };
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setLoading(true);
 
-    const validationError = validateInputs();
-    if (validationError) {
-      setErrorMessage(validationError);
-      setOpenSnackbar(true);
+    if (!validateInputs(username, password, confirmPassword)) {
+      setLoading(false);
       return;
     }
 
@@ -61,14 +32,13 @@ const Register: React.FC = () => {
         setUsername("");
         setPassword("");
         setConfirmPassword("");
-        setErrorMessage(null);
         navigate("/login");
       } else {
-        setErrorMessage(response?.message || "Registration failed");
+        setBackendError(response?.message || "Registration failed");
         setOpenSnackbar(true);
       }
     } catch (error) {
-      setErrorMessage("An unexpected error occurred.");
+      setBackendError("An unexpected error occurred.");
       setOpenSnackbar(true);
     } finally {
       setLoading(false);
@@ -142,6 +112,9 @@ const Register: React.FC = () => {
               className={styles.input}
             />
           </div>
+          {validationError && (
+            <div className={styles.errorMessage}>{validationError}</div>
+          )}
 
           <div className={styles.buttonGroup}>
             <button
@@ -167,7 +140,7 @@ const Register: React.FC = () => {
 
       <Snackbar
         open={openSnackbar}
-        message={errorMessage || "Something went wrong"}
+        message={backendError || "Something went wrong"}
         autoHideDuration={6000}
         onClose={handleCloseSnackbar}
       />

@@ -78,6 +78,10 @@ const Login: React.FC = () => {
             />
           </div>
 
+          {errorMessage && (
+            <div className={styles.errorMessage}>{errorMessage}</div>
+          )}
+
           <button
             type="submit"
             disabled={loading}
