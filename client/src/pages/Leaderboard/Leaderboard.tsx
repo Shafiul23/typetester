@@ -69,7 +69,13 @@ const Leaderboard: React.FC = () => {
                 <td>{index + 1}</td>
                 <td>{entry.username}</td>
                 <td>{entry.score}</td>
-                <td>{new Date(entry.created).toLocaleDateString()}</td>
+                <td>
+                  {new Date(entry.created).toLocaleDateString("en-GB", {
+                    day: "2-digit",
+                    month: "2-digit",
+                    year: "2-digit",
+                  })}
+                </td>
               </tr>
             ))}
           </tbody>
