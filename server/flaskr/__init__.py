@@ -1,7 +1,7 @@
 import os
 from flask import Flask
 from flask_cors import CORS
-from flaskr.db import db
+from flaskr.db import db, register_commands
 from dotenv import load_dotenv
 
 load_dotenv(dotenv_path='.flaskenv')
@@ -41,6 +41,7 @@ def create_app(test_config=None):
         pass
 
     db.init_app(app)
+    register_commands(app)
 
     from . import auth
     app.register_blueprint(auth.bp)

@@ -18,11 +18,11 @@ Users have the option to save their scores to a database, which can be viewed in
 
 - React (TypeScript), CSS Modules for styling and Jest for unit tests
 - Backend: Flask (Python)
-- Database: SQLite for storing user data and scores
+- Database: PostgreSQL (e.g. via Neon) for storing user data and scores
 
 ## Database
 
-The database is relatively simple and uses SQLite to set up the database, query data and manage connections.
+The database layer uses PostgreSQL accessed through SQLAlchemy. The connection URL is supplied via the `DATABASE_URL` environment variable.
 
 It contains a user table that stores an auto incrementing id, a unique username, and a hashed password. The scores table also has an auto incrementing id, associated user id, score, and a created timestamp.
 
