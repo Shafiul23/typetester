@@ -212,7 +212,9 @@ const TypeTest: React.FC = () => {
             <p className={styles.wrongWord}>Wrong words: {wrongWordsCounter}</p>
             {userId ? (
               <>
-                <p>Hit the save button below to save your score to your profile</p>
+                <p>
+                  Hit the save button below to save your score to your profile
+                </p>
                 {state.scoreSaved && <p>Score saved!</p>}
                 <div className={styles.buttonContainer}>
                   <button
@@ -229,24 +231,25 @@ const TypeTest: React.FC = () => {
               <>
                 <p>
                   Want to save your score? <br />
+                  <br />
                   <Link
                     to="/login"
                     onClick={() =>
                       localStorage.setItem("pendingScore", wpm.toString())
                     }
+                    className={styles.linkButton}
                   >
                     Log in
                   </Link>{" "}
-                  or{" "}
                   <Link
                     to="/register"
                     onClick={() =>
                       localStorage.setItem("pendingScore", wpm.toString())
                     }
+                    className={styles.linkButton}
                   >
-                    create an account
+                    Create an account
                   </Link>
-                  .
                 </p>
                 <div className={styles.buttonContainer}>
                   <button onClick={resetTest}>Try Again</button>

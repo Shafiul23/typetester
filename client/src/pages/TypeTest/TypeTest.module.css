@@ -196,3 +196,33 @@ button:focus {
     font-size: 1rem;
   }
 }
+
+.linkButton {
+  display: inline-block;
+  padding: 0.75rem 1rem;
+  font-size: 1rem;
+  color: #fff;
+  background-color: #3498db;
+  border: none;
+  border-radius: 0.25rem;
+  cursor: pointer;
+  font-weight: 600;
+  text-decoration: none; /* Remove underline */
+  text-align: center;
+  transition: background-color 0.3s ease, transform 0.2s ease;
+}
+
+.linkButton:hover {
+  background-color: #2980b9;
+  transform: translateY(-2px);
+}
+
+.linkButton:active {
+  background-color: #1c6ca7;
+  transform: translateY(1px);
+}
+
+.linkButton:disabled {
+  background-color: #bdc3c7;
+  cursor: not-allowed;
+}
