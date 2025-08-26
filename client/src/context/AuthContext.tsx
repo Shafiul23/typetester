@@ -18,7 +18,11 @@ interface AuthContextType {
   login: (
     username: string,
     password: string
-  ) => Promise<{ success: boolean; message: string }>;
+  ) => Promise<{
+    token: string;
+    success: boolean;
+    message: string;
+  }>;
   logout: () => Promise<void>;
 }
 
@@ -90,10 +94,14 @@ export const AuthProvider: React.FC<{ children: ReactNode }> = ({
       const payload = JSON.parse(atob(data.token.split(".")[1]));
       setUserId(payload.user_id);
       setUsername(payload.username);
-      return { success: true, message: data.message };
-    } catch (err) {
+      return { token: data.token, success: true, message: data.message };
+    } catch (err: any) {
       console.error("Error during login:", err);
-      return { success: false, message: err.message || "An error occurred." };
+      return {
+        token: "",
+        success: false,
+        message: err.message || "An error occurred.",
+      };
     }
   };
 

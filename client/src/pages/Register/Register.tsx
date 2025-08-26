@@ -22,6 +22,7 @@ const Register: React.FC = () => {
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setLoading(true);
+    setBackendError(null);
 
     if (!validateInputs(username, password, confirmPassword)) {
       setLoading(false);
@@ -29,26 +30,39 @@ const Register: React.FC = () => {
     }
 
     try {
-      const response = await register(username, password);
-      if (response?.success) {
-        const loginResponse = await login(username, password);
-        if (loginResponse?.success) {
-          const pending = localStorage.getItem("pendingScore");
-          if (pending) {
-            await submitScore(Number(pending));
-            localStorage.removeItem("pendingScore");
-            navigate("/profile");
-          } else {
-            navigate("/");
-          }
-        } else {
-          navigate("/login");
-        }
-      } else {
-        setBackendError(response?.message || "Registration failed");
+      const registerRes = await register(username, password);
+      if (!registerRes?.success) {
+        setBackendError(registerRes?.message || "Registration failed");
         setOpenSnackbar(true);
+        return;
       }
-    } catch (error) {
+
+      const loginRes = await login(username, password);
+      if (!loginRes?.success) {
+        setBackendError(loginRes?.message || "Login failed");
+        setOpenSnackbar(true);
+        navigate("/login");
+        return;
+      }
+
+      const token = loginRes.token || localStorage.getItem("token");
+      if (token) {
+        localStorage.setItem("token", token);
+      } else {
+        setBackendError("Authentication token not found.");
+        setOpenSnackbar(true);
+        return;
+      }
+
+      const pending = localStorage.getItem("pendingScore");
+      if (pending) {
+        await submitScore(Number(pending));
+        localStorage.removeItem("pendingScore");
+        navigate("/profile");
+      } else {
+        navigate("/");
+      }
+    } catch (err) {
       setBackendError("An unexpected error occurred.");
       setOpenSnackbar(true);
     } finally {
