@@ -6,12 +6,27 @@ from dotenv import load_dotenv
 
 load_dotenv(dotenv_path='.flaskenv')
 
+
+def _get_database_uri() -> str | None:
+    """Return a SQLAlchemy-compatible database URI.
+
+    Render and some external providers supply a `postgres://` URL which SQLAlchemy
+    does not recognise.  Convert it to the `postgresql://` scheme when needed so
+    the app can connect using modern Postgres drivers.
+    """
+
+    uri = os.getenv("DATABASE_URL")
+    if uri and uri.startswith("postgres://"):
+        uri = uri.replace("postgres://", "postgresql://", 1)
+    return uri
+
+
 def create_app(test_config=None):
     app = Flask(__name__, instance_relative_config=True)
 
     app.config.from_mapping(
         SECRET_KEY=os.getenv('FLASK_SECRET_KEY', 'dev'),
-        SQLALCHEMY_DATABASE_URI=os.getenv('DATABASE_URL'),
+        SQLALCHEMY_DATABASE_URI=_get_database_uri(),
         SQLALCHEMY_TRACK_MODIFICATIONS=False,
     )
 

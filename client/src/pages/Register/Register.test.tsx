@@ -19,7 +19,7 @@ describe("Register page tests", () => {
 
   it("should render register form", () => {
     const { useAuth } = require("../../context/AuthContext");
-    useAuth.mockReturnValue({ register: jest.fn() });
+    useAuth.mockReturnValue({ register: jest.fn(), login: jest.fn() });
     render(
       <BrowserRouter>
         <Register />
@@ -35,7 +35,7 @@ describe("Register page tests", () => {
 
   it("should show error if username is too short", async () => {
     const { useAuth } = require("../../context/AuthContext");
-    useAuth.mockReturnValue({ register: jest.fn() });
+    useAuth.mockReturnValue({ register: jest.fn(), login: jest.fn() });
     render(
       <BrowserRouter>
         <Register />
@@ -59,7 +59,7 @@ describe("Register page tests", () => {
   });
   it("should show error if username is too long", async () => {
     const { useAuth } = require("../../context/AuthContext");
-    useAuth.mockReturnValue({ register: jest.fn() });
+    useAuth.mockReturnValue({ register: jest.fn(), login: jest.fn() });
     render(
       <BrowserRouter>
         <Register />
@@ -84,7 +84,7 @@ describe("Register page tests", () => {
 
   it("should show error if username contains non-alphanumeric characters", async () => {
     const { useAuth } = require("../../context/AuthContext");
-    useAuth.mockReturnValue({ register: jest.fn() });
+    useAuth.mockReturnValue({ register: jest.fn(), login: jest.fn() });
     render(
       <BrowserRouter>
         <Register />
@@ -109,7 +109,7 @@ describe("Register page tests", () => {
 
   it("should show error if password does not meet complexity requirements", async () => {
     const { useAuth } = require("../../context/AuthContext");
-    useAuth.mockReturnValue({ register: jest.fn() });
+    useAuth.mockReturnValue({ register: jest.fn(), login: jest.fn() });
     render(
       <BrowserRouter>
         <Register />
@@ -134,7 +134,7 @@ describe("Register page tests", () => {
 
   it("should show error if passwords do not match", async () => {
     const { useAuth } = require("../../context/AuthContext");
-    useAuth.mockReturnValue({ register: jest.fn() });
+    useAuth.mockReturnValue({ register: jest.fn(), login: jest.fn() });
     render(
       <BrowserRouter>
         <Register />
@@ -161,6 +161,7 @@ describe("Register page tests", () => {
     const { useAuth } = require("../../context/AuthContext");
     useAuth.mockReturnValue({
       register: jest.fn().mockResolvedValue({ success: true }),
+      login: jest.fn().mockResolvedValue({ success: true }),
     });
 
     render(
@@ -181,7 +182,7 @@ describe("Register page tests", () => {
     fireEvent.click(screen.getByRole("button", { name: /register/i }));
 
     await waitFor(() => {
-      expect(mockNavigate).toHaveBeenCalledWith("/login");
+      expect(mockNavigate).toHaveBeenCalledWith("/");
     });
   });
 
@@ -191,6 +192,7 @@ describe("Register page tests", () => {
       register: jest
         .fn()
         .mockResolvedValue({ success: false, message: "Registration failed" }),
+      login: jest.fn(),
     });
 
     render(

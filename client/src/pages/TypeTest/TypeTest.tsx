@@ -10,6 +10,8 @@ import storyWords from "../../dictionaries/story";
 import useAudio from "../../hooks/useAudio";
 import useSubmitScore from "../../hooks/useSubmitScore";
 import useTimer from "../../hooks/useTimer";
+import { useAuth } from "../../context/AuthContext";
+import { Link } from "react-router-dom";
 import styles from "./TypeTest.module.css";
 
 const initialState = {
@@ -95,6 +97,7 @@ const TypeTest: React.FC = () => {
   const { submitScore } = useSubmitScore();
   const { playAudio } = useAudio("/typewriter-click.mp3", 0.7);
   const { timer, hasStarted, isFinished } = state;
+  const { userId } = useAuth();
 
   const startTimeRef = useTimer(hasStarted, isFinished, dispatch);
   const wordsBoxRef = useRef<HTMLDivElement>(null);
@@ -207,18 +210,49 @@ const TypeTest: React.FC = () => {
               Correct words: {correctWordsCounter}
             </p>
             <p className={styles.wrongWord}>Wrong words: {wrongWordsCounter}</p>
-            <p>Hit the save button below to save your score to your profile</p>
-            {state.scoreSaved && <p>Score saved!</p>}
-            <div className={styles.buttonContainer}>
-              <button
-                onClick={() => handleScoreSubmission(wpm)}
-                disabled={state.scoreSaved || !wpm}
-              >
-                Save
-              </button>
+            {userId ? (
+              <>
+                <p>Hit the save button below to save your score to your profile</p>
+                {state.scoreSaved && <p>Score saved!</p>}
+                <div className={styles.buttonContainer}>
+                  <button
+                    onClick={() => handleScoreSubmission(wpm)}
+                    disabled={state.scoreSaved || !wpm}
+                  >
+                    Save
+                  </button>
 
-              <button onClick={resetTest}>Try Again</button>
-            </div>
+                  <button onClick={resetTest}>Try Again</button>
+                </div>
+              </>
+            ) : (
+              <>
+                <p>
+                  Want to save your score? <br />
+                  <Link
+                    to="/login"
+                    onClick={() =>
+                      localStorage.setItem("pendingScore", wpm.toString())
+                    }
+                  >
+                    Log in
+                  </Link>{" "}
+                  or{" "}
+                  <Link
+                    to="/register"
+                    onClick={() =>
+                      localStorage.setItem("pendingScore", wpm.toString())
+                    }
+                  >
+                    create an account
+                  </Link>
+                  .
+                </p>
+                <div className={styles.buttonContainer}>
+                  <button onClick={resetTest}>Try Again</button>
+                </div>
+              </>
+            )}
           </div>
         ) : (
           <>
