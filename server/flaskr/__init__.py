@@ -48,4 +48,11 @@ def create_app(test_config=None):
 
     CORS(app, supports_credentials=True)
 
+    with app.app_context():
+        # This will create all tables if they don't exist
+        from .models import User, Score
+        db.create_all()
+        print("✅ Database tables ensured/created!")
+
     return app
+
