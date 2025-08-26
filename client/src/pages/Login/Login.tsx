@@ -5,9 +5,11 @@ import styles from "./Login.module.css";
 
 import { useAuth } from "../../context/AuthContext";
 import Loading from "../../components/Loading/Loading";
+import useSubmitScore from "../../hooks/useSubmitScore";
 
 const Login: React.FC = () => {
   const { login } = useAuth();
+  const { submitScore } = useSubmitScore();
   const [username, setUsername] = useState<string>("");
   const [password, setPassword] = useState<string>("");
   const [errorMessage, setErrorMessage] = useState<string | null>(null);
@@ -24,7 +26,14 @@ const Login: React.FC = () => {
     try {
       const response = await login(username, password);
       if (response?.success) {
-        navigate("/");
+        const pending = localStorage.getItem("pendingScore");
+        if (pending) {
+          await submitScore(Number(pending));
+          localStorage.removeItem("pendingScore");
+          navigate("/profile");
+        } else {
+          navigate("/");
+        }
       } else {
         setErrorMessage(
           response?.message || "An unexpected error occurred. Please try again."

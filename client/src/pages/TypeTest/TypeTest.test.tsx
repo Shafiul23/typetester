@@ -16,7 +16,7 @@ afterEach(() => {
 describe("TypeTest Component", () => {
   it("should render the initial state correctly", () => {
     const { useAuth } = require("../../context/AuthContext");
-    (useAuth as jest.Mock).mockReturnValue({ username: "user1" });
+    (useAuth as jest.Mock).mockReturnValue({ username: "user1", userId: 1 });
     render(
       <BrowserRouter>
         <TypeTest />
@@ -28,7 +28,7 @@ describe("TypeTest Component", () => {
 
   it("should start the test on input change", () => {
     const { useAuth } = require("../../context/AuthContext");
-    (useAuth as jest.Mock).mockReturnValue({ username: "user1" });
+    (useAuth as jest.Mock).mockReturnValue({ username: "user1", userId: 1 });
     render(
       <BrowserRouter>
         <TypeTest />
@@ -43,7 +43,7 @@ describe("TypeTest Component", () => {
 
   it("should toggle dictionary on button click", () => {
     const { useAuth } = require("../../context/AuthContext");
-    (useAuth as jest.Mock).mockReturnValue({ username: "user1" });
+    (useAuth as jest.Mock).mockReturnValue({ username: "user1", userId: 1 });
     render(
       <BrowserRouter>
         <TypeTest />
@@ -56,7 +56,7 @@ describe("TypeTest Component", () => {
 
   it("should update input value on change", () => {
     const { useAuth } = require("../../context/AuthContext");
-    (useAuth as jest.Mock).mockReturnValue({ username: "user1" });
+    (useAuth as jest.Mock).mockReturnValue({ username: "user1", userId: 1 });
     render(
       <BrowserRouter>
         <TypeTest />

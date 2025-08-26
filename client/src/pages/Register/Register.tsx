@@ -5,10 +5,12 @@ import { useAuth } from "../../context/AuthContext";
 import styles from "./Register.module.css";
 import Loading from "../../components/Loading/Loading";
 import { useValidation } from "../../hooks/useValidation";
+import useSubmitScore from "../../hooks/useSubmitScore";
 
 const Register: React.FC = () => {
-  const { register } = useAuth();
+  const { register, login } = useAuth();
   const { validationError, validateInputs } = useValidation();
+  const { submitScore } = useSubmitScore();
   const [username, setUsername] = useState("");
   const [password, setPassword] = useState("");
   const [confirmPassword, setConfirmPassword] = useState("");
@@ -29,10 +31,19 @@ const Register: React.FC = () => {
     try {
       const response = await register(username, password);
       if (response?.success) {
-        setUsername("");
-        setPassword("");
-        setConfirmPassword("");
-        navigate("/login");
+        const loginResponse = await login(username, password);
+        if (loginResponse?.success) {
+          const pending = localStorage.getItem("pendingScore");
+          if (pending) {
+            await submitScore(Number(pending));
+            localStorage.removeItem("pendingScore");
+            navigate("/profile");
+          } else {
+            navigate("/");
+          }
+        } else {
+          navigate("/login");
+        }
       } else {
         setBackendError(response?.message || "Registration failed");
         setOpenSnackbar(true);

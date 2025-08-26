@@ -96,6 +96,14 @@ const Navbar: React.FC = () => {
                   className={styles.navItem}
                   onClick={() => setIsMenuOpen(false)}
                 >
+                  <Link to="/typetest" className={styles.navLink}>
+                    Type Test
+                  </Link>
+                </li>
+                <li
+                  className={styles.navItem}
+                  onClick={() => setIsMenuOpen(false)}
+                >
                   <Link to="/register" className={styles.navLink}>
                     Register
                   </Link>

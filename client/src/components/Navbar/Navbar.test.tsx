@@ -27,7 +27,9 @@ describe("Navbar tests", () => {
       </BrowserRouter>
     );
 
-    expect(screen.getByText(/Type/i)).toBeInTheDocument();
+    expect(
+      screen.getByText(/Type/i, { selector: "span" })
+    ).toBeInTheDocument();
     expect(screen.getByText(/Tester/i)).toBeInTheDocument();
   });
 
@@ -41,6 +43,7 @@ describe("Navbar tests", () => {
     );
 
     expect(screen.getByText(/Leaderboard/i)).toBeInTheDocument();
+    expect(screen.getByText(/Type Test/i)).toBeInTheDocument();
     expect(screen.getByText(/Register/i)).toBeInTheDocument();
     expect(screen.getByText(/Login/i)).toBeInTheDocument();
   });
