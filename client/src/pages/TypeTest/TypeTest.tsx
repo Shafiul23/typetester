@@ -79,6 +79,7 @@ const typeTestReducer = (state: State, action: Action): State => {
 
 const TypeTest: React.FC = () => {
   const [state, dispatch] = useReducer(typeTestReducer, { ...initialState });
+  const backendApiUrl = process.env.REACT_APP_BACKEND_API_URL;
 
   const words = useMemo(
     () => (state.useStory ? storyWords : commonWords),
@@ -166,6 +167,31 @@ const TypeTest: React.FC = () => {
       block: "center",
     });
   }, [currentWordIndex]);
+
+  useEffect(() => {
+    if (!hasStarted || !backendApiUrl) return;
+
+    const controller = new AbortController();
+    const apiUrl = backendApiUrl;
+
+    const warmupRequest = async () => {
+      try {
+        await fetch(`${apiUrl}/auth/leaderboard`, {
+          method: "GET",
+          signal: controller.signal,
+        });
+      } catch (error) {
+        if ((error as Error).name === "AbortError") return;
+        console.warn("Warmup request failed:", error);
+      }
+    };
+
+    warmupRequest();
+
+    return () => {
+      controller.abort();
+    };
+  }, [hasStarted, backendApiUrl]);
 
   const safeElapsedTime = Math.max(elapsedTime, 1);
   const wpm = Math.round((correctWordsCounter / safeElapsedTime) * 60);
