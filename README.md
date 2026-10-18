@@ -2,6 +2,15 @@
 
 #### Video Demo: https://youtu.be/rBoJuZAD7Mw
 
+## Upcoming features
+
+- [ ] **Configurable test duration** — allow users to choose test timings, such as 30 seconds.
+- [ ] **Disable mobile autocapitalisation** — prevent automatic capital letters in the typing input.
+- [ ] **Cancel and retry controls** — support cancelling an active test and starting again, including keyboard shortcuts.
+- [ ] **Move to a new domain** — update hosting/domain configuration and relevant links.
+- [ ] **Open directly on the typing test** — make the typetest page the default landing page instead of Home.
+- [ ] **Improve mobile performance** — profile with CPU throttling and on mobile devices to investigate the current lag. Review responsive styles and input responsiveness, and use the findings to guide architectural changes, memoisation, or a Web Worker where beneficial.
+
 ## Setup
 
 Check readme in /server and /client for instructions on how to install the run the app
