@@ -21,6 +21,42 @@ afterEach(() => {
   jest.restoreAllMocks();
 });
 describe("TypeTest Component", () => {
+  it("cancels an active test with Tab then Enter", () => {
+      jest.useFakeTimers();
+      const { useAuth } = require("../../context/AuthContext");
+      (useAuth as jest.Mock).mockReturnValue({ userId: 1 });
+      render(<BrowserRouter><TypeTest /></BrowserRouter>);
+      fireEvent.change(screen.getByRole("combobox"), { target: { value: "60" } });
+      fireEvent.click(screen.getByRole("button", { name: "Use Short Story" }));
+      const input = screen.getByRole("textbox");
+      fireEvent.change(input, { target: { value: "wrong" } });
+      fireEvent.keyDown(input, { key: " " });
+      act(() => { jest.advanceTimersByTime(5000); });
+      expect(screen.getByText("Time remaining: 55s")).toBeInTheDocument();
+      expect(screen.queryByRole("button", { name: "Cancel Test" })).not.toBeInTheDocument();
+      expect(screen.queryByRole("button", { name: "Restart Test" })).not.toBeInTheDocument();
+      fireEvent.keyDown(input, { key: "Escape" });
+      fireEvent.keyDown(input, { key: "r", altKey: true });
+      expect(screen.getByText("Time remaining: 55s")).toBeInTheDocument();
+      fireEvent.keyDown(input, { key: "Tab" });
+      expect(screen.getByText("Time remaining: 55s")).toBeInTheDocument();
+      fireEvent.keyDown(input, { key: "Enter" });
+      expect(input).toHaveValue("");
+      expect(input).toHaveFocus();
+      expect(screen.getByRole("combobox")).toBeEnabled();
+      expect(screen.getByRole("button", { name: "Use Most Common 300 Words" })).toBeInTheDocument();
+      expect(screen.queryByRole("button", { name: "Save" })).not.toBeInTheDocument();
+      act(() => { jest.advanceTimersByTime(65000); });
+      expect(screen.getByText("Time remaining: 60s")).toBeInTheDocument();
+      fireEvent.change(input, { target: { value: "next" } });
+      act(() => { jest.advanceTimersByTime(60000); });
+      expect(screen.getByText("Wrong words: 0")).toBeInTheDocument();
+      fireEvent.click(screen.getByRole("button", { name: "Try Again" }));
+      expect(screen.getByRole("textbox")).toHaveFocus();
+      expect(screen.getByText("Time remaining: 60s")).toBeInTheDocument();
+    },
+  );
+
   it.each([30, 60])(
     "runs a %i-second test and keeps the duration on retry",
     (duration) => {

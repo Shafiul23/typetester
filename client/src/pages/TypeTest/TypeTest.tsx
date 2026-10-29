@@ -78,6 +78,7 @@ const typeTestReducer = (state: State, action: Action): State => {
       return {
         ...initialState,
         duration: state.duration,
+        useStory: state.useStory,
         timer: state.duration,
         wordStatuses: Array(action.payload).fill(null),
       };
@@ -113,6 +114,8 @@ const TypeTest: React.FC = () => {
 
   const startTimeRef = useTimer(hasStarted, isFinished, dispatch);
   const wordsBoxRef = useRef<HTMLDivElement>(null);
+  const inputRef = useRef<HTMLInputElement>(null);
+  const cancelArmedRef = useRef(false);
 
   const {
     currentWordIndex,
@@ -214,10 +217,13 @@ const TypeTest: React.FC = () => {
     }
   };
 
-  const resetTest = () => {
+  const resetTest = useCallback(() => {
     dispatch({ type: "RESET_TEST", payload: totalWords });
     startTimeRef.current = null;
-  };
+    cancelArmedRef.current = false;
+    inputRef.current?.focus();
+    if (wordsBoxRef.current) wordsBoxRef.current.scrollTop = 0;
+  }, [totalWords, startTimeRef]);
 
   return (
     <div className={styles.container}>
@@ -257,6 +263,10 @@ const TypeTest: React.FC = () => {
             </button>
           )}
         </div>
+
+        <p id="test-shortcuts">
+          Tab then Enter: cancel active test
+        </p>
 
         {isFinished ? (
           <div className={styles.reportCard}>
@@ -333,10 +343,29 @@ const TypeTest: React.FC = () => {
 
             <div className={styles.inputBoxContainer}>
               <input
+                ref={inputRef}
                 type="text"
+                aria-label="Typing input"
+                aria-describedby="test-shortcuts"
                 value={userInput}
                 onChange={handleInputChange}
+                onBlur={() => { cancelArmedRef.current = false; }}
                 onKeyDown={(e) => {
+                  if (e.nativeEvent.isComposing) return;
+                  const unmodified = !e.altKey && !e.ctrlKey && !e.metaKey && !e.shiftKey;
+                  if (hasStarted && unmodified && !e.repeat) {
+                    if (e.key === "Tab" && !cancelArmedRef.current) {
+                      e.preventDefault();
+                      cancelArmedRef.current = true;
+                      return;
+                    }
+                    if (e.key === "Enter" && cancelArmedRef.current) {
+                      e.preventDefault();
+                      resetTest();
+                      return;
+                    }
+                  }
+                  cancelArmedRef.current = false;
                   playAudio();
                   handleKeyPress(e);
                 }}
