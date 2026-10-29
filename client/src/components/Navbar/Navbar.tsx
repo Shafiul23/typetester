@@ -35,7 +35,7 @@ const Navbar: React.FC = () => {
           height={25}
           strokeWidth={3}
           rotate={0}
-          color="#fff"
+          color="var(--color-primary)"
           borderRadius={0}
           animationDuration={0.3}
           className={styles.hamburger}

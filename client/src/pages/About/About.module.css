@@ -1,6 +1,6 @@
 .container {
   padding: 2rem;
-  color: #333;
+  color: var(--color-primary);
   max-width: 800px;
   margin: 0 auto;
   font-family: Arial, sans-serif;
@@ -26,7 +26,7 @@
 .subtitle {
   font-size: 1.5rem;
   margin-bottom: 1rem;
-  color: #4e9bff;
+  color: var(--color-accent-text);
 }
 
 .list {
@@ -36,13 +36,13 @@
 }
 
 .link {
-  color: #4e9bff;
+  color: var(--color-accent-text);
   text-decoration: none;
   transition: color 0.3s ease;
 }
 
 .link:hover {
-  color: #357ab7;
+  color: var(--color-accent-hover);
 }
 
 @media (min-width: 768px) {

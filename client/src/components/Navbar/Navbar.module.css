@@ -1,5 +1,5 @@
 .navbar {
-  background-color: #333;
+  background-color: var(--color-surface);
   padding: 1rem 1rem;
   display: flex;
   justify-content: space-between;
@@ -35,11 +35,11 @@
 }
 
 .brandPrimary {
-  color: #3498db;
+  color: var(--color-accent-text);
 }
 
 .brandSecondary {
-  color: #e74c3c;
+  color: var(--color-accent-text);
 }
 
 .navLinks {
@@ -48,7 +48,7 @@
   right: -100%;
   height: 100%;
   width: 70%;
-  background-color: #333;
+  background-color: var(--color-surface);
   flex-direction: column;
   padding: 3rem 1rem;
   transition: right 0.3s ease;
@@ -75,20 +75,20 @@
 }
 
 .navLink {
-  color: #fff;
+  color: var(--color-primary);
   text-decoration: none;
   font-size: 1.3rem;
   transition: color 0.3s;
 }
 
 .navLink:hover {
-  color: #f39c12;
+  color: var(--color-accent-text);
 }
 
 .logoutButton {
   background: none;
   border: none;
-  color: #fff;
+  color: var(--color-primary);
   font-size: 1.3rem;
   cursor: pointer;
   padding: 0;
@@ -96,7 +96,7 @@
 }
 
 .logoutButton:hover {
-  color: #f39c12;
+  color: var(--color-accent-text);
 }
 
 @media (min-width: 768px) {

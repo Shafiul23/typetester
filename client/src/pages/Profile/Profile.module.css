@@ -4,24 +4,24 @@
   align-items: center;
   justify-content: flex-start;
   min-height: 100vh;
-  background-color: #f4f4f4;
+  background-color: var(--color-background);
   padding: 1rem;
 }
 
 .username {
   font-size: 1.75rem;
   font-weight: bold;
-  color: #333;
+  color: var(--color-primary);
 }
 
 .details {
   font-size: 1rem;
-  color: #555;
+  color: var(--color-secondary);
   margin-top: 0.5rem;
 }
 
 .error {
-  color: red;
+  color: var(--color-negative);
   font-size: 1rem;
   margin-bottom: 1rem;
 }
@@ -41,15 +41,15 @@
 
 .tableTitle {
   font-size: 1.25rem;
-  color: #333;
+  color: var(--color-primary);
   margin: 0;
 }
 
 .sortButton {
   padding: 0.5rem 0.75rem;
   font-size: 0.875rem;
-  background-color: #007bff;
-  color: white;
+  background-color: var(--color-accent);
+  color: var(--color-on-accent);
   border: none;
   border-radius: 0.25rem;
   cursor: pointer;
@@ -58,7 +58,7 @@
 }
 
 .sortButton:hover {
-  background-color: #0056b3;
+  background-color: var(--color-accent-hover);
 }
 
 .table {
@@ -69,37 +69,37 @@
 
 .table th,
 .table td {
-  border: 1px solid #ddd;
+  border: 1px solid var(--color-divider);
   padding: 0.75rem;
   text-align: left;
 }
 
 .table th {
-  background-color: #ececec;
+  background-color: var(--color-surface-raised);
   font-weight: bold;
 }
 
 .table td {
-  color: #333;
+  color: var(--color-primary);
 }
 
 .table tr:nth-child(even) {
-  background-color: #ececec;
+  background-color: var(--color-surface-raised);
 }
 
 .table tr:nth-child(odd) {
-  background-color: #f4f7fc;
+  background-color: var(--color-background);
 }
 
 .noScores {
   text-align: left;
-  color: #666;
+  color: var(--color-muted);
   margin-top: 1rem;
 }
 
 .deleteButton {
-  background-color: red;
-  color: white;
+  background-color: var(--color-negative);
+  color: var(--color-on-accent);
   border: none;
   padding: 10px 20px;
   margin-top: 20px;
@@ -108,7 +108,7 @@
 }
 
 .deleteButton:hover {
-  background-color: darkred;
+  background-color: var(--color-negative-subtle);
 }
 
 .loading {
