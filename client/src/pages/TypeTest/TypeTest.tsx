@@ -14,6 +14,8 @@ import { useAuth } from "../../context/AuthContext";
 import { Link } from "react-router-dom";
 import styles from "./TypeTest.module.css";
 
+const testDurations = [30, 60];
+
 const initialState = {
   useStory: false,
   currentWordIndex: 0,
@@ -22,6 +24,7 @@ const initialState = {
   wrongWordsCounter: 0,
   wordStatuses: [] as (boolean | null)[],
   timer: 60,
+  duration: 30,
   isFinished: false,
   hasStarted: false,
   elapsedTime: 0,
@@ -31,6 +34,7 @@ const initialState = {
 type State = typeof initialState;
 
 type Action =
+  | { type: "SET_DURATION"; payload: number }
   | { type: "TOGGLE_DICTIONARY" }
   | { type: "START_TEST" }
   | { type: "UPDATE_INPUT"; payload: string }
@@ -45,6 +49,10 @@ type Action =
 
 const typeTestReducer = (state: State, action: Action): State => {
   switch (action.type) {
+    case "SET_DURATION":
+      if (state.hasStarted || !testDurations.includes(action.payload))
+        return state;
+      return { ...state, duration: action.payload, timer: action.payload };
     case "TOGGLE_DICTIONARY":
       return { ...state, useStory: !state.useStory };
     case "START_TEST":
@@ -68,6 +76,8 @@ const typeTestReducer = (state: State, action: Action): State => {
     case "RESET_TEST":
       return {
         ...initialState,
+        duration: state.duration,
+        timer: state.duration,
         wordStatuses: Array(action.payload).fill(null),
       };
     case "SET_ELAPSED_TIME":
@@ -83,7 +93,7 @@ const TypeTest: React.FC = () => {
 
   const words = useMemo(
     () => (state.useStory ? storyWords : commonWords),
-    [state.useStory]
+    [state.useStory],
   );
 
   const totalWords = words.length;
@@ -119,7 +129,7 @@ const TypeTest: React.FC = () => {
       }
       dispatch({ type: "UPDATE_INPUT", payload: e.target.value });
     },
-    [hasStarted]
+    [hasStarted],
   );
 
   const handleKeyPress = useCallback(
@@ -139,7 +149,7 @@ const TypeTest: React.FC = () => {
       dispatch({ type: "INCREMENT_INDEX" });
       dispatch({ type: "UPDATE_INPUT", payload: "" });
     },
-    [isFinished, playAudio, words, currentWordIndex, userInput, wordStatuses]
+    [isFinished, playAudio, words, currentWordIndex, userInput, wordStatuses],
   );
 
   const toggleDictionary = () => {
@@ -221,6 +231,25 @@ const TypeTest: React.FC = () => {
           <div className={styles.timer}>
             <p>Time remaining: {timer}s</p>
           </div>
+          <label className={styles.durationControl}>
+            Test duration
+            <select
+              value={state.duration}
+              disabled={hasStarted}
+              onChange={(e) =>
+                dispatch({
+                  type: "SET_DURATION",
+                  payload: Number(e.target.value),
+                })
+              }
+            >
+              {testDurations.map((duration) => (
+                <option key={duration} value={duration}>
+                  {duration} seconds
+                </option>
+              ))}
+            </select>
+          </label>
           {!hasStarted && (
             <button onClick={toggleDictionary} className={styles.toggleButton}>
               {state.useStory ? "Use Most Common 300 Words" : "Use Short Story"}

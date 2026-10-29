@@ -41,9 +41,28 @@
 
 .timerContainer {
   display: flex;
+  flex-wrap: wrap;
+  gap: 0.75rem;
   justify-content: space-between;
   align-items: center;
   margin-bottom: 0.5rem;
+}
+
+.durationControl {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  color: #333;
+  font-size: 0.9rem;
+}
+
+.durationControl select {
+  padding: 0.5rem;
+  border: 1px solid #ddd;
+  border-radius: 0.25rem;
+  background-color: #fff;
+  color: #333;
+  font: inherit;
 }
 
 .timer {
