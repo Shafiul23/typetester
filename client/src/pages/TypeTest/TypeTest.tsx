@@ -14,6 +14,9 @@ import { useAuth } from "../../context/AuthContext";
 import { Link } from "react-router-dom";
 import styles from "./TypeTest.module.css";
 
+const testDurations = [30, 60];
+const defaultDuration = testDurations[0];
+
 const initialState = {
   useStory: false,
   currentWordIndex: 0,
@@ -21,7 +24,8 @@ const initialState = {
   correctWordsCounter: 0,
   wrongWordsCounter: 0,
   wordStatuses: [] as (boolean | null)[],
-  timer: 60,
+  timer: defaultDuration,
+  duration: defaultDuration,
   isFinished: false,
   hasStarted: false,
   elapsedTime: 0,
@@ -31,6 +35,7 @@ const initialState = {
 type State = typeof initialState;
 
 type Action =
+  | { type: "SET_DURATION"; payload: number }
   | { type: "TOGGLE_DICTIONARY" }
   | { type: "START_TEST" }
   | { type: "UPDATE_INPUT"; payload: string }
@@ -45,6 +50,10 @@ type Action =
 
 const typeTestReducer = (state: State, action: Action): State => {
   switch (action.type) {
+    case "SET_DURATION":
+      if (state.hasStarted || !testDurations.includes(action.payload))
+        return state;
+      return { ...state, duration: action.payload, timer: action.payload };
     case "TOGGLE_DICTIONARY":
       return { ...state, useStory: !state.useStory };
     case "START_TEST":
@@ -68,6 +77,9 @@ const typeTestReducer = (state: State, action: Action): State => {
     case "RESET_TEST":
       return {
         ...initialState,
+        duration: state.duration,
+        useStory: state.useStory,
+        timer: state.duration,
         wordStatuses: Array(action.payload).fill(null),
       };
     case "SET_ELAPSED_TIME":
@@ -83,7 +95,7 @@ const TypeTest: React.FC = () => {
 
   const words = useMemo(
     () => (state.useStory ? storyWords : commonWords),
-    [state.useStory]
+    [state.useStory],
   );
 
   const totalWords = words.length;
@@ -102,6 +114,8 @@ const TypeTest: React.FC = () => {
 
   const startTimeRef = useTimer(hasStarted, isFinished, dispatch);
   const wordsBoxRef = useRef<HTMLDivElement>(null);
+  const inputRef = useRef<HTMLInputElement>(null);
+  const cancelArmedRef = useRef(false);
 
   const {
     currentWordIndex,
@@ -119,7 +133,7 @@ const TypeTest: React.FC = () => {
       }
       dispatch({ type: "UPDATE_INPUT", payload: e.target.value });
     },
-    [hasStarted]
+    [hasStarted],
   );
 
   const handleKeyPress = useCallback(
@@ -139,7 +153,7 @@ const TypeTest: React.FC = () => {
       dispatch({ type: "INCREMENT_INDEX" });
       dispatch({ type: "UPDATE_INPUT", payload: "" });
     },
-    [isFinished, playAudio, words, currentWordIndex, userInput, wordStatuses]
+    [isFinished, playAudio, words, currentWordIndex, userInput, wordStatuses],
   );
 
   const toggleDictionary = () => {
@@ -203,10 +217,13 @@ const TypeTest: React.FC = () => {
     }
   };
 
-  const resetTest = () => {
+  const resetTest = useCallback(() => {
     dispatch({ type: "RESET_TEST", payload: totalWords });
     startTimeRef.current = null;
-  };
+    cancelArmedRef.current = false;
+    inputRef.current?.focus();
+    if (wordsBoxRef.current) wordsBoxRef.current.scrollTop = 0;
+  }, [totalWords, startTimeRef]);
 
   return (
     <div className={styles.container}>
@@ -221,12 +238,35 @@ const TypeTest: React.FC = () => {
           <div className={styles.timer}>
             <p>Time remaining: {timer}s</p>
           </div>
+          <label className={styles.durationControl}>
+            Test duration
+            <select
+              value={state.duration}
+              disabled={hasStarted}
+              onChange={(e) =>
+                dispatch({
+                  type: "SET_DURATION",
+                  payload: Number(e.target.value),
+                })
+              }
+            >
+              {testDurations.map((duration) => (
+                <option key={duration} value={duration}>
+                  {duration} seconds
+                </option>
+              ))}
+            </select>
+          </label>
           {!hasStarted && (
             <button onClick={toggleDictionary} className={styles.toggleButton}>
               {state.useStory ? "Use Most Common 300 Words" : "Use Short Story"}
             </button>
           )}
         </div>
+
+        <p id="test-shortcuts">
+          Tab then Enter: cancel active test
+        </p>
 
         {isFinished ? (
           <div className={styles.reportCard}>
@@ -303,15 +343,35 @@ const TypeTest: React.FC = () => {
 
             <div className={styles.inputBoxContainer}>
               <input
+                ref={inputRef}
                 type="text"
+                aria-label="Typing input"
+                aria-describedby="test-shortcuts"
                 value={userInput}
                 onChange={handleInputChange}
+                onBlur={() => { cancelArmedRef.current = false; }}
                 onKeyDown={(e) => {
+                  if (e.nativeEvent.isComposing) return;
+                  const unmodified = !e.altKey && !e.ctrlKey && !e.metaKey && !e.shiftKey;
+                  if (hasStarted && unmodified && !e.repeat) {
+                    if (e.key === "Tab" && !cancelArmedRef.current) {
+                      e.preventDefault();
+                      cancelArmedRef.current = true;
+                      return;
+                    }
+                    if (e.key === "Enter" && cancelArmedRef.current) {
+                      e.preventDefault();
+                      resetTest();
+                      return;
+                    }
+                  }
+                  cancelArmedRef.current = false;
                   playAudio();
                   handleKeyPress(e);
                 }}
                 className={styles.inputBox}
                 autoComplete="off"
+                autoCapitalize="none"
                 spellCheck="false"
                 autoFocus
                 disabled={isFinished}
