@@ -341,6 +341,7 @@ const TypeTest: React.FC = () => {
                 }}
                 className={styles.inputBox}
                 autoComplete="off"
+                autoCapitalize="none"
                 spellCheck="false"
                 autoFocus
                 disabled={isFinished}
