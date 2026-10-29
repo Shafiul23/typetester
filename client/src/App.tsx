@@ -19,7 +19,8 @@ const App: React.FC = () => {
       <Navbar />
       <div className={styles.content}>
         <Routes>
-          <Route path="/" element={<Home />} />
+          <Route path="/" element={<TypeTest />} />
+          <Route path="/home" element={<Home />} />
           <Route path="/register" element={<Register />} />
           <Route path="/login" element={<Login />} />
           <Route path="/leaderboard" element={<Leaderboard />} />

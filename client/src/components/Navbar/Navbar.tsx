@@ -44,6 +44,14 @@ const Navbar: React.FC = () => {
 
         <div className={`${styles.navLinks} ${isMenuOpen ? styles.open : ""}`}>
           <ul className={styles.navList}>
+            <li
+              className={styles.navItem}
+              onClick={() => setIsMenuOpen(false)}
+            >
+              <Link to="/home" className={styles.navLink}>
+                Home
+              </Link>
+            </li>
             {userId ? (
               <>
                 <li
