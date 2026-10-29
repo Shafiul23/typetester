@@ -34,7 +34,10 @@ describe("TypeTest Component", () => {
       );
 
       const selector = screen.getByRole("combobox", { name: "Test duration" });
-      fireEvent.change(selector, { target: { value: String(duration) } });
+      if (duration !== 30) {
+        fireEvent.change(selector, { target: { value: String(duration) } });
+      }
+      expect(selector).toHaveValue(String(duration));
       expect(
         screen.getByText(`Time remaining: ${duration}s`),
       ).toBeInTheDocument();
@@ -87,7 +90,8 @@ describe("TypeTest Component", () => {
       </BrowserRouter>,
     );
     expect(screen.getByText("Start typing to begin test!")).toBeInTheDocument();
-    expect(screen.getByText("Time remaining: 60s")).toBeInTheDocument();
+    expect(screen.getByRole("combobox", { name: "Test duration" })).toHaveValue("30");
+    expect(screen.getByText("Time remaining: 30s")).toBeInTheDocument();
   });
 
   it("should start the test on input change", () => {

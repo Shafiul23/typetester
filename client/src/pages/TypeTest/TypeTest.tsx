@@ -15,6 +15,7 @@ import { Link } from "react-router-dom";
 import styles from "./TypeTest.module.css";
 
 const testDurations = [30, 60];
+const defaultDuration = testDurations[0];
 
 const initialState = {
   useStory: false,
@@ -23,8 +24,8 @@ const initialState = {
   correctWordsCounter: 0,
   wrongWordsCounter: 0,
   wordStatuses: [] as (boolean | null)[],
-  timer: 60,
-  duration: 30,
+  timer: defaultDuration,
+  duration: defaultDuration,
   isFinished: false,
   hasStarted: false,
   elapsedTime: 0,
