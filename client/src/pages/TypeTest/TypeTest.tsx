@@ -13,6 +13,7 @@ import useTimer from "../../hooks/useTimer";
 import { useAuth } from "../../context/AuthContext";
 import { Link } from "react-router-dom";
 import styles from "./TypeTest.module.css";
+import WordList from "./WordList";
 
 function shuffleWords(words: string[]) {
   const shuffled = [...words];
@@ -130,7 +131,6 @@ const TypeTest: React.FC = () => {
   const startTimeRef = useTimer(hasStarted, isFinished, dispatch);
   const wordsBoxRef = useRef<HTMLDivElement>(null);
   const inputRef = useRef<HTMLInputElement>(null);
-  const activeWordRef = useRef<HTMLSpanElement>(null);
 
   const {
     currentWordIndex,
@@ -192,22 +192,6 @@ const TypeTest: React.FC = () => {
       dispatch({ type: "SET_FINISHED" });
     }
   }, [timer, dispatch, startTimeRef]);
-
-  useEffect(() => {
-    const container = wordsBoxRef.current;
-    const activeWord = activeWordRef.current;
-    if (!container || !activeWord) return;
-
-    const containerRect = container.getBoundingClientRect();
-    const wordRect = activeWord.getBoundingClientRect();
-    const paddingTop = parseFloat(getComputedStyle(container).paddingTop) || 0;
-    const visibleTop = containerRect.top + container.clientTop + paddingTop;
-    const lineOffset = wordRect.top - visibleTop;
-
-    if (Math.abs(lineOffset) > 1) {
-      container.scrollTop += lineOffset;
-    }
-  }, [currentWordIndex, words, isFinished]);
 
   useEffect(() => {
     if (!hasStarted || !backendApiUrl) return;
@@ -428,22 +412,12 @@ const TypeTest: React.FC = () => {
           </div>
         ) : (
           <>
-            <div className={styles.wordsBox} ref={wordsBoxRef}>
-              <div className={styles.words}>
-                {words.map((word, index) => (
-                  <span
-                    key={index}
-                    ref={index === currentWordIndex ? activeWordRef : null}
-                    className={`${styles.word}
-                      ${index === currentWordIndex ? styles.selectedWord : ""}
-                      ${wordStatuses[index] === true ? styles.correctWord : ""}
-                      ${wordStatuses[index] === false ? styles.wrongWord : ""}`}
-                  >
-                    {word}
-                  </span>
-                ))}
-              </div>
-            </div>
+            <WordList
+              words={words}
+              currentWordIndex={currentWordIndex}
+              wordStatuses={wordStatuses}
+              wordsBoxRef={wordsBoxRef}
+            />
 
             <div className={styles.inputBoxContainer}>
               <input
