@@ -156,7 +156,6 @@ const TypeTest: React.FC = () => {
       if (isFinished || (e.key !== " " && e.key !== "Enter")) return;
 
       e.preventDefault();
-      playAudio();
 
       const currentWord = words[currentWordIndex];
       if (!currentWord || !userInput) return;
@@ -176,7 +175,7 @@ const TypeTest: React.FC = () => {
       dispatch({ type: "INCREMENT_INDEX" });
       dispatch({ type: "UPDATE_INPUT", payload: "" });
     },
-    [isFinished, playAudio, words, currentWordIndex, userInput, wordStatuses],
+    [isFinished, words, currentWordIndex, userInput, wordStatuses],
   );
 
   const toggleDictionary = () => {
@@ -429,7 +428,17 @@ const TypeTest: React.FC = () => {
                 onChange={handleInputChange}
                 onKeyDown={(e) => {
                   if (e.nativeEvent.isComposing) return;
-                  playAudio();
+                  if (
+                    !e.ctrlKey &&
+                    !e.metaKey &&
+                    !e.altKey &&
+                    (e.key.length === 1 ||
+                      e.key === "Enter" ||
+                      e.key === "Backspace" ||
+                      e.key === "Delete")
+                  ) {
+                    playAudio();
+                  }
                   handleKeyPress(e);
                 }}
                 className={styles.inputBox}
