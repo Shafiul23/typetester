@@ -63,7 +63,7 @@ describe("TypeTest Component", () => {
     },
   );
 
-  it.each([30, 60])(
+  it.each([15, 30, 60])(
     "runs a %i-second test and keeps the duration on retry",
     (duration) => {
       jest.useFakeTimers();

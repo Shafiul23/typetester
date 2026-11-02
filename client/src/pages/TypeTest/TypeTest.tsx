@@ -15,8 +15,8 @@ import { useAuth } from "../../context/AuthContext";
 import { Link } from "react-router-dom";
 import styles from "./TypeTest.module.css";
 
-const testDurations = [30, 60];
-const defaultDuration = testDurations[0];
+const testDurations = [15, 30, 60];
+const defaultDuration = 30;
 
 const initialState = {
   useStory: false,
