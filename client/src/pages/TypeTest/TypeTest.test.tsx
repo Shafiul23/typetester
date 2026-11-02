@@ -30,6 +30,49 @@ afterEach(() => {
   jest.restoreAllMocks();
 });
 describe("TypeTest Component", () => {
+  it.each([false, true])("keeps the active row at the top and resets (story: %s)", (useStory) => {
+    const { useAuth } = require("../../context/AuthContext");
+    (useAuth as jest.Mock).mockReturnValue({ userId: null });
+    let wordTop = 101;
+    jest.spyOn(Element.prototype, "getBoundingClientRect").mockImplementation(function (this: Element) {
+      const top = this.classList.contains("wordsBox") ? 100 : wordTop;
+      return { top, bottom: top + 20 } as DOMRect;
+    });
+    const { container } = render(<BrowserRouter><TypeTest /></BrowserRouter>);
+    const wordBox = container.querySelector(".wordsBox") as HTMLDivElement;
+    Object.defineProperty(wordBox, "clientHeight", { configurable: true, value: 80 });
+    Object.defineProperty(wordBox, "clientTop", { configurable: true, value: 1 });
+    wordBox.scrollTop = 0;
+    const scrollPage = jest.spyOn(window, "scrollTo");
+    const focus = jest.spyOn(HTMLElement.prototype, "focus");
+    if (useStory) fireEvent.click(screen.getByRole("button", { name: "Use short story" }));
+    const input = screen.getByRole("textbox");
+    const advance = () => {
+      fireEvent.change(input, { target: { value: "word" } });
+      fireEvent.keyDown(input, { key: " " });
+    };
+    advance();
+    expect(wordBox.scrollTop).toBe(0);
+    // The next row is already visible, but should move to the top.
+    wordTop = 141;
+    advance();
+    expect(wordBox.scrollTop).toBe(40);
+    wordTop = 101;
+    advance();
+    expect(wordBox.scrollTop).toBe(40);
+    wordTop = 95;
+    advance();
+    expect(wordBox.scrollTop).toBe(34);
+    expect(Element.prototype.scrollIntoView).not.toHaveBeenCalled();
+    expect(scrollPage).not.toHaveBeenCalled();
+    wordTop = 101;
+    fireEvent.click(screen.getByRole("button", { name: "Cancel" }));
+    expect(wordBox.scrollTop).toBe(0);
+    expect(input).toHaveValue("");
+    expect(focus).toHaveBeenLastCalledWith({ preventScroll: true });
+    expect(screen.getByRole("button", { name: useStory ? "Use common words" : "Use short story" })).toBeInTheDocument();
+  });
+
   it("restarts an active test with Escape even outside the typing field", () => {
       jest.useFakeTimers();
       const { useAuth } = require("../../context/AuthContext");

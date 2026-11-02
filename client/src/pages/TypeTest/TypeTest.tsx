@@ -108,7 +108,9 @@ const TypeTest: React.FC = () => {
   const [state, dispatch] = useReducer(typeTestReducer, { ...initialState });
   const backendApiUrl = process.env.REACT_APP_BACKEND_API_URL;
 
-  const [shuffledWords, setShuffledWords] = useState(() => shuffleWords(commonWords));
+  const [shuffledWords, setShuffledWords] = useState(() =>
+    shuffleWords(commonWords),
+  );
   const words = state.useStory ? storyWords : shuffledWords;
 
   const totalWords = words.length;
@@ -128,6 +130,7 @@ const TypeTest: React.FC = () => {
   const startTimeRef = useTimer(hasStarted, isFinished, dispatch);
   const wordsBoxRef = useRef<HTMLDivElement>(null);
   const inputRef = useRef<HTMLInputElement>(null);
+  const activeWordRef = useRef<HTMLSpanElement>(null);
 
   const {
     currentWordIndex,
@@ -191,16 +194,20 @@ const TypeTest: React.FC = () => {
   }, [timer, dispatch, startTimeRef]);
 
   useEffect(() => {
-    if (!wordsBoxRef.current) return;
-
     const container = wordsBoxRef.current;
-    const selectedWord = container.querySelectorAll("span")[currentWordIndex];
+    const activeWord = activeWordRef.current;
+    if (!container || !activeWord) return;
 
-    selectedWord?.scrollIntoView({
-      behavior: "smooth",
-      block: "center",
-    });
-  }, [currentWordIndex]);
+    const containerRect = container.getBoundingClientRect();
+    const wordRect = activeWord.getBoundingClientRect();
+    const paddingTop = parseFloat(getComputedStyle(container).paddingTop) || 0;
+    const visibleTop = containerRect.top + container.clientTop + paddingTop;
+    const lineOffset = wordRect.top - visibleTop;
+
+    if (Math.abs(lineOffset) > 1) {
+      container.scrollTop += lineOffset;
+    }
+  }, [currentWordIndex, words, isFinished]);
 
   useEffect(() => {
     if (!hasStarted || !backendApiUrl) return;
@@ -255,7 +262,7 @@ const TypeTest: React.FC = () => {
     if (!state.useStory) setShuffledWords(shuffleWords(commonWords));
     dispatch({ type: "RESET_TEST", payload: totalWords });
     startTimeRef.current = null;
-    inputRef.current?.focus();
+    inputRef.current?.focus({ preventScroll: true });
     if (wordsBoxRef.current) wordsBoxRef.current.scrollTop = 0;
   }, [totalWords, startTimeRef, state.useStory]);
 
@@ -264,9 +271,15 @@ const TypeTest: React.FC = () => {
 
     const handleRestart = (event: KeyboardEvent) => {
       if (
-        event.key !== "Escape" || event.repeat || event.isComposing ||
-        event.altKey || event.ctrlKey || event.metaKey || event.shiftKey
-      ) return;
+        event.key !== "Escape" ||
+        event.repeat ||
+        event.isComposing ||
+        event.altKey ||
+        event.ctrlKey ||
+        event.metaKey ||
+        event.shiftKey
+      )
+        return;
       event.preventDefault();
       resetTest();
     };
@@ -283,13 +296,19 @@ const TypeTest: React.FC = () => {
         )}
       </div>
 
-      <div className={`${styles.textBox} ${isFinished ? styles.resultsPanel : ""}`}>
+      <div
+        className={`${styles.textBox} ${isFinished ? styles.resultsPanel : ""}`}
+      >
         {!isFinished && (
           <div className={styles.timerContainer}>
             <div className={styles.timer}>
               <p>Time remaining: {timer}s</p>
               {hasStarted && (
-                <button type="button" className={styles.cancelButton} onClick={resetTest}>
+                <button
+                  type="button"
+                  className={styles.cancelButton}
+                  onClick={resetTest}
+                >
                   Cancel
                 </button>
               )}
@@ -298,7 +317,11 @@ const TypeTest: React.FC = () => {
               <div className={styles.testControls}>
                 <div className={styles.durationControl}>
                   <span id="duration-label">Duration</span>
-                  <div className={styles.durationSegments} role="group" aria-labelledby="duration-label">
+                  <div
+                    className={styles.durationSegments}
+                    role="group"
+                    aria-labelledby="duration-label"
+                  >
                     {testDurations.map((duration) => (
                       <button
                         key={duration}
@@ -306,14 +329,19 @@ const TypeTest: React.FC = () => {
                         className={styles.durationSegment}
                         aria-label={`${duration} seconds`}
                         aria-pressed={state.duration === duration}
-                        onClick={() => dispatch({ type: "SET_DURATION", payload: duration })}
+                        onClick={() =>
+                          dispatch({ type: "SET_DURATION", payload: duration })
+                        }
                       >
                         {duration}s
                       </button>
                     ))}
                   </div>
                 </div>
-                <button onClick={toggleDictionary} className={styles.toggleButton}>
+                <button
+                  onClick={toggleDictionary}
+                  className={styles.toggleButton}
+                >
                   {state.useStory ? "Use common words" : "Use short story"}
                 </button>
               </div>
@@ -349,7 +377,9 @@ const TypeTest: React.FC = () => {
                     Save
                   </button>
 
-                  <button className={styles.reportButton} onClick={resetTest}>Try Again</button>
+                  <button className={styles.reportButton} onClick={resetTest}>
+                    Try Again
+                  </button>
                 </div>
               </>
             ) : (
@@ -360,7 +390,13 @@ const TypeTest: React.FC = () => {
                   <Link
                     to="/login"
                     onClick={() =>
-                      localStorage.setItem("pendingScore", JSON.stringify({ score: wpm, duration_seconds: state.duration }))
+                      localStorage.setItem(
+                        "pendingScore",
+                        JSON.stringify({
+                          score: wpm,
+                          duration_seconds: state.duration,
+                        }),
+                      )
                     }
                     className={styles.reportButton}
                   >
@@ -369,7 +405,13 @@ const TypeTest: React.FC = () => {
                   <Link
                     to="/register"
                     onClick={() =>
-                      localStorage.setItem("pendingScore", JSON.stringify({ score: wpm, duration_seconds: state.duration }))
+                      localStorage.setItem(
+                        "pendingScore",
+                        JSON.stringify({
+                          score: wpm,
+                          duration_seconds: state.duration,
+                        }),
+                      )
                     }
                     className={styles.reportButton}
                   >
@@ -377,7 +419,9 @@ const TypeTest: React.FC = () => {
                   </Link>
                 </p>
                 <div className={styles.buttonContainer}>
-                  <button className={styles.reportButton} onClick={resetTest}>Try Again</button>
+                  <button className={styles.reportButton} onClick={resetTest}>
+                    Try Again
+                  </button>
                 </div>
               </>
             )}
@@ -389,6 +433,7 @@ const TypeTest: React.FC = () => {
                 {words.map((word, index) => (
                   <span
                     key={index}
+                    ref={index === currentWordIndex ? activeWordRef : null}
                     className={`${styles.word}
                       ${index === currentWordIndex ? styles.selectedWord : ""}
                       ${wordStatuses[index] === true ? styles.correctWord : ""}
