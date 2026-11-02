@@ -35,9 +35,8 @@ describe("TypeTest Component", () => {
       const { useAuth } = require("../../context/AuthContext");
       (useAuth as jest.Mock).mockReturnValue({ userId: 1 });
       render(<BrowserRouter><TypeTest /></BrowserRouter>);
-      fireEvent.click(screen.getByRole("combobox"));
-      fireEvent.click(screen.getByRole("option", { name: "60 seconds" }));
-      fireEvent.click(screen.getByRole("button", { name: "Use Short Story" }));
+      fireEvent.click(screen.getByRole("button", { name: "60 seconds" }));
+      fireEvent.click(screen.getByRole("button", { name: "Use short story" }));
       const input = screen.getByRole("textbox");
       fireEvent.change(input, { target: { value: "wrong" } });
       fireEvent.keyDown(input, { key: " " });
@@ -56,8 +55,8 @@ describe("TypeTest Component", () => {
       fireEvent.keyDown(document.body, { key: "Escape" });
       expect(input).toHaveValue("");
       expect(input).toHaveFocus();
-      expect(screen.getByRole("combobox")).toBeEnabled();
-      expect(screen.getByRole("button", { name: "Use Most Common 300 Words" })).toBeInTheDocument();
+      expect(screen.getByRole("group", { name: "Duration" })).toBeEnabled();
+      expect(screen.getByRole("button", { name: "Use common words" })).toBeInTheDocument();
       expect(screen.queryByRole("button", { name: "Save" })).not.toBeInTheDocument();
       act(() => { jest.advanceTimersByTime(65000); });
       expect(screen.getByText("Time remaining: 60s")).toBeInTheDocument();
@@ -84,12 +83,11 @@ describe("TypeTest Component", () => {
         </BrowserRouter>,
       );
 
-      let selector = screen.getByRole("combobox", { name: "Test duration" });
+      let selector = screen.getByRole("button", { name: `${duration} seconds` });
       if (duration !== 30) {
         fireEvent.click(selector);
-        fireEvent.click(screen.getByRole("option", { name: `${duration} seconds` }));
       }
-      expect(selector).toHaveValue(String(duration));
+      expect(selector).toHaveAttribute("aria-pressed", "true");
       expect(
         screen.getByText(`Time remaining: ${duration}s`),
       ).toBeInTheDocument();
@@ -103,7 +101,7 @@ describe("TypeTest Component", () => {
       const input = screen.getByRole("textbox");
       fireEvent.change(input, { target: { value: commonWords[0] } });
       fireEvent.keyDown(input, { key: " " });
-      expect(screen.queryByRole("combobox")).not.toBeInTheDocument();
+      expect(screen.queryByRole("group", { name: "Duration" })).not.toBeInTheDocument();
       act(() => {
         jest.advanceTimersByTime((duration - 1) * 1000);
       });
@@ -121,19 +119,18 @@ describe("TypeTest Component", () => {
         screen.getByText(`Words per minute: ${Math.round(((commonWords[0].length + 1) / 5) * 60 / duration)}`),
       ).toBeInTheDocument();
 
-      expect(screen.queryByRole("combobox")).not.toBeInTheDocument();
+      expect(screen.queryByRole("group", { name: "Duration" })).not.toBeInTheDocument();
       expect(screen.queryByText(/Time remaining:/)).not.toBeInTheDocument();
       expect(screen.queryByText(/restart test/)).not.toBeInTheDocument();
       fireEvent.click(screen.getByRole("button", { name: "Try Again" }));
-      selector = screen.getByRole("combobox", { name: "Test duration" });
+      selector = screen.getByRole("button", { name: `${duration} seconds` });
       expect(selector).toBeEnabled();
-      expect(selector).toHaveValue(String(duration));
+      expect(selector).toHaveAttribute("aria-pressed", "true");
       expect(
         screen.getByText(`Time remaining: ${duration}s`),
       ).toBeInTheDocument();
       expect(screen.getByRole("textbox")).toHaveValue("");
-      fireEvent.click(selector);
-      fireEvent.click(screen.getByRole("option", { name: "30 seconds" }));
+      fireEvent.click(screen.getByRole("button", { name: "30 seconds" }));
       expect(screen.getByText("Time remaining: 30s")).toBeInTheDocument();
     },
   );
@@ -199,7 +196,7 @@ describe("TypeTest Component", () => {
     expect(input).toHaveValue("");
     expect(input).toHaveFocus();
     expect(screen.getByText("Time remaining: 30s")).toBeInTheDocument();
-    expect(screen.getByRole("combobox")).toBeEnabled();
+    expect(screen.getByRole("group", { name: "Duration" })).toBeEnabled();
     expect(screen.queryByRole("button", { name: "Cancel" })).not.toBeInTheDocument();
     act(() => { jest.advanceTimersByTime(30000); });
     expect(screen.getByText("Time remaining: 30s")).toBeInTheDocument();
@@ -214,7 +211,7 @@ describe("TypeTest Component", () => {
       </BrowserRouter>,
     );
     expect(screen.getByText("Start typing to begin test!")).toBeInTheDocument();
-    expect(screen.getByRole("combobox", { name: "Test duration" })).toHaveValue("30");
+    expect(screen.getByRole("button", { name: "30 seconds" })).toHaveAttribute("aria-pressed", "true");
     expect(screen.getByText("Time remaining: 30s")).toBeInTheDocument();
   });
 
@@ -241,9 +238,9 @@ describe("TypeTest Component", () => {
         <TypeTest />
       </BrowserRouter>,
     );
-    const button = screen.getByText("Use Short Story");
+    const button = screen.getByText("Use short story");
     fireEvent.click(button);
-    expect(screen.getByText("Use Most Common 300 Words")).toBeInTheDocument();
+    expect(screen.getByText("Use common words")).toBeInTheDocument();
   });
 
   it("should update input value on change", () => {

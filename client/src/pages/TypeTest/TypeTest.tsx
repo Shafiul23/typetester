@@ -5,7 +5,6 @@ import React, {
   useRef,
   useState,
 } from "react";
-import { Dropdown } from "../../components/Dropdown/Dropdown";
 import commonWords from "../../dictionaries/commonWords";
 import storyWords from "../../dictionaries/story";
 import useAudio from "../../hooks/useAudio";
@@ -296,25 +295,28 @@ const TypeTest: React.FC = () => {
               )}
             </div>
             {!hasStarted && (
-              <>
+              <div className={styles.testControls}>
                 <div className={styles.durationControl}>
-                  <label htmlFor="test-duration">Test duration</label>
-                  <Dropdown
-                    id="test-duration"
-                    value={String(state.duration)}
-                    onChange={(value) =>
-                      dispatch({ type: "SET_DURATION", payload: Number(value) })
-                    }
-                    options={testDurations.map((duration) => ({
-                      value: String(duration),
-                      label: `${duration} seconds`,
-                    }))}
-                  />
+                  <span id="duration-label">Duration</span>
+                  <div className={styles.durationSegments} role="group" aria-labelledby="duration-label">
+                    {testDurations.map((duration) => (
+                      <button
+                        key={duration}
+                        type="button"
+                        className={styles.durationSegment}
+                        aria-label={`${duration} seconds`}
+                        aria-pressed={state.duration === duration}
+                        onClick={() => dispatch({ type: "SET_DURATION", payload: duration })}
+                      >
+                        {duration}s
+                      </button>
+                    ))}
+                  </div>
                 </div>
                 <button onClick={toggleDictionary} className={styles.toggleButton}>
-                  {state.useStory ? "Use Most Common 300 Words" : "Use Short Story"}
+                  {state.useStory ? "Use common words" : "Use short story"}
                 </button>
-              </>
+              </div>
             )}
           </div>
         )}
