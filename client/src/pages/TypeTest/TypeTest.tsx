@@ -23,6 +23,7 @@ const initialState = {
   currentWordIndex: 0,
   userInput: "",
   correctWordsCounter: 0,
+  correctCharacters: 0,
   wrongWordsCounter: 0,
   wordStatuses: [] as (boolean | null)[],
   timer: defaultDuration,
@@ -40,7 +41,7 @@ type Action =
   | { type: "TOGGLE_DICTIONARY" }
   | { type: "START_TEST" }
   | { type: "UPDATE_INPUT"; payload: string }
-  | { type: "CHECK_WORD"; payload: boolean }
+  | { type: "CHECK_WORD"; payload: { isCorrect: boolean; characters: number } }
   | { type: "INCREMENT_INDEX" }
   | { type: "UPDATE_STATUSES"; payload: (boolean | null)[] }
   | { type: "SET_FINISHED" }
@@ -62,8 +63,13 @@ const typeTestReducer = (state: State, action: Action): State => {
     case "UPDATE_INPUT":
       return { ...state, userInput: action.payload };
     case "CHECK_WORD":
-      return action.payload
-        ? { ...state, correctWordsCounter: state.correctWordsCounter + 1 }
+      return action.payload.isCorrect
+        ? {
+            ...state,
+            correctWordsCounter: state.correctWordsCounter + 1,
+            correctCharacters:
+              state.correctCharacters + action.payload.characters,
+          }
         : { ...state, wrongWordsCounter: state.wrongWordsCounter + 1 };
     case "INCREMENT_INDEX":
       return { ...state, currentWordIndex: state.currentWordIndex + 1 };
@@ -141,16 +147,24 @@ const TypeTest: React.FC = () => {
     (e: React.KeyboardEvent) => {
       if (isFinished || (e.key !== " " && e.key !== "Enter")) return;
 
+      e.preventDefault();
       playAudio();
 
       const currentWord = words[currentWordIndex];
-      const isCorrect = userInput.trim() === currentWord;
+      if (!currentWord || !userInput) return;
+      const isCorrect = userInput === currentWord;
 
       const updatedStatuses = [...wordStatuses];
       updatedStatuses[currentWordIndex] = isCorrect;
 
       dispatch({ type: "UPDATE_STATUSES", payload: updatedStatuses });
-      dispatch({ type: "CHECK_WORD", payload: isCorrect });
+      dispatch({
+        type: "CHECK_WORD",
+        payload: {
+          isCorrect,
+          characters: currentWord.length + (e.key === " " ? 1 : 0),
+        },
+      });
       dispatch({ type: "INCREMENT_INDEX" });
       dispatch({ type: "UPDATE_INPUT", payload: "" });
     },
@@ -209,7 +223,21 @@ const TypeTest: React.FC = () => {
   }, [hasStarted, backendApiUrl]);
 
   const safeElapsedTime = Math.max(elapsedTime, 1);
-  const wpm = Math.round((correctWordsCounter / safeElapsedTime) * 60);
+  const currentWord = words[currentWordIndex] ?? "";
+  let partialCorrectCharacters = 0;
+  while (
+    partialCorrectCharacters < userInput.length &&
+    userInput[partialCorrectCharacters] ===
+      currentWord[partialCorrectCharacters]
+  ) {
+    partialCorrectCharacters += 1;
+  }
+  const wpm = Math.round(
+    ((state.correctCharacters + partialCorrectCharacters) /
+      5 /
+      safeElapsedTime) *
+      60,
+  );
 
   const handleScoreSubmission = async (score: number) => {
     const success = await submitScore(score);
@@ -245,7 +273,9 @@ const TypeTest: React.FC = () => {
               id="test-duration"
               value={String(state.duration)}
               disabled={hasStarted}
-              onChange={(value) => dispatch({ type: "SET_DURATION", payload: Number(value) })}
+              onChange={(value) =>
+                dispatch({ type: "SET_DURATION", payload: Number(value) })
+              }
               options={testDurations.map((duration) => ({
                 value: String(duration),
                 label: `${duration} seconds`,
@@ -259,14 +289,16 @@ const TypeTest: React.FC = () => {
           )}
         </div>
 
-        <p id="test-shortcuts">
-          Tab then Enter: cancel active test
-        </p>
+        <p id="test-shortcuts">Tab then Enter: cancel active test</p>
 
         {isFinished ? (
           <div className={styles.reportCard}>
             <h2>Great job! You've completed the test!</h2>
             <h3 className={styles.wpmText}>Words per minute: {wpm}</h3>
+            <p>
+              WPM counts five correct characters as one word, including spaces
+              and punctuation.
+            </p>
             <p className={styles.correctWord}>
               Correct words: {correctWordsCounter}
             </p>
@@ -344,10 +376,13 @@ const TypeTest: React.FC = () => {
                 aria-describedby="test-shortcuts"
                 value={userInput}
                 onChange={handleInputChange}
-                onBlur={() => { cancelArmedRef.current = false; }}
+                onBlur={() => {
+                  cancelArmedRef.current = false;
+                }}
                 onKeyDown={(e) => {
                   if (e.nativeEvent.isComposing) return;
-                  const unmodified = !e.altKey && !e.ctrlKey && !e.metaKey && !e.shiftKey;
+                  const unmodified =
+                    !e.altKey && !e.ctrlKey && !e.metaKey && !e.shiftKey;
                   if (hasStarted && unmodified && !e.repeat) {
                     if (e.key === "Tab" && !cancelArmedRef.current) {
                       e.preventDefault();

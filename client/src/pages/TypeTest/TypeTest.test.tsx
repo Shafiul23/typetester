@@ -3,6 +3,11 @@ import { BrowserRouter } from "react-router-dom";
 import TypeTest from "./TypeTest";
 import commonWords from "../../dictionaries/commonWords";
 
+jest.mock("../../dictionaries/commonWords", () => ({
+  __esModule: true,
+  default: ["a", "elephant", "can't", "wrong", "typing"],
+}));
+
 jest.mock("../../hooks/useAudio", () => ({
   __esModule: true,
   default: () => ({ playAudio: jest.fn() }),
@@ -104,7 +109,7 @@ describe("TypeTest Component", () => {
         screen.getByText("Great job! You've completed the test!"),
       ).toBeInTheDocument();
       expect(
-        screen.getByText(`Words per minute: ${Math.round(60 / duration)}`),
+        screen.getByText(`Words per minute: ${Math.round(((commonWords[0].length + 1) / 5) * 60 / duration)}`),
       ).toBeInTheDocument();
 
       fireEvent.click(screen.getByRole("button", { name: "Try Again" }));
@@ -119,6 +124,28 @@ describe("TypeTest Component", () => {
       expect(screen.getByText("Time remaining: 30s")).toBeInTheDocument();
     },
   );
+
+  it("scores five-character words, spaces, punctuation and the final correct prefix", () => {
+    jest.useFakeTimers();
+    const { useAuth } = require("../../context/AuthContext");
+    (useAuth as jest.Mock).mockReturnValue({ userId: null });
+    render(<BrowserRouter><TypeTest /></BrowserRouter>);
+    const input = screen.getByRole("textbox");
+    for (const [value, key] of [["a", " "], ["elephant", "Enter"], ["can't", " "], ["mistake", " "]]) {
+      fireEvent.change(input, { target: { value } });
+      fireEvent.keyDown(input, { key });
+    }
+    fireEvent.change(input, { target: { value: "tyX" } });
+    act(() => { jest.advanceTimersByTime(30000); });
+    // 2 + 8 + 6 + 0 + 2 correct characters in half a minute = 7.2 WPM.
+    expect(screen.getByText("Words per minute: 7")).toBeInTheDocument();
+    expect(screen.getByText("Correct words: 3")).toBeInTheDocument();
+    expect(screen.getByText("Wrong words: 1")).toBeInTheDocument();
+    fireEvent.click(screen.getByRole("button", { name: "Try Again" }));
+    fireEvent.change(screen.getByRole("textbox"), { target: { value: "X" } });
+    act(() => { jest.advanceTimersByTime(30000); });
+    expect(screen.getByText("Words per minute: 0")).toBeInTheDocument();
+  });
 
   it("should render the initial state correctly", () => {
     const { useAuth } = require("../../context/AuthContext");
