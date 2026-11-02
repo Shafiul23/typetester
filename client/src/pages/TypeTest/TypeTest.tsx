@@ -263,33 +263,37 @@ const TypeTest: React.FC = () => {
       </div>
 
       <div className={styles.textBox}>
-        <div className={styles.timerContainer}>
-          <div className={styles.timer}>
-            <p>Time remaining: {timer}s</p>
-          </div>
-          <div className={styles.durationControl}>
-            <label htmlFor="test-duration">Test duration</label>
-            <Dropdown
-              id="test-duration"
-              value={String(state.duration)}
-              disabled={hasStarted}
-              onChange={(value) =>
-                dispatch({ type: "SET_DURATION", payload: Number(value) })
-              }
-              options={testDurations.map((duration) => ({
-                value: String(duration),
-                label: `${duration} seconds`,
-              }))}
-            />
-          </div>
-          {!hasStarted && (
-            <button onClick={toggleDictionary} className={styles.toggleButton}>
-              {state.useStory ? "Use Most Common 300 Words" : "Use Short Story"}
-            </button>
-          )}
-        </div>
+        {!isFinished && (
+          <>
+            <div className={styles.timerContainer}>
+              <div className={styles.timer}>
+                <p>Time remaining: {timer}s</p>
+              </div>
+              <div className={styles.durationControl}>
+                <label htmlFor="test-duration">Test duration</label>
+                <Dropdown
+                  id="test-duration"
+                  value={String(state.duration)}
+                  disabled={hasStarted}
+                  onChange={(value) =>
+                    dispatch({ type: "SET_DURATION", payload: Number(value) })
+                  }
+                  options={testDurations.map((duration) => ({
+                    value: String(duration),
+                    label: `${duration} seconds`,
+                  }))}
+                />
+              </div>
+              {!hasStarted && (
+                <button onClick={toggleDictionary} className={styles.toggleButton}>
+                  {state.useStory ? "Use Most Common 300 Words" : "Use Short Story"}
+                </button>
+              )}
+            </div>
 
-        <p id="test-shortcuts">Tab then Enter: cancel active test</p>
+            <p id="test-shortcuts">Tab then Enter: cancel active test</p>
+          </>
+        )}
 
         {isFinished ? (
           <div className={styles.reportCard}>
@@ -311,13 +315,14 @@ const TypeTest: React.FC = () => {
                 {state.scoreSaved && <p>Score saved!</p>}
                 <div className={styles.buttonContainer}>
                   <button
+                    className={styles.reportButton}
                     onClick={() => handleScoreSubmission(wpm)}
                     disabled={state.scoreSaved || !wpm}
                   >
                     Save
                   </button>
 
-                  <button onClick={resetTest}>Try Again</button>
+                  <button className={styles.reportButton} onClick={resetTest}>Try Again</button>
                 </div>
               </>
             ) : (
@@ -330,7 +335,7 @@ const TypeTest: React.FC = () => {
                     onClick={() =>
                       localStorage.setItem("pendingScore", wpm.toString())
                     }
-                    className={styles.linkButton}
+                    className={styles.reportButton}
                   >
                     Log in
                   </Link>{" "}
@@ -339,13 +344,13 @@ const TypeTest: React.FC = () => {
                     onClick={() =>
                       localStorage.setItem("pendingScore", wpm.toString())
                     }
-                    className={styles.linkButton}
+                    className={styles.reportButton}
                   >
                     Create an account
                   </Link>
                 </p>
                 <div className={styles.buttonContainer}>
-                  <button onClick={resetTest}>Try Again</button>
+                  <button className={styles.reportButton} onClick={resetTest}>Try Again</button>
                 </div>
               </>
             )}
@@ -357,9 +362,9 @@ const TypeTest: React.FC = () => {
                 {words.map((word, index) => (
                   <span
                     key={index}
-                    className={`${styles.word} 
-                      ${index === currentWordIndex ? styles.selectedWord : ""} 
-                      ${wordStatuses[index] === true ? styles.correctWord : ""} 
+                    className={`${styles.word}
+                      ${index === currentWordIndex ? styles.selectedWord : ""}
+                      ${wordStatuses[index] === true ? styles.correctWord : ""}
                       ${wordStatuses[index] === false ? styles.wrongWord : ""}`}
                   >
                     {word}

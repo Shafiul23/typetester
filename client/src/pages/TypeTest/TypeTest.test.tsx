@@ -75,7 +75,7 @@ describe("TypeTest Component", () => {
         </BrowserRouter>,
       );
 
-      const selector = screen.getByRole("combobox", { name: "Test duration" });
+      let selector = screen.getByRole("combobox", { name: "Test duration" });
       if (duration !== 30) {
         fireEvent.click(selector);
         fireEvent.click(screen.getByRole("option", { name: `${duration} seconds` }));
@@ -112,7 +112,11 @@ describe("TypeTest Component", () => {
         screen.getByText(`Words per minute: ${Math.round(((commonWords[0].length + 1) / 5) * 60 / duration)}`),
       ).toBeInTheDocument();
 
+      expect(screen.queryByRole("combobox")).not.toBeInTheDocument();
+      expect(screen.queryByText(/Time remaining:/)).not.toBeInTheDocument();
+      expect(screen.queryByText("Tab then Enter: cancel active test")).not.toBeInTheDocument();
       fireEvent.click(screen.getByRole("button", { name: "Try Again" }));
+      selector = screen.getByRole("combobox", { name: "Test duration" });
       expect(selector).toBeEnabled();
       expect(selector).toHaveValue(String(duration));
       expect(
