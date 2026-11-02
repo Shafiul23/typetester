@@ -4,7 +4,7 @@
   align-items: center;
   padding: 1rem;
   background-color: var(--color-background);
-  min-height: 100vh;
+  min-height: 100svh;
   box-sizing: border-box;
 }
 
@@ -128,7 +128,7 @@
 .inputBox {
   width: 100%;
   padding: 0.5rem;
-  font-size: 0.9rem;
+  font-size: 1rem;
   border: 2px solid var(--color-divider);
   border-radius: 0.25rem;
   box-sizing: border-box;
@@ -361,4 +361,35 @@ button:focus-visible {
 
 @media (prefers-reduced-motion: reduce) {
   .durationSegment { transition: none; }
+}
+
+.reservedHidden {
+  visibility: hidden;
+  pointer-events: none;
+}
+
+.words .correctWord,
+.words .wrongWord {
+  font-weight: 400;
+}
+
+@media (max-width: 767px) {
+  .hero {
+    display: none;
+  }
+
+  /* Settings sit below the input on mobile, so this slot needn't be reserved. */
+  .cancelButton[aria-hidden="true"] {
+    display: none;
+  }
+
+  /* Keep the typing surface above settings and within the keyboard's viewport. */
+  .textBox:not(.resultsPanel) {
+    display: flex;
+    flex-direction: column;
+  }
+
+  .wordsBox { order: 0; }
+  .inputBoxContainer { order: 1; margin-top: 0; }
+  .timerContainer { order: 2; margin-top: 1rem; margin-bottom: 0; }
 }

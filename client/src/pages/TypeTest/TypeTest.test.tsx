@@ -10,7 +10,7 @@ jest.mock("../../dictionaries/commonWords", () => ({
 
 jest.mock("../../hooks/useAudio", () => ({
   __esModule: true,
-  default: () => ({ playAudio: jest.fn() }),
+  default: () => ({ playAudio: jest.fn(), prepareAudio: jest.fn() }),
 }));
 
 jest.mock("../../context/AuthContext", () => ({
@@ -143,6 +143,36 @@ describe("TypeTest Component", () => {
     act(() => { jest.advanceTimersByTime(30000); });
     expect(screen.getByText("Correct words: 2")).toBeInTheDocument();
     expect(screen.getByText("Wrong words: 0")).toBeInTheDocument();
+  });
+
+  it("focuses a touched input without requesting page scrolling or mobile autofocus", () => {
+    const { useAuth } = require("../../context/AuthContext");
+    (useAuth as jest.Mock).mockReturnValue({ userId: null });
+    const descriptor = Object.getOwnPropertyDescriptor(window, "matchMedia");
+    Object.defineProperty(window, "matchMedia", {
+      configurable: true, value: jest.fn(() => ({ matches: true })),
+    });
+    try {
+      render(<BrowserRouter><TypeTest /></BrowserRouter>);
+      const input = screen.getByRole("textbox");
+      expect(input).not.toHaveFocus();
+      const focus = jest.spyOn(input, "focus");
+      const touch = new Event("pointerdown", { bubbles: true, cancelable: true });
+      Object.defineProperty(touch, "pointerType", { value: "touch" });
+      fireEvent(input, touch);
+      expect(touch.defaultPrevented).toBe(true);
+      expect(focus).toHaveBeenCalledWith({ preventScroll: true });
+      expect(input).toHaveFocus();
+      focus.mockClear();
+      const secondTouch = new Event("pointerdown", { bubbles: true, cancelable: true });
+      Object.defineProperty(secondTouch, "pointerType", { value: "touch" });
+      fireEvent(input, secondTouch);
+      expect(secondTouch.defaultPrevented).toBe(false);
+      expect(focus).not.toHaveBeenCalled();
+    } finally {
+      if (descriptor) Object.defineProperty(window, "matchMedia", descriptor);
+      else delete (window as any).matchMedia;
+    }
   });
 
   it("restarts an active test with Escape even outside the typing field", () => {
@@ -341,8 +371,8 @@ describe("TypeTest Component", () => {
     const input = screen.getByRole("textbox");
     fireEvent.change(input, { target: { value: "test" } });
     expect(
-      screen.queryByText("Start typing to begin test!"),
-    ).not.toBeInTheDocument();
+      screen.getByText("Start typing to begin test!"),
+    ).toHaveAttribute("aria-hidden", "true");
   });
 
   it("should toggle dictionary on button click", () => {

@@ -300,9 +300,9 @@ const TypeTest: React.FC = () => {
   return (
     <div className={styles.container}>
       <div className={styles.hero}>
-        {!hasStarted && (
-          <h1 className={styles.title}>Start typing to begin test!</h1>
-        )}
+        <h1 className={`${styles.title} ${hasStarted ? styles.reservedHidden : ""}`} aria-hidden={hasStarted}>
+          Start typing to begin test!
+        </h1>
       </div>
 
       <div
@@ -312,49 +312,47 @@ const TypeTest: React.FC = () => {
           <div className={styles.timerContainer}>
             <div className={styles.timer}>
               <p>Time remaining: {timer}s</p>
-              {hasStarted && (
-                <button
-                  type="button"
-                  className={styles.cancelButton}
-                  onClick={resetTest}
-                >
-                  Cancel
-                </button>
-              )}
+              <button
+                type="button"
+                className={`${styles.cancelButton} ${!hasStarted ? styles.reservedHidden : ""}`}
+                aria-hidden={!hasStarted}
+                disabled={!hasStarted}
+                onClick={resetTest}
+              >
+                Cancel
+              </button>
             </div>
-            {!hasStarted && (
-              <div className={styles.testControls}>
-                <div className={styles.durationControl}>
-                  <span id="duration-label">Duration</span>
-                  <div
-                    className={styles.durationSegments}
-                    role="group"
-                    aria-labelledby="duration-label"
-                  >
-                    {testDurations.map((duration) => (
-                      <button
-                        key={duration}
-                        type="button"
-                        className={styles.durationSegment}
-                        aria-label={`${duration} seconds`}
-                        aria-pressed={state.duration === duration}
-                        onClick={() =>
-                          dispatch({ type: "SET_DURATION", payload: duration })
-                        }
-                      >
-                        {duration}s
-                      </button>
-                    ))}
-                  </div>
-                </div>
-                <button
-                  onClick={toggleDictionary}
-                  className={styles.toggleButton}
+            <div className={`${styles.testControls} ${hasStarted ? styles.reservedHidden : ""}`} aria-hidden={hasStarted} inert={hasStarted}>
+              <div className={styles.durationControl}>
+                <span id="duration-label">Duration</span>
+                <div
+                  className={styles.durationSegments}
+                  role="group"
+                  aria-labelledby="duration-label"
                 >
-                  {state.useStory ? "Use common words" : "Use short story"}
-                </button>
+                  {testDurations.map((duration) => (
+                    <button
+                      key={duration}
+                      type="button"
+                      className={styles.durationSegment}
+                      aria-label={`${duration} seconds`}
+                      aria-pressed={state.duration === duration}
+                      onClick={() =>
+                        dispatch({ type: "SET_DURATION", payload: duration })
+                      }
+                    >
+                      {duration}s
+                    </button>
+                  ))}
+                </div>
               </div>
-            )}
+              <button
+                onClick={toggleDictionary}
+                className={styles.toggleButton}
+              >
+                {state.useStory ? "Use common words" : "Use short story"}
+              </button>
+            </div>
           </div>
         )}
 
@@ -451,7 +449,13 @@ const TypeTest: React.FC = () => {
                 aria-label="Typing input"
                 aria-describedby="test-shortcuts"
                 value={userInput}
-                onPointerDown={prepareAudio}
+                onPointerDown={(e) => {
+                  prepareAudio();
+                  if (e.pointerType === "touch" && document.activeElement !== e.currentTarget) {
+                    e.preventDefault();
+                    e.currentTarget.focus({ preventScroll: true });
+                  }
+                }}
                 onFocus={prepareAudio}
                 onChange={handleInputChange}
                 onCompositionStart={() => {
@@ -493,7 +497,7 @@ const TypeTest: React.FC = () => {
                 autoComplete="off"
                 autoCapitalize="none"
                 spellCheck="false"
-                autoFocus
+                autoFocus={!window.matchMedia?.("(max-width: 767px)").matches}
                 disabled={isFinished}
               />
               <p id="test-shortcuts" className={styles.shortcutHint}>

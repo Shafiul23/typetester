@@ -24,7 +24,7 @@ jest.mock("react", () => {
 
 jest.mock("../../hooks/useAudio", () => ({
   __esModule: true,
-  default: () => ({ playAudio: jest.fn() }),
+  default: () => ({ playAudio: jest.fn(), prepareAudio: jest.fn() }),
 }));
 jest.mock("../../context/AuthContext", () => ({
   useAuth: () => ({ userId: null }),
