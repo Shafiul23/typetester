@@ -181,6 +181,30 @@ describe("TypeTest Component", () => {
     expect(displayedWords()).toEqual(commonWords);
   });
 
+  it("cancels with the mobile button and reshuffles for the next test", () => {
+    jest.useFakeTimers();
+    const { useAuth } = require("../../context/AuthContext");
+    (useAuth as jest.Mock).mockReturnValue({ userId: null });
+    const { container } = render(<BrowserRouter><TypeTest /></BrowserRouter>);
+    expect(screen.queryByRole("button", { name: "Cancel" })).not.toBeInTheDocument();
+    const input = screen.getByRole("textbox");
+    fireEvent.change(input, { target: { value: "a" } });
+    fireEvent.keyDown(input, { key: " " });
+    act(() => { jest.advanceTimersByTime(5000); });
+    (Math.random as jest.Mock).mockReturnValue(0);
+    fireEvent.click(screen.getByRole("button", { name: "Cancel" }));
+    const words = Array.from(container.querySelectorAll(".words > span"), (word) => word.textContent);
+    expect(words).not.toEqual(commonWords);
+    expect(words.sort()).toEqual([...commonWords].sort());
+    expect(input).toHaveValue("");
+    expect(input).toHaveFocus();
+    expect(screen.getByText("Time remaining: 30s")).toBeInTheDocument();
+    expect(screen.getByRole("combobox")).toBeEnabled();
+    expect(screen.queryByRole("button", { name: "Cancel" })).not.toBeInTheDocument();
+    act(() => { jest.advanceTimersByTime(30000); });
+    expect(screen.getByText("Time remaining: 30s")).toBeInTheDocument();
+  });
+
   it("should render the initial state correctly", () => {
     const { useAuth } = require("../../context/AuthContext");
     (useAuth as jest.Mock).mockReturnValue({ username: "user1", userId: 1 });

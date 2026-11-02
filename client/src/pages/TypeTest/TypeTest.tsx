@@ -289,6 +289,11 @@ const TypeTest: React.FC = () => {
           <div className={styles.timerContainer}>
             <div className={styles.timer}>
               <p>Time remaining: {timer}s</p>
+              {hasStarted && (
+                <button type="button" className={styles.cancelButton} onClick={resetTest}>
+                  Cancel
+                </button>
+              )}
             </div>
             {!hasStarted && (
               <>

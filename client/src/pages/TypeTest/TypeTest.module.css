@@ -258,7 +258,21 @@ button:focus-visible {
   display: none;
 }
 
+.cancelButton {
+  display: block;
+  min-height: 44px;
+  margin-bottom: 0.75rem;
+  padding: 0.5rem 1rem;
+  font: inherit;
+  font-weight: 600;
+  line-height: 1.5;
+}
+
 @media (min-width: 768px) and (hover: hover) and (pointer: fine) {
+  .cancelButton {
+    display: none;
+  }
+
   .shortcutHint {
     display: flex;
     align-items: center;
