@@ -33,7 +33,7 @@
   text-align: left;
 }
 
-p {
+.bodyContainer p {
   font-size: 1rem;
   color: var(--color-secondary);
   margin-bottom: 2rem;
@@ -96,10 +96,11 @@ p {
   }
 
   .bodyContainer {
-    text-align: center;
+    max-width: 65ch;
+    text-align: left;
     padding-top: 1rem;
     padding-bottom: 2rem;
-    line-height: 5px;
+    line-height: 1.7;
   }
 
   .buttonGroup {

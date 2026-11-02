@@ -15,7 +15,7 @@ const Home: React.FC = () => {
         </p>
         <div className={styles.bodyContainer}>
           <p>
-            Sign in to access the Type Test page where you can choose between a
+            Head over to the Type Test page where you can choose between a
             randomized list of 300 common words or a short story.
           </p>
           <p>
