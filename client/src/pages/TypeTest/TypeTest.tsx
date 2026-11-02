@@ -270,7 +270,7 @@ const TypeTest: React.FC = () => {
         )}
       </div>
 
-      <div className={styles.textBox}>
+      <div className={`${styles.textBox} ${isFinished ? styles.resultsPanel : ""}`}>
         {!isFinished && (
           <>
             <div className={styles.timerContainer}>
