@@ -1,9 +1,9 @@
 import React, {
   useCallback,
   useEffect,
-  useMemo,
   useReducer,
   useRef,
+  useState,
 } from "react";
 import { Dropdown } from "../../components/Dropdown/Dropdown";
 import commonWords from "../../dictionaries/commonWords";
@@ -14,6 +14,15 @@ import useTimer from "../../hooks/useTimer";
 import { useAuth } from "../../context/AuthContext";
 import { Link } from "react-router-dom";
 import styles from "./TypeTest.module.css";
+
+function shuffleWords(words: string[]) {
+  const shuffled = [...words];
+  for (let i = shuffled.length - 1; i > 0; i--) {
+    const j = Math.floor(Math.random() * (i + 1));
+    [shuffled[i], shuffled[j]] = [shuffled[j], shuffled[i]];
+  }
+  return shuffled;
+}
 
 const testDurations = [15, 30, 60];
 const defaultDuration = 30;
@@ -100,10 +109,8 @@ const TypeTest: React.FC = () => {
   const [state, dispatch] = useReducer(typeTestReducer, { ...initialState });
   const backendApiUrl = process.env.REACT_APP_BACKEND_API_URL;
 
-  const words = useMemo(
-    () => (state.useStory ? storyWords : commonWords),
-    [state.useStory],
-  );
+  const [shuffledWords, setShuffledWords] = useState(() => shuffleWords(commonWords));
+  const words = state.useStory ? storyWords : shuffledWords;
 
   const totalWords = words.length;
 
@@ -247,12 +254,13 @@ const TypeTest: React.FC = () => {
   };
 
   const resetTest = useCallback(() => {
+    if (!state.useStory) setShuffledWords(shuffleWords(commonWords));
     dispatch({ type: "RESET_TEST", payload: totalWords });
     startTimeRef.current = null;
     cancelArmedRef.current = false;
     inputRef.current?.focus();
     if (wordsBoxRef.current) wordsBoxRef.current.scrollTop = 0;
-  }, [totalWords, startTimeRef]);
+  }, [totalWords, startTimeRef, state.useStory]);
 
   return (
     <div className={styles.container}>

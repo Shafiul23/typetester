@@ -21,6 +21,10 @@ beforeAll(() => {
   Element.prototype.scrollIntoView = jest.fn();
 });
 
+beforeEach(() => {
+  jest.spyOn(Math, "random").mockReturnValue(0.999);
+});
+
 afterEach(() => {
   jest.useRealTimers();
   jest.restoreAllMocks();
@@ -149,6 +153,28 @@ describe("TypeTest Component", () => {
     fireEvent.change(screen.getByRole("textbox"), { target: { value: "X" } });
     act(() => { jest.advanceTimersByTime(30000); });
     expect(screen.getByText("Words per minute: 0")).toBeInTheDocument();
+  });
+
+  it("reshuffles common words on retry and cancellation without changing the dictionary", () => {
+    jest.useFakeTimers();
+    const { useAuth } = require("../../context/AuthContext");
+    (useAuth as jest.Mock).mockReturnValue({ userId: null });
+    const { container } = render(<BrowserRouter><TypeTest /></BrowserRouter>);
+    const displayedWords = () => Array.from(container.querySelectorAll(".words > span"), (word) => word.textContent);
+    expect(displayedWords()).toEqual(commonWords);
+    fireEvent.change(screen.getByRole("textbox"), { target: { value: "a" } });
+    act(() => { jest.advanceTimersByTime(30000); });
+    (Math.random as jest.Mock).mockReturnValue(0);
+    fireEvent.click(screen.getByRole("button", { name: "Try Again" }));
+    expect(displayedWords()).not.toEqual(commonWords);
+    expect(displayedWords().sort()).toEqual([...commonWords].sort());
+    expect(commonWords).toEqual(["a", "elephant", "can't", "wrong", "typing"]);
+    (Math.random as jest.Mock).mockReturnValue(0.999);
+    const input = screen.getByRole("textbox");
+    fireEvent.change(input, { target: { value: "elephant" } });
+    fireEvent.keyDown(input, { key: "Tab" });
+    fireEvent.keyDown(input, { key: "Enter" });
+    expect(displayedWords()).toEqual(commonWords);
   });
 
   it("should render the initial state correctly", () => {
