@@ -73,6 +73,78 @@ describe("TypeTest Component", () => {
     expect(screen.getByRole("button", { name: useStory ? "Use common words" : "Use short story" })).toBeInTheDocument();
   });
 
+  it("submits mobile input without Space keydown and scores words and the remaining prefix", () => {
+    jest.useFakeTimers();
+    const { useAuth } = require("../../context/AuthContext");
+    (useAuth as jest.Mock).mockReturnValue({ userId: null });
+    const { container } = render(<BrowserRouter><TypeTest /></BrowserRouter>);
+    const input = screen.getByRole("textbox");
+    const words = () => container.querySelectorAll(".words > span");
+    fireEvent.input(input, { target: { value: "a " }, inputType: "insertText" });
+    expect(input).toHaveValue("");
+    expect(words()[0]).toHaveClass("correctWord");
+    expect(words()[1]).toHaveClass("selectedWord");
+    fireEvent.input(input, { target: { value: "elephant  mistake ty" }, inputType: "insertText" });
+    expect(input).toHaveValue("ty");
+    expect(words()[1]).toHaveClass("correctWord");
+    expect(words()[2]).toHaveClass("wrongWord");
+    expect(words()[3]).toHaveClass("selectedWord");
+    act(() => { jest.advanceTimersByTime(30000); });
+    expect(screen.getByText("Correct words: 2")).toBeInTheDocument();
+    expect(screen.getByText("Wrong words: 1")).toBeInTheDocument();
+    // 'a ' (2) + 'elephant ' (9) = 11 characters in half a minute.
+    expect(screen.getByText("Words per minute: 4")).toBeInTheDocument();
+  });
+
+  it("keeps desktop Space and Enter submission distinct and ignores empty separators", () => {
+    jest.useFakeTimers();
+    const { useAuth } = require("../../context/AuthContext");
+    (useAuth as jest.Mock).mockReturnValue({ userId: null });
+    const { container } = render(<BrowserRouter><TypeTest /></BrowserRouter>);
+    const input = screen.getByRole("textbox");
+    fireEvent.input(input, { target: { value: "a" } });
+    expect(fireEvent.keyDown(input, { key: " " })).toBe(false);
+    fireEvent.input(input, { target: { value: " " } });
+    fireEvent.input(input, { target: { value: "elephant" } });
+    expect(fireEvent.keyDown(input, { key: "Enter" })).toBe(false);
+    fireEvent.keyDown(input, { key: "Enter" });
+    expect(input).toHaveValue("");
+    expect(container.querySelectorAll(".words > span")[2]).toHaveClass("selectedWord");
+    act(() => { jest.advanceTimersByTime(30000); });
+    expect(screen.getByText("Correct words: 2")).toBeInTheDocument();
+    expect(screen.getByText("Wrong words: 0")).toBeInTheDocument();
+    // Enter contributes no space: 2 + 8 correct characters.
+    expect(screen.getByText("Words per minute: 4")).toBeInTheDocument();
+  });
+
+  it.each([false, true])("waits for composition completion without duplicate submission (final input after end: %s)", (finalInputAfterEnd) => {
+    jest.useFakeTimers();
+    const { useAuth } = require("../../context/AuthContext");
+    (useAuth as jest.Mock).mockReturnValue({ userId: null });
+    const { container } = render(<BrowserRouter><TypeTest /></BrowserRouter>);
+    const input = screen.getByRole("textbox");
+    fireEvent.compositionStart(input);
+    fireEvent.input(input, { target: { value: "a " }, isComposing: true, inputType: "insertCompositionText" });
+    // Also guard keyboards that omit isComposing on the confirmation key.
+    fireEvent.keyDown(input, { key: "Enter", keyCode: 229 });
+    fireEvent.keyDown(input, { key: " " });
+    expect(input).toHaveValue("a ");
+    expect(container.querySelectorAll(".words > span")[0]).toHaveClass("selectedWord");
+    expect(container.querySelector(".correctWord")).toBeNull();
+    fireEvent.compositionEnd(input, { data: "a " });
+    expect(input).toHaveValue("");
+    if (finalInputAfterEnd) {
+      fireEvent.input(input, { target: { value: "a " }, inputType: "insertFromComposition" });
+    }
+    expect(input).toHaveValue("");
+    expect(container.querySelectorAll(".words > span")[1]).toHaveClass("selectedWord");
+    fireEvent.input(input, { target: { value: "elephant " }, inputType: "insertText" });
+    expect(container.querySelectorAll(".words > span")[2]).toHaveClass("selectedWord");
+    act(() => { jest.advanceTimersByTime(30000); });
+    expect(screen.getByText("Correct words: 2")).toBeInTheDocument();
+    expect(screen.getByText("Wrong words: 0")).toBeInTheDocument();
+  });
+
   it("restarts an active test with Escape even outside the typing field", () => {
       jest.useFakeTimers();
       const { useAuth } = require("../../context/AuthContext");

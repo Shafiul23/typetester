@@ -50,8 +50,10 @@ type Action =
   | { type: "TOGGLE_DICTIONARY" }
   | { type: "START_TEST" }
   | { type: "UPDATE_INPUT"; payload: string }
-  | { type: "CHECK_WORD"; payload: { isCorrect: boolean; characters: number } }
-  | { type: "INCREMENT_INDEX" }
+  | {
+      type: "PROCESS_INPUT";
+      payload: { value: string; words: string[]; submitLast?: boolean };
+    }
   | { type: "UPDATE_STATUSES"; payload: (boolean | null)[] }
   | { type: "SET_FINISHED" }
   | { type: "DECREMENT_TIMER" }
@@ -71,17 +73,41 @@ const typeTestReducer = (state: State, action: Action): State => {
       return { ...state, hasStarted: true };
     case "UPDATE_INPUT":
       return { ...state, userInput: action.payload };
-    case "CHECK_WORD":
-      return action.payload.isCorrect
-        ? {
-            ...state,
-            correctWordsCounter: state.correctWordsCounter + 1,
-            correctCharacters:
-              state.correctCharacters + action.payload.characters,
-          }
-        : { ...state, wrongWordsCounter: state.wrongWordsCounter + 1 };
-    case "INCREMENT_INDEX":
-      return { ...state, currentWordIndex: state.currentWordIndex + 1 };
+    case "PROCESS_INPUT": {
+      if (state.isFinished) return state;
+      const { value, words, submitLast = false } = action.payload;
+      const parts = value.split(/[ \u00a0]+/);
+      const remainingInput = submitLast ? "" : parts.pop()!;
+      let index = state.currentWordIndex;
+      let correctWords = state.correctWordsCounter;
+      let wrongWords = state.wrongWordsCounter;
+      let characters = state.correctCharacters;
+      let statuses = state.wordStatuses;
+      parts.forEach((word, partIndex) => {
+        if (!word || index >= words.length) return;
+        const correct = word === words[index];
+        if (statuses === state.wordStatuses) statuses = [...statuses];
+        statuses[index] = correct;
+        if (correct) {
+          correctWords += 1;
+          const hasSpace = !submitLast || partIndex < parts.length - 1;
+          characters += word.length + (hasSpace ? 1 : 0);
+        } else {
+          wrongWords += 1;
+        }
+        index += 1;
+      });
+      return {
+        ...state,
+        hasStarted: state.hasStarted || value.length > 0,
+        userInput: remainingInput,
+        currentWordIndex: index,
+        correctWordsCounter: correctWords,
+        wrongWordsCounter: wrongWords,
+        correctCharacters: characters,
+        wordStatuses: statuses,
+      };
+    }
     case "UPDATE_STATUSES":
       return { ...state, wordStatuses: action.payload };
     case "SET_FINISHED":
@@ -131,6 +157,8 @@ const TypeTest: React.FC = () => {
   const startTimeRef = useTimer(hasStarted, isFinished, dispatch);
   const wordsBoxRef = useRef<HTMLDivElement>(null);
   const inputRef = useRef<HTMLInputElement>(null);
+  const composingRef = useRef(false);
+  const compositionCommitRef = useRef<string | null>(null);
 
   const {
     currentWordIndex,
@@ -143,39 +171,35 @@ const TypeTest: React.FC = () => {
 
   const handleInputChange = useCallback(
     (e: React.ChangeEvent<HTMLInputElement>) => {
-      if (!hasStarted) {
-        dispatch({ type: "START_TEST" });
+      if (isFinished) return;
+      const value = e.currentTarget.value;
+      if (composingRef.current || (e.nativeEvent as InputEvent).isComposing) {
+        if (!hasStarted) dispatch({ type: "START_TEST" });
+        dispatch({ type: "UPDATE_INPUT", payload: value });
+        return;
       }
-      dispatch({ type: "UPDATE_INPUT", payload: e.target.value });
+      const committedValue = compositionCommitRef.current;
+      compositionCommitRef.current = null;
+      if (committedValue === value) return;
+      dispatch({ type: "PROCESS_INPUT", payload: { value, words } });
     },
-    [hasStarted],
+    [hasStarted, isFinished, words],
   );
 
   const handleKeyPress = useCallback(
-    (e: React.KeyboardEvent) => {
+    (e: React.KeyboardEvent<HTMLInputElement>) => {
       if (isFinished || (e.key !== " " && e.key !== "Enter")) return;
-
       e.preventDefault();
-
-      const currentWord = words[currentWordIndex];
-      if (!currentWord || !userInput) return;
-      const isCorrect = userInput === currentWord;
-
-      const updatedStatuses = [...wordStatuses];
-      updatedStatuses[currentWordIndex] = isCorrect;
-
-      dispatch({ type: "UPDATE_STATUSES", payload: updatedStatuses });
       dispatch({
-        type: "CHECK_WORD",
+        type: "PROCESS_INPUT",
         payload: {
-          isCorrect,
-          characters: currentWord.length + (e.key === " " ? 1 : 0),
+          value: e.currentTarget.value + (e.key === " " ? " " : ""),
+          words,
+          submitLast: e.key === "Enter",
         },
       });
-      dispatch({ type: "INCREMENT_INDEX" });
-      dispatch({ type: "UPDATE_INPUT", payload: "" });
     },
-    [isFinished, words, currentWordIndex, userInput, wordStatuses],
+    [isFinished, words],
   );
 
   const toggleDictionary = () => {
@@ -245,6 +269,8 @@ const TypeTest: React.FC = () => {
     if (!state.useStory) setShuffledWords(shuffleWords(commonWords));
     dispatch({ type: "RESET_TEST", payload: totalWords });
     startTimeRef.current = null;
+    composingRef.current = false;
+    compositionCommitRef.current = null;
     inputRef.current?.focus({ preventScroll: true });
     if (wordsBoxRef.current) wordsBoxRef.current.scrollTop = 0;
   }, [totalWords, startTimeRef, state.useStory]);
@@ -426,8 +452,28 @@ const TypeTest: React.FC = () => {
                 aria-describedby="test-shortcuts"
                 value={userInput}
                 onChange={handleInputChange}
+                onCompositionStart={() => {
+                  composingRef.current = true;
+                  compositionCommitRef.current = null;
+                }}
+                onCompositionEnd={(e) => {
+                  composingRef.current = false;
+                  if (isFinished) return;
+                  const value = e.currentTarget.value;
+                  compositionCommitRef.current = value;
+                  dispatch({
+                    type: "PROCESS_INPUT",
+                    payload: { value, words },
+                  });
+                }}
                 onKeyDown={(e) => {
-                  if (e.nativeEvent.isComposing) return;
+                  if (
+                    composingRef.current ||
+                    e.nativeEvent.isComposing ||
+                    e.keyCode === 229
+                  )
+                    return;
+                  compositionCommitRef.current = null;
                   if (
                     !e.ctrlKey &&
                     !e.metaKey &&
