@@ -42,7 +42,7 @@ const Home: React.FC = () => {
               </Link>
             </>
           ) : (
-            <Link to="/typetest" className={styles.buttonSuccess}>
+            <Link to="/typetest" className={styles.buttonPrimary}>
               Start Typing Test
             </Link>
           )}
