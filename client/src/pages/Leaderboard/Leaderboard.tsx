@@ -16,7 +16,6 @@ const Leaderboard: React.FC = () => {
     null
   );
   const [error, setError] = useState<string | null>(null);
-  const [duration, setDuration] = useState<string>("30");
   const [loading, setLoading] = useState<boolean>(true);
 
   useEffect(() => {
@@ -25,14 +24,20 @@ const Leaderboard: React.FC = () => {
     setError(null);
     const fetchLeaderboard = async () => {
       try {
-        const response = await fetch(
-          `${process.env.REACT_APP_BACKEND_API_URL}/auth/leaderboard?duration_seconds=${duration}`
+        const results = await Promise.all(
+          [15, 30, 60].map(async (duration) => {
+            const response = await fetch(
+              `${process.env.REACT_APP_BACKEND_API_URL}/auth/leaderboard?duration_seconds=${duration}`
+            );
+            if (!response.ok) {
+              throw new Error("Failed to fetch leaderboard data");
+            }
+            const data = await response.json();
+            return data.leaderboard as LeaderboardEntry[];
+          })
         );
-        if (!response.ok) {
-          throw new Error("Failed to fetch leaderboard data");
-        }
-        const data = await response.json();
-        if (active) setLeaderboard(data.leaderboard);
+        const combined = results.flat().sort((a, b) => b.score - a.score);
+        if (active) setLeaderboard(combined);
       } catch (err) {
         if (active) setError((err as Error).message);
       } finally {
@@ -42,7 +47,7 @@ const Leaderboard: React.FC = () => {
 
     fetchLeaderboard();
     return () => { active = false; };
-  }, [duration]);
+  }, []);
 
   if (loading) {
     return (
@@ -60,12 +65,6 @@ const Leaderboard: React.FC = () => {
     <div className={styles.leaderboardContainer}>
       <h1 className={styles.title}>Leaderboard</h1>
 
-      <label htmlFor="score-duration">Test duration </label>
-      <select id="score-duration" value={duration} onChange={(event) => setDuration(event.target.value)}>
-        <option value="15">15 seconds</option>
-        <option value="30">30 seconds</option>
-        <option value="60">60 seconds</option>
-      </select>
       {leaderboard && leaderboard.length > 0 ? (
         <table className={styles.table}>
           <thead>

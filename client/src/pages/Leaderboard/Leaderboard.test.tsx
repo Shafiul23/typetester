@@ -1,4 +1,4 @@
-import { fireEvent, render, screen, waitFor } from "@testing-library/react";
+import { render, screen } from "@testing-library/react";
 import { BrowserRouter } from "react-router-dom";
 import Leaderboard from "./Leaderboard";
 
@@ -29,10 +29,21 @@ describe("Leaderboard page tests", () => {
             user_id: 2,
             username: "user2",
             score: 50,
+            duration_seconds: 60,
             created: "2024-12-02",
           },
         ],
       }),
+    });
+
+    (global.fetch as jest.Mock).mockResolvedValueOnce({
+      ok: true,
+      json: async () => ({ leaderboard: [
+        { score_id: 3, username: "user3", score: 95, duration_seconds: 15, created: "2024-12-03" },
+      ] }),
+    }).mockResolvedValueOnce({
+      ok: true,
+      json: async () => ({ leaderboard: [] }),
     });
 
     render(
@@ -47,21 +58,21 @@ describe("Leaderboard page tests", () => {
     expect(screen.getByText(/80/i)).toBeInTheDocument();
     expect(screen.getByText("01/12/24")).toBeInTheDocument();
     expect(screen.getByText("30 s")).toBeInTheDocument();
-    (global.fetch as jest.Mock).mockResolvedValueOnce({
-      ok: true,
-      json: async () => ({leaderboard: [{score_id: 3, username: "sixty", score: 70, duration_seconds: 60, created: "2024-12-01"}]}),
-    });
-    fireEvent.change(screen.getByLabelText("Test duration"), {target: {value: "60"}});
-    expect(await screen.findByText("sixty")).toBeInTheDocument();
     expect(screen.getByText("60 s")).toBeInTheDocument();
-    expect(screen.queryByText("user1")).not.toBeInTheDocument();
-    await waitFor(() => expect(global.fetch).toHaveBeenLastCalledWith(
-      `${process.env.REACT_APP_BACKEND_API_URL}/auth/leaderboard?duration_seconds=60`
-    ));
+    expect(screen.getByRole("columnheader", { name: "Duration" })).toBeInTheDocument();
+    expect(screen.queryByLabelText("Test duration")).not.toBeInTheDocument();
+    expect(screen.getAllByRole("table")).toHaveLength(1);
+    expect(screen.getByText("15 s")).toBeInTheDocument();
+    expect(screen.getAllByRole("row")[1]).toHaveTextContent("user3");
+    for (const duration of [15, 30, 60]) {
+      expect(global.fetch).toHaveBeenCalledWith(
+        `${process.env.REACT_APP_BACKEND_API_URL}/auth/leaderboard?duration_seconds=${duration}`
+      );
+    }
   });
 
   it("should display an error if leaderboard data fails to load", async () => {
-    (global.fetch as jest.Mock).mockRejectedValueOnce(
+    (global.fetch as jest.Mock).mockRejectedValue(
       new Error("Server error")
     );
 

@@ -58,6 +58,12 @@ describe("Profile page tests", () => {
     });
     expect(screen.getByText("60 s")).toBeInTheDocument();
     expect(screen.getByText("Unknown")).toBeInTheDocument();
+    expect(screen.queryByLabelText("Test duration")).not.toBeInTheDocument();
+    expect(screen.getAllByRole("table")).toHaveLength(1);
+    expect(global.fetch).toHaveBeenCalledWith(
+      `${process.env.REACT_APP_BACKEND_API_URL}/auth/personal?order_by=created`,
+      expect.objectContaining({ headers: expect.any(Object) })
+    );
     await waitFor(() => {
       expect(screen.getByText(/80/i)).toBeInTheDocument();
     });

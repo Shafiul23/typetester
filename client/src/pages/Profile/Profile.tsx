@@ -18,7 +18,6 @@ const Profile: React.FC = () => {
   const { username, logout } = useAuth();
   const [errorMessage, setErrorMessage] = useState<string | null>(null);
   const [scores, setScores] = useState<Score[]>([]);
-  const [duration, setDuration] = useState<string>("all");
   const [loading, setLoading] = useState<boolean>(true);
   const [orderBy, setOrderBy] = useState<string>("created");
   const [openSnackbar, setOpenSnackbar] = useState(false);
@@ -64,7 +63,7 @@ const Profile: React.FC = () => {
     const fetchScores = async () => {
       try {
         const response = await fetch(
-          `${process.env.REACT_APP_BACKEND_API_URL}/auth/personal?order_by=${orderBy}${duration === "all" ? "" : `&duration_seconds=${duration}`}`,
+          `${process.env.REACT_APP_BACKEND_API_URL}/auth/personal?order_by=${orderBy}`,
           {
             headers: {
               Authorization: `Bearer ${localStorage.getItem("token")}`,
@@ -89,7 +88,7 @@ const Profile: React.FC = () => {
 
     fetchScores();
     return () => { active = false; };
-  }, [orderBy, duration]);
+  }, [orderBy]);
 
   const handleCloseSnackbar = () => {
     setOpenSnackbar(false);
@@ -109,13 +108,6 @@ const Profile: React.FC = () => {
         <h1 className={styles.username}>{`Welcome, ${username}`}</h1>
       )}
 
-      <label htmlFor="score-duration">Test duration </label>
-      <select id="score-duration" value={duration} onChange={(event) => setDuration(event.target.value)}>
-        <option value="all">All durations</option>
-        <option value="15">15 seconds</option>
-        <option value="30">30 seconds</option>
-        <option value="60">60 seconds</option>
-      </select>
 
       <div className={styles.tableContainer}>
         <div className={styles.tableTitleContainer}>
