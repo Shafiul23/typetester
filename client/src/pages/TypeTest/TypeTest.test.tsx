@@ -30,7 +30,7 @@ afterEach(() => {
   jest.restoreAllMocks();
 });
 describe("TypeTest Component", () => {
-  it("cancels an active test with Tab then Enter", () => {
+  it("restarts an active test with Escape even outside the typing field", () => {
       jest.useFakeTimers();
       const { useAuth } = require("../../context/AuthContext");
       (useAuth as jest.Mock).mockReturnValue({ userId: 1 });
@@ -45,12 +45,15 @@ describe("TypeTest Component", () => {
       expect(screen.getByText("Time remaining: 55s")).toBeInTheDocument();
       expect(screen.queryByRole("button", { name: "Cancel Test" })).not.toBeInTheDocument();
       expect(screen.queryByRole("button", { name: "Restart Test" })).not.toBeInTheDocument();
-      fireEvent.keyDown(input, { key: "Escape" });
+      fireEvent.keyDown(input, { key: "Escape", isComposing: true });
+      fireEvent.keyDown(input, { key: "Escape", repeat: true });
+      fireEvent.keyDown(input, { key: "Escape", ctrlKey: true });
       fireEvent.keyDown(input, { key: "r", altKey: true });
       expect(screen.getByText("Time remaining: 55s")).toBeInTheDocument();
       fireEvent.keyDown(input, { key: "Tab" });
       expect(screen.getByText("Time remaining: 55s")).toBeInTheDocument();
-      fireEvent.keyDown(input, { key: "Enter" });
+      input.blur();
+      fireEvent.keyDown(document.body, { key: "Escape" });
       expect(input).toHaveValue("");
       expect(input).toHaveFocus();
       expect(screen.getByRole("combobox")).toBeEnabled();
@@ -61,6 +64,8 @@ describe("TypeTest Component", () => {
       fireEvent.change(input, { target: { value: "next" } });
       act(() => { jest.advanceTimersByTime(60000); });
       expect(screen.getByText("Wrong words: 0")).toBeInTheDocument();
+      fireEvent.keyDown(document.body, { key: "Escape" });
+      expect(screen.getByText("Great job! You've completed the test!")).toBeInTheDocument();
       fireEvent.click(screen.getByRole("button", { name: "Try Again" }));
       expect(screen.getByRole("textbox")).toHaveFocus();
       expect(screen.getByText("Time remaining: 60s")).toBeInTheDocument();
@@ -98,7 +103,7 @@ describe("TypeTest Component", () => {
       const input = screen.getByRole("textbox");
       fireEvent.change(input, { target: { value: commonWords[0] } });
       fireEvent.keyDown(input, { key: " " });
-      expect(selector).toBeDisabled();
+      expect(screen.queryByRole("combobox")).not.toBeInTheDocument();
       act(() => {
         jest.advanceTimersByTime((duration - 1) * 1000);
       });
@@ -118,7 +123,7 @@ describe("TypeTest Component", () => {
 
       expect(screen.queryByRole("combobox")).not.toBeInTheDocument();
       expect(screen.queryByText(/Time remaining:/)).not.toBeInTheDocument();
-      expect(screen.queryByText("Tab then Enter: cancel active test")).not.toBeInTheDocument();
+      expect(screen.queryByText(/restart test/)).not.toBeInTheDocument();
       fireEvent.click(screen.getByRole("button", { name: "Try Again" }));
       selector = screen.getByRole("combobox", { name: "Test duration" });
       expect(selector).toBeEnabled();
@@ -172,8 +177,7 @@ describe("TypeTest Component", () => {
     (Math.random as jest.Mock).mockReturnValue(0.999);
     const input = screen.getByRole("textbox");
     fireEvent.change(input, { target: { value: "elephant" } });
-    fireEvent.keyDown(input, { key: "Tab" });
-    fireEvent.keyDown(input, { key: "Enter" });
+    fireEvent.keyDown(input, { key: "Escape" });
     expect(displayedWords()).toEqual(commonWords);
   });
 

@@ -253,3 +253,29 @@ button:focus-visible {
   background-color: var(--color-surface-raised);
   cursor: not-allowed;
 }
+
+.shortcutHint {
+  display: none;
+}
+
+@media (min-width: 768px) and (hover: hover) and (pointer: fine) {
+  .shortcutHint {
+    display: flex;
+    align-items: center;
+    justify-content: flex-end;
+    gap: 0.375rem;
+    margin: 0.75rem 0 0;
+    color: var(--color-muted);
+    font-size: 0.8rem;
+    line-height: 1.5;
+  }
+
+  .shortcutHint kbd {
+    padding: 0.125rem 0.375rem;
+    border: 1px solid var(--color-control);
+    border-radius: 0.25rem;
+    background-color: var(--color-surface-raised);
+    color: var(--color-secondary);
+    font: inherit;
+  }
+}

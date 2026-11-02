@@ -129,7 +129,6 @@ const TypeTest: React.FC = () => {
   const startTimeRef = useTimer(hasStarted, isFinished, dispatch);
   const wordsBoxRef = useRef<HTMLDivElement>(null);
   const inputRef = useRef<HTMLInputElement>(null);
-  const cancelArmedRef = useRef(false);
 
   const {
     currentWordIndex,
@@ -257,10 +256,25 @@ const TypeTest: React.FC = () => {
     if (!state.useStory) setShuffledWords(shuffleWords(commonWords));
     dispatch({ type: "RESET_TEST", payload: totalWords });
     startTimeRef.current = null;
-    cancelArmedRef.current = false;
     inputRef.current?.focus();
     if (wordsBoxRef.current) wordsBoxRef.current.scrollTop = 0;
   }, [totalWords, startTimeRef, state.useStory]);
+
+  useEffect(() => {
+    if (!hasStarted || isFinished) return;
+
+    const handleRestart = (event: KeyboardEvent) => {
+      if (
+        event.key !== "Escape" || event.repeat || event.isComposing ||
+        event.altKey || event.ctrlKey || event.metaKey || event.shiftKey
+      ) return;
+      event.preventDefault();
+      resetTest();
+    };
+
+    document.addEventListener("keydown", handleRestart);
+    return () => document.removeEventListener("keydown", handleRestart);
+  }, [hasStarted, isFinished, resetTest]);
 
   return (
     <div className={styles.container}>
@@ -272,35 +286,32 @@ const TypeTest: React.FC = () => {
 
       <div className={`${styles.textBox} ${isFinished ? styles.resultsPanel : ""}`}>
         {!isFinished && (
-          <>
-            <div className={styles.timerContainer}>
-              <div className={styles.timer}>
-                <p>Time remaining: {timer}s</p>
-              </div>
-              <div className={styles.durationControl}>
-                <label htmlFor="test-duration">Test duration</label>
-                <Dropdown
-                  id="test-duration"
-                  value={String(state.duration)}
-                  disabled={hasStarted}
-                  onChange={(value) =>
-                    dispatch({ type: "SET_DURATION", payload: Number(value) })
-                  }
-                  options={testDurations.map((duration) => ({
-                    value: String(duration),
-                    label: `${duration} seconds`,
-                  }))}
-                />
-              </div>
-              {!hasStarted && (
+          <div className={styles.timerContainer}>
+            <div className={styles.timer}>
+              <p>Time remaining: {timer}s</p>
+            </div>
+            {!hasStarted && (
+              <>
+                <div className={styles.durationControl}>
+                  <label htmlFor="test-duration">Test duration</label>
+                  <Dropdown
+                    id="test-duration"
+                    value={String(state.duration)}
+                    onChange={(value) =>
+                      dispatch({ type: "SET_DURATION", payload: Number(value) })
+                    }
+                    options={testDurations.map((duration) => ({
+                      value: String(duration),
+                      label: `${duration} seconds`,
+                    }))}
+                  />
+                </div>
                 <button onClick={toggleDictionary} className={styles.toggleButton}>
                   {state.useStory ? "Use Most Common 300 Words" : "Use Short Story"}
                 </button>
-              )}
-            </div>
-
-            <p id="test-shortcuts">Tab then Enter: cancel active test</p>
-          </>
+              </>
+            )}
+          </div>
         )}
 
         {isFinished ? (
@@ -389,26 +400,8 @@ const TypeTest: React.FC = () => {
                 aria-describedby="test-shortcuts"
                 value={userInput}
                 onChange={handleInputChange}
-                onBlur={() => {
-                  cancelArmedRef.current = false;
-                }}
                 onKeyDown={(e) => {
                   if (e.nativeEvent.isComposing) return;
-                  const unmodified =
-                    !e.altKey && !e.ctrlKey && !e.metaKey && !e.shiftKey;
-                  if (hasStarted && unmodified && !e.repeat) {
-                    if (e.key === "Tab" && !cancelArmedRef.current) {
-                      e.preventDefault();
-                      cancelArmedRef.current = true;
-                      return;
-                    }
-                    if (e.key === "Enter" && cancelArmedRef.current) {
-                      e.preventDefault();
-                      resetTest();
-                      return;
-                    }
-                  }
-                  cancelArmedRef.current = false;
                   playAudio();
                   handleKeyPress(e);
                 }}
@@ -419,6 +412,9 @@ const TypeTest: React.FC = () => {
                 autoFocus
                 disabled={isFinished}
               />
+              <p id="test-shortcuts" className={styles.shortcutHint}>
+                <kbd>Esc</kbd> restart test
+              </p>
             </div>
           </>
         )}
