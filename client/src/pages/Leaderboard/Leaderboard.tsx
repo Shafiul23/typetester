@@ -7,6 +7,7 @@ interface LeaderboardEntry {
   user_id: number;
   username: string;
   score: number;
+  duration_seconds: number | null;
   created: string;
 }
 
@@ -15,28 +16,33 @@ const Leaderboard: React.FC = () => {
     null
   );
   const [error, setError] = useState<string | null>(null);
+  const [duration, setDuration] = useState<string>("30");
   const [loading, setLoading] = useState<boolean>(true);
 
   useEffect(() => {
+    let active = true;
+    setLoading(true);
+    setError(null);
     const fetchLeaderboard = async () => {
       try {
         const response = await fetch(
-          `${process.env.REACT_APP_BACKEND_API_URL}/auth/leaderboard`
+          `${process.env.REACT_APP_BACKEND_API_URL}/auth/leaderboard?duration_seconds=${duration}`
         );
         if (!response.ok) {
           throw new Error("Failed to fetch leaderboard data");
         }
         const data = await response.json();
-        setLeaderboard(data.leaderboard);
+        if (active) setLeaderboard(data.leaderboard);
       } catch (err) {
-        setError((err as Error).message);
+        if (active) setError((err as Error).message);
       } finally {
-        setLoading(false);
+        if (active) setLoading(false);
       }
     };
 
     fetchLeaderboard();
-  }, []);
+    return () => { active = false; };
+  }, [duration]);
 
   if (loading) {
     return (
@@ -53,6 +59,13 @@ const Leaderboard: React.FC = () => {
   return (
     <div className={styles.leaderboardContainer}>
       <h1 className={styles.title}>Leaderboard</h1>
+
+      <label htmlFor="score-duration">Test duration </label>
+      <select id="score-duration" value={duration} onChange={(event) => setDuration(event.target.value)}>
+        <option value="15">15 seconds</option>
+        <option value="30">30 seconds</option>
+        <option value="60">60 seconds</option>
+      </select>
       {leaderboard && leaderboard.length > 0 ? (
         <table className={styles.table}>
           <thead>
@@ -60,6 +73,7 @@ const Leaderboard: React.FC = () => {
               <th>Rank</th>
               <th>Username</th>
               <th>Score / wpm</th>
+              <th>Duration</th>
               <th>Date</th>
             </tr>
           </thead>
@@ -69,6 +83,7 @@ const Leaderboard: React.FC = () => {
                 <td>{index + 1}</td>
                 <td>{entry.username}</td>
                 <td>{entry.score}</td>
+                <td>{entry.duration_seconds == null ? "Unknown" : `${entry.duration_seconds} s`}</td>
                 <td>
                   {new Date(entry.created).toLocaleDateString("en-GB", {
                     day: "2-digit",

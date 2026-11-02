@@ -11,6 +11,7 @@ CREATE TABLE score (
     id SERIAL PRIMARY KEY,
     user_id INTEGER NOT NULL,
     score INTEGER NOT NULL,
+    duration_seconds INTEGER CHECK (duration_seconds IN (15, 30, 60)),
     created TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
     FOREIGN KEY (user_id) REFERENCES user (id)
 );

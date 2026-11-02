@@ -1,4 +1,4 @@
-import { render, screen } from "@testing-library/react";
+import { fireEvent, render, screen, waitFor } from "@testing-library/react";
 import { BrowserRouter } from "react-router-dom";
 import Leaderboard from "./Leaderboard";
 
@@ -21,6 +21,7 @@ describe("Leaderboard page tests", () => {
             user_id: 1,
             username: "user1",
             score: 80,
+            duration_seconds: 30,
             created: "2024-12-01",
           },
           {
@@ -45,6 +46,18 @@ describe("Leaderboard page tests", () => {
     expect(screen.getByText(/user1/i)).toBeInTheDocument();
     expect(screen.getByText(/80/i)).toBeInTheDocument();
     expect(screen.getByText("01/12/24")).toBeInTheDocument();
+    expect(screen.getByText("30 s")).toBeInTheDocument();
+    (global.fetch as jest.Mock).mockResolvedValueOnce({
+      ok: true,
+      json: async () => ({leaderboard: [{score_id: 3, username: "sixty", score: 70, duration_seconds: 60, created: "2024-12-01"}]}),
+    });
+    fireEvent.change(screen.getByLabelText("Test duration"), {target: {value: "60"}});
+    expect(await screen.findByText("sixty")).toBeInTheDocument();
+    expect(screen.getByText("60 s")).toBeInTheDocument();
+    expect(screen.queryByText("user1")).not.toBeInTheDocument();
+    await waitFor(() => expect(global.fetch).toHaveBeenLastCalledWith(
+      `${process.env.REACT_APP_BACKEND_API_URL}/auth/leaderboard?duration_seconds=60`
+    ));
   });
 
   it("should display an error if leaderboard data fails to load", async () => {

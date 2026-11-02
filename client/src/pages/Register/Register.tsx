@@ -5,6 +5,7 @@ import { useAuth } from "../../context/AuthContext";
 import styles from "./Register.module.css";
 import Loading from "../../components/Loading/Loading";
 import { useValidation } from "../../hooks/useValidation";
+import { readPendingScore } from "../../utils/pendingScore";
 import useSubmitScore from "../../hooks/useSubmitScore";
 
 const Register: React.FC = () => {
@@ -54,9 +55,10 @@ const Register: React.FC = () => {
         return;
       }
 
-      const pending = localStorage.getItem("pendingScore");
+      const pending = readPendingScore();
       if (pending) {
-        await submitScore(Number(pending));
+        const saved = await submitScore(pending.score, pending.duration_seconds);
+        if (!saved) return;
         localStorage.removeItem("pendingScore");
         navigate("/profile");
       } else {

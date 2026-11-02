@@ -112,13 +112,18 @@ def login():
 @bp.route('/leaderboard', methods=['GET'])
 def get_leaderboard():
     try:
+        duration = request.args.get('duration_seconds', '30')
+        if duration not in ('15', '30', '60'):
+            return {'error': 'Duration must be 15, 30 or 60 seconds.'}, 400
+
         leaderboard = db.session.query(
             Score.id.label('score_id'),
             User.id.label('user_id'),
             User.username,
             Score.score,
+            Score.duration_seconds,
             Score.created
-        ).join(User).order_by(Score.score.desc()).limit(20).all()
+        ).join(User).filter(Score.duration_seconds == int(duration)).order_by(Score.score.desc()).limit(20).all()
 
         leaderboard_list = [
             {
@@ -126,6 +131,7 @@ def get_leaderboard():
                 "user_id": row.user_id,
                 "username": row.username,
                 "score": row.score,
+                "duration_seconds": row.duration_seconds,
                 "created": row.created,
             }
             for row in leaderboard
@@ -161,13 +167,21 @@ def get_personal_scores():
 
         order_clause = Score.created if order_by == 'created' else Score.score
 
+        duration = request.args.get('duration_seconds')
+        if duration is not None and duration not in ('15', '30', '60'):
+            return {'error': 'Duration must be 15, 30 or 60 seconds.'}, 400
+
         personal_scores = db.session.query(
             Score.id.label('score_id'),
             User.id.label('user_id'),
             User.username,
             Score.score,
+            Score.duration_seconds,
             Score.created
-        ).join(User).filter(User.id == user_id).order_by(order_clause.desc()).limit(20).all()
+        ).join(User).filter(User.id == user_id)
+        if duration is not None:
+            personal_scores = personal_scores.filter(Score.duration_seconds == int(duration))
+        personal_scores = personal_scores.order_by(order_clause.desc()).limit(20).all()
 
         personal_list = [
             {
@@ -175,6 +189,7 @@ def get_personal_scores():
                 "user_id": row.user_id,
                 "username": row.username,
                 "score": row.score,
+                "duration_seconds": row.duration_seconds,
                 "created": row.created,
             }
             for row in personal_scores
@@ -194,6 +209,10 @@ def submit_score():
         data = request.get_json()
         if not data:
             return {"error": "Invalid input"}, 400
+
+        duration = data.get('duration_seconds')
+        if type(duration) is not int or duration not in (15, 30, 60):
+            return {'error': 'Duration must be an integer: 15, 30 or 60 seconds.'}, 400
 
         score = data.get('score')
         if not score:
@@ -225,7 +244,7 @@ def submit_score():
             if datetime.now() - last_submission.created < cooldown_period:
                 return {"error": "You can only submit a score once every minute."}, 429
 
-        new_score = Score(user_id=user_id, score=score)
+        new_score = Score(user_id=user_id, score=score, duration_seconds=duration)
         db.session.add(new_score)
         db.session.commit()
 

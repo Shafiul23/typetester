@@ -28,3 +28,27 @@
    flask run
 
 By default, the server runs at http://127.0.0.1:5000.
+
+### Adding durations to an existing database
+
+Before serving the updated API, run from `server` using the application's database configuration:
+
+```sh
+flask --app flaskr migrate-score-duration
+```
+
+This idempotent migration adds a nullable `duration_seconds` column with a
+15/30/60 constraint. Existing scores retain `NULL` (displayed as “Unknown”);
+no historical duration is guessed. Fresh databases include the column automatically.
+Do not run `schema.sql` against an existing database: it drops tables.
+
+Deploy the migration first, then the API and frontend together: new score requests
+must include `duration_seconds` as an integer (15, 30 or 60). Older clients without
+this field receive HTTP 400 and should reload before submitting.
+
+`GET /auth/leaderboard?duration_seconds=30` returns the top 20 scores for that
+duration (30 seconds by default), excluding historical unknown durations.
+`GET /auth/personal` includes all durations; optionally supply `duration_seconds`
+to filter before sorting and limiting results. Both responses include
+`duration_seconds` for each score. The existing one-minute submission cooldown
+still applies to all durations.

@@ -29,6 +29,7 @@ describe("Profile page tests", () => {
             user_id: 1,
             username: "user1",
             score: 80,
+            duration_seconds: 60,
             created: "2024-12-01",
           },
           {
@@ -55,6 +56,8 @@ describe("Profile page tests", () => {
     await waitFor(() => {
       expect(screen.queryByText(/loading/i)).not.toBeInTheDocument();
     });
+    expect(screen.getByText("60 s")).toBeInTheDocument();
+    expect(screen.getByText("Unknown")).toBeInTheDocument();
     await waitFor(() => {
       expect(screen.getByText(/80/i)).toBeInTheDocument();
     });
@@ -128,6 +131,13 @@ describe("Profile page tests", () => {
       expect(screen.getByText(/90/i)).toBeInTheDocument();
     });
 
+    (global.fetch as jest.Mock).mockResolvedValueOnce({
+      ok: true,
+      json: async () => ({personal: [
+        {score_id: 2, score: 90, duration_seconds: 60, created: "2024-12-02"},
+        {score_id: 1, score: 80, duration_seconds: 30, created: "2024-12-01"},
+      ]}),
+    });
     fireEvent.click(screen.getByText(/Sort by Score/i));
 
     await waitFor(() => {

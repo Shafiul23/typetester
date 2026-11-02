@@ -245,7 +245,7 @@ const TypeTest: React.FC = () => {
   );
 
   const handleScoreSubmission = async (score: number) => {
-    const success = await submitScore(score);
+    const success = await submitScore(score, state.duration);
     if (success) {
       dispatch({ type: "SET_SCORE_SAVED", payload: true });
     }
@@ -324,6 +324,7 @@ const TypeTest: React.FC = () => {
         {isFinished ? (
           <div className={styles.reportCard}>
             <h2>Great job! You've completed the test!</h2>
+            <p>Test duration: {state.duration} s</p>
             <h3 className={styles.wpmText}>Words per minute: {wpm}</h3>
             <p>
               WPM counts five correct characters as one word, including spaces
@@ -359,7 +360,7 @@ const TypeTest: React.FC = () => {
                   <Link
                     to="/login"
                     onClick={() =>
-                      localStorage.setItem("pendingScore", wpm.toString())
+                      localStorage.setItem("pendingScore", JSON.stringify({ score: wpm, duration_seconds: state.duration }))
                     }
                     className={styles.reportButton}
                   >
@@ -368,7 +369,7 @@ const TypeTest: React.FC = () => {
                   <Link
                     to="/register"
                     onClick={() =>
-                      localStorage.setItem("pendingScore", wpm.toString())
+                      localStorage.setItem("pendingScore", JSON.stringify({ score: wpm, duration_seconds: state.duration }))
                     }
                     className={styles.reportButton}
                   >

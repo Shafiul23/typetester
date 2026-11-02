@@ -161,7 +161,7 @@ describe("Register page tests", () => {
     const { useAuth } = require("../../context/AuthContext");
     useAuth.mockReturnValue({
       register: jest.fn().mockResolvedValue({ success: true }),
-      login: jest.fn().mockResolvedValue({ success: true }),
+      login: jest.fn().mockResolvedValue({ success: true, token: "test-token" }),
     });
 
     render(

@@ -5,6 +5,7 @@ import styles from "./Login.module.css";
 
 import { useAuth } from "../../context/AuthContext";
 import Loading from "../../components/Loading/Loading";
+import { readPendingScore } from "../../utils/pendingScore";
 import useSubmitScore from "../../hooks/useSubmitScore";
 
 const Login: React.FC = () => {
@@ -26,9 +27,10 @@ const Login: React.FC = () => {
     try {
       const response = await login(username, password);
       if (response?.success) {
-        const pending = localStorage.getItem("pendingScore");
+        const pending = readPendingScore();
         if (pending) {
-          await submitScore(Number(pending));
+          const saved = await submitScore(pending.score, pending.duration_seconds);
+          if (!saved) return;
           localStorage.removeItem("pendingScore");
           navigate("/profile");
         } else {

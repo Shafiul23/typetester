@@ -10,6 +10,7 @@ interface Score {
   user_id: number;
   username: string;
   score: number;
+  duration_seconds: number | null;
   created: string;
 }
 
@@ -17,6 +18,7 @@ const Profile: React.FC = () => {
   const { username, logout } = useAuth();
   const [errorMessage, setErrorMessage] = useState<string | null>(null);
   const [scores, setScores] = useState<Score[]>([]);
+  const [duration, setDuration] = useState<string>("all");
   const [loading, setLoading] = useState<boolean>(true);
   const [orderBy, setOrderBy] = useState<string>("created");
   const [openSnackbar, setOpenSnackbar] = useState(false);
@@ -56,10 +58,13 @@ const Profile: React.FC = () => {
   };
 
   useEffect(() => {
+    let active = true;
+    setLoading(true);
+    setScores([]);
     const fetchScores = async () => {
       try {
         const response = await fetch(
-          `${process.env.REACT_APP_BACKEND_API_URL}/auth/personal?order_by=${orderBy}`,
+          `${process.env.REACT_APP_BACKEND_API_URL}/auth/personal?order_by=${orderBy}${duration === "all" ? "" : `&duration_seconds=${duration}`}`,
           {
             headers: {
               Authorization: `Bearer ${localStorage.getItem("token")}`,
@@ -72,17 +77,19 @@ const Profile: React.FC = () => {
         }
 
         const data = await response.json();
-        setScores(data.personal);
+        if (active) setScores(data.personal);
       } catch (err: any) {
+        if (!active) return;
         setErrorMessage(err.message);
         setOpenSnackbar(true);
       } finally {
-        setLoading(false);
+        if (active) setLoading(false);
       }
     };
 
     fetchScores();
-  }, [orderBy]);
+    return () => { active = false; };
+  }, [orderBy, duration]);
 
   const handleCloseSnackbar = () => {
     setOpenSnackbar(false);
@@ -101,6 +108,14 @@ const Profile: React.FC = () => {
       {username && (
         <h1 className={styles.username}>{`Welcome, ${username}`}</h1>
       )}
+
+      <label htmlFor="score-duration">Test duration </label>
+      <select id="score-duration" value={duration} onChange={(event) => setDuration(event.target.value)}>
+        <option value="all">All durations</option>
+        <option value="15">15 seconds</option>
+        <option value="30">30 seconds</option>
+        <option value="60">60 seconds</option>
+      </select>
 
       <div className={styles.tableContainer}>
         <div className={styles.tableTitleContainer}>
@@ -126,6 +141,7 @@ const Profile: React.FC = () => {
             <thead>
               <tr>
                 <th>Score / wpm</th>
+                <th>Duration</th>
                 <th>Date</th>
               </tr>
             </thead>
@@ -133,6 +149,7 @@ const Profile: React.FC = () => {
               {scores.map((score) => (
                 <tr key={score.score_id}>
                   <td>{score.score}</td>
+                  <td>{score.duration_seconds == null ? "Unknown" : `${score.duration_seconds} s`}</td>
                   <td>
                     {new Date(score.created).toLocaleString("en-GB", {
                       day: "2-digit",

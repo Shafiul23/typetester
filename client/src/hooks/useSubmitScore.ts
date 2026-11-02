@@ -1,14 +1,14 @@
 import { useState, useCallback } from "react";
 
 interface UseSubmitScoreReturn {
-  submitScore: (score: number) => Promise<boolean>;
+  submitScore: (score: number, durationSeconds: number) => Promise<boolean>;
   error: string | null;
 }
 
 const useSubmitScore = (): UseSubmitScoreReturn => {
   const [error, setError] = useState<string | null>(null);
 
-  const submitScore = useCallback(async (score: number): Promise<boolean> => {
+  const submitScore = useCallback(async (score: number, durationSeconds: number): Promise<boolean> => {
     try {
       const response = await fetch(
         `${process.env.REACT_APP_BACKEND_API_URL}/auth/scores`,
@@ -18,7 +18,7 @@ const useSubmitScore = (): UseSubmitScoreReturn => {
             "Content-Type": "application/json",
             Authorization: `Bearer ${localStorage.getItem("token")}`,
           },
-          body: JSON.stringify({ score }),
+          body: JSON.stringify({ score, duration_seconds: durationSeconds }),
         }
       );
 

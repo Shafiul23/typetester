@@ -20,6 +20,10 @@ class Score(db.Model):
     id = db.Column(db.Integer, primary_key=True)
     user_id = db.Column(db.Integer, db.ForeignKey('user.id'), nullable=False)
     score = db.Column(db.Integer, nullable=False)
+    duration_seconds = db.Column(db.Integer, nullable=True)
+    __table_args__ = (
+        db.CheckConstraint('duration_seconds IN (15, 30, 60)', name='valid_score_duration'),
+    )
     created = db.Column(db.DateTime, default=datetime.utcnow)
 
     def __repr__(self):
