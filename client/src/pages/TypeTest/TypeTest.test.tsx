@@ -26,7 +26,8 @@ describe("TypeTest Component", () => {
       const { useAuth } = require("../../context/AuthContext");
       (useAuth as jest.Mock).mockReturnValue({ userId: 1 });
       render(<BrowserRouter><TypeTest /></BrowserRouter>);
-      fireEvent.change(screen.getByRole("combobox"), { target: { value: "60" } });
+      fireEvent.click(screen.getByRole("combobox"));
+      fireEvent.click(screen.getByRole("option", { name: "60 seconds" }));
       fireEvent.click(screen.getByRole("button", { name: "Use Short Story" }));
       const input = screen.getByRole("textbox");
       fireEvent.change(input, { target: { value: "wrong" } });
@@ -71,7 +72,8 @@ describe("TypeTest Component", () => {
 
       const selector = screen.getByRole("combobox", { name: "Test duration" });
       if (duration !== 30) {
-        fireEvent.change(selector, { target: { value: String(duration) } });
+        fireEvent.click(selector);
+        fireEvent.click(screen.getByRole("option", { name: `${duration} seconds` }));
       }
       expect(selector).toHaveValue(String(duration));
       expect(
@@ -112,7 +114,8 @@ describe("TypeTest Component", () => {
         screen.getByText(`Time remaining: ${duration}s`),
       ).toBeInTheDocument();
       expect(screen.getByRole("textbox")).toHaveValue("");
-      fireEvent.change(selector, { target: { value: "30" } });
+      fireEvent.click(selector);
+      fireEvent.click(screen.getByRole("option", { name: "30 seconds" }));
       expect(screen.getByText("Time remaining: 30s")).toBeInTheDocument();
     },
   );

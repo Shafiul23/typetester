@@ -5,6 +5,7 @@ import React, {
   useReducer,
   useRef,
 } from "react";
+import { Dropdown } from "../../components/Dropdown/Dropdown";
 import commonWords from "../../dictionaries/commonWords";
 import storyWords from "../../dictionaries/story";
 import useAudio from "../../hooks/useAudio";
@@ -238,25 +239,19 @@ const TypeTest: React.FC = () => {
           <div className={styles.timer}>
             <p>Time remaining: {timer}s</p>
           </div>
-          <label className={styles.durationControl}>
-            Test duration
-            <select
-              value={state.duration}
+          <div className={styles.durationControl}>
+            <label htmlFor="test-duration">Test duration</label>
+            <Dropdown
+              id="test-duration"
+              value={String(state.duration)}
               disabled={hasStarted}
-              onChange={(e) =>
-                dispatch({
-                  type: "SET_DURATION",
-                  payload: Number(e.target.value),
-                })
-              }
-            >
-              {testDurations.map((duration) => (
-                <option key={duration} value={duration}>
-                  {duration} seconds
-                </option>
-              ))}
-            </select>
-          </label>
+              onChange={(value) => dispatch({ type: "SET_DURATION", payload: Number(value) })}
+              options={testDurations.map((duration) => ({
+                value: String(duration),
+                label: `${duration} seconds`,
+              }))}
+            />
+          </div>
           {!hasStarted && (
             <button onClick={toggleDictionary} className={styles.toggleButton}>
               {state.useStory ? "Use Most Common 300 Words" : "Use Short Story"}
