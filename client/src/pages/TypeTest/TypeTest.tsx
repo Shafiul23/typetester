@@ -150,7 +150,7 @@ const TypeTest: React.FC = () => {
   }, [totalWords]);
 
   const { submitScore } = useSubmitScore();
-  const { playAudio } = useAudio("/typewriter-click.mp3", 0.7);
+  const { playAudio, prepareAudio } = useAudio("/typewriter-click.mp3", 0.7);
   const { timer, hasStarted, isFinished } = state;
   const { userId } = useAuth();
 
@@ -451,6 +451,8 @@ const TypeTest: React.FC = () => {
                 aria-label="Typing input"
                 aria-describedby="test-shortcuts"
                 value={userInput}
+                onPointerDown={prepareAudio}
+                onFocus={prepareAudio}
                 onChange={handleInputChange}
                 onCompositionStart={() => {
                   composingRef.current = true;
