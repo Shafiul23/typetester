@@ -81,6 +81,22 @@
   background-color: var(--color-accent-hover);
 }
 
+.storyControls {
+  display: flex;
+  align-items: stretch;
+  gap: 0.5rem;
+}
+
+.soundButton {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+  width: 2.375rem;
+  padding: 0.5rem;
+  color: #000;
+}
+
 .wordsBox {
   text-align: center;
   margin-bottom: 1rem;

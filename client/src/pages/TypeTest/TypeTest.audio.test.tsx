@@ -15,8 +15,16 @@ it("plays once per typing key, skips non-typing keys, and preserves scoring", ()
   try {
     const { container } = render(<BrowserRouter><TypeTest /></BrowserRouter>);
     const input = screen.getByRole("textbox");
-    expect(screen.queryByRole("button", { name: "Typing sounds" })).not.toBeInTheDocument();
+    const soundToggle = screen.getByRole("button", { name: "Typing sounds" });
+    expect(soundToggle).toHaveAttribute("aria-pressed", "true");
     expect(createAudio).not.toHaveBeenCalled();
+
+    fireEvent.click(soundToggle);
+    expect(soundToggle).toHaveAttribute("aria-pressed", "false");
+    fireEvent.keyDown(input, { key: "t" });
+    expect(play).not.toHaveBeenCalled();
+    fireEvent.click(soundToggle);
+    expect(soundToggle).toHaveAttribute("aria-pressed", "true");
 
     for (const key of ["t", "Backspace", "Delete", " ", "Enter"]) {
       play.mockClear();

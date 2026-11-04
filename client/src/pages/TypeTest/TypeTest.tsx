@@ -133,6 +133,7 @@ const typeTestReducer = (state: State, action: Action): State => {
 
 const TypeTest: React.FC = () => {
   const [state, dispatch] = useReducer(typeTestReducer, { ...initialState });
+  const [soundEnabled, setSoundEnabled] = useState(true);
   const backendApiUrl = process.env.REACT_APP_BACKEND_API_URL;
 
   const [shuffledWords, setShuffledWords] = useState(() =>
@@ -346,12 +347,40 @@ const TypeTest: React.FC = () => {
                   ))}
                 </div>
               </div>
-              <button
-                onClick={toggleDictionary}
-                className={styles.toggleButton}
-              >
-                {state.useStory ? "Use common words" : "Use short story"}
-              </button>
+              <div className={styles.storyControls}>
+                <button
+                  onClick={toggleDictionary}
+                  className={styles.toggleButton}
+                >
+                  {state.useStory ? "Use common words" : "Use short story"}
+                </button>
+                <button
+                  type="button"
+                  className={`${styles.toggleButton} ${styles.soundButton}`}
+                  aria-label="Typing sounds"
+                  aria-pressed={soundEnabled}
+                  title={soundEnabled ? "Mute typing sounds" : "Enable typing sounds"}
+                  onClick={() => setSoundEnabled((enabled) => !enabled)}
+                >
+                  <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
+                    {soundEnabled ? (
+                      <>
+                        <path d="M11 4.702a.705.705 0 0 0-1.203-.498L6.413 7.587A1.4 1.4 0 0 1 5.416 8H3a1 1 0 0 0-1 1v6a1 1 0 0 0 1 1h2.416a1.4 1.4 0 0 1 .997.413l3.383 3.384A.705.705 0 0 0 11 19.298z" fill="currentColor" />
+                        <path d="M16 9a5 5 0 0 1 0 6" />
+                        <path d="M19.364 18.364a9 9 0 0 0 0-12.728" />
+                      </>
+                    ) : (
+                      <>
+                        <path d="M16 9a5 5 0 0 1 .95 2.293" />
+                        <path d="M19.364 5.636a9 9 0 0 1 1.889 9.96" />
+                        <path d="m2 2 20 20" />
+                        <path d="m7 7-.587.587A1.4 1.4 0 0 1 5.416 8H3a1 1 0 0 0-1 1v6a1 1 0 0 0 1 1h2.416a1.4 1.4 0 0 1 .997.413l3.383 3.384A.705.705 0 0 0 11 19.298V11" fill="currentColor" />
+                        <path d="M9.828 4.172A.686.686 0 0 1 11 4.657v.686" fill="currentColor" />
+                      </>
+                    )}
+                  </svg>
+                </button>
+              </div>
             </div>
           </div>
         )}
@@ -481,6 +510,7 @@ const TypeTest: React.FC = () => {
                     return;
                   compositionCommitRef.current = null;
                   if (
+                    soundEnabled &&
                     !e.ctrlKey &&
                     !e.metaKey &&
                     !e.altKey &&
