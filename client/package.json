@@ -49,6 +49,7 @@
     "@babel/preset-react": "^7.26.3",
     "@babel/preset-typescript": "^7.26.0",
     "@types/jest": "^29.5.14",
+    "@types/node": "^18.19.130",
     "babel-jest": "^29.7.0",
     "msw": "^2.7.0",
     "serve": "^14.2.4"
